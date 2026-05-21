@@ -73,6 +73,7 @@
 
         <div class="mt-4">
             <h2 class="text-md font-bold text-slate-200 mb-2 flex items-center gap-1">📊 Concentrado General de Palomitas y Ajustes</h2>
+            <p class="text-[10px] text-slate-400 mb-2">💡 Tip: Toca el nombre de una tarea para editarla/borrarla. Toca una celda vacía para dar puntos extra o penalizar.</p>
             <div class="overflow-x-auto rounded-xl border border-slate-700 shadow-md">
                 <table class="w-full text-center border-collapse bg-slate-850 text-xs">
                     <thead>
@@ -138,7 +139,6 @@
             cargarAlumnosYTabla();
         }
 
-        // NUEVA FUNCIÓN: ELIMINAR ALUMNO
         window.eliminarAlumnoDeBase = async function(nombreAlumno, grupoAlumno) {
             const confirmar = confirm(`⚠️ ¿Seguro que deseas eliminar a ${nombreAlumno} del grupo ${grupoAlumno}?\nEsta acción no se puede deshacer.`);
             if(!confirmar) return;
@@ -147,10 +147,8 @@
             try {
                 await deleteDoc(doc(db, "alumnos", idAlumno));
                 alert("🗑️ Alumno eliminado correctamente.");
-                cargarAlumnosYTabla(); // Recarga la interfaz
-            } catch (error) {
-                alert("Error al intentar eliminar al alumno.");
-            }
+                cargarAlumnosYTabla();
+            } catch (error) { alert("Error al intentar eliminar al alumno."); }
         }
 
         window.crearActividad = async function() {
@@ -160,17 +158,68 @@
             const fecha = document.getElementById("fechaActividad").value;
             const valor = parseInt(document.getElementById("valorActividad").value) || 10;
 
-            if(!grupo || !nombre) { alert("Especifica el grupo y el nombre de la tarea."); return; }
+            if(!grupo || !nombre) { alert("Anota grupo y nombre de la tarea."); return; }
             const id = `${grupo}_${parcial}_${nombre.replace(/\s+/g, '_')}`;
             await setDoc(doc(db, "actividades", id), { nombre, grupo, parcial, fecha, valor });
-            alert(`✅ Tarea "${nombre}" publicada con éxito.`);
+            alert(`✅ Tarea "${nombre}" publicada.`);
             document.getElementById("nomActividad").value = "";
             cargarAlumnosYTabla();
         }
 
+        // FUNCIÓN DE BORRADO INTEGRAL CORREGIDA
+        window.gestionarActividad = async function(nombreActividad, valorActual, fechaActual) {
+            const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
+            const parcial = document.getElementById("filtroParcial").value;
+            const idActividad = `${grupo}_${parcial}_${nombreActividad.replace(/\s+/g, '_')}`;
+
+            const seleccion = prompt(`⚙️ Panel de Tarea: "${nombreActividad}"\n\n¿Qué deseas hacer?\nEscribe "PUNTOS" para cambiar el valor.\nEscribe "FECHA" para modificar la entrega.\nEscribe "BORRAR" para eliminar el trabajo por completo:`, "PUNTOS");
+            
+            if (!seleccion) return;
+            const accion = seleccion.toUpperCase().trim();
+
+            if (accion === "PUNTOS") {
+                const nuevoValor = prompt(`El valor actual es [${valorActual} pts]. Ingresa el nuevo valor numérico:`, valorActual);
+                if(nuevoValor && !isNaN(nuevoValor)) {
+                    await updateDoc(doc(db, "actividades", idActividad), { valor: parseInt(nuevoValor) });
+                    alert("✨ Puntos de la actividad actualizados.");
+                    cargarAlumnosYTabla();
+                }
+            } else if (accion === "FECHA") {
+                const nuevaFecha = prompt(`La fecha actual es [${fechaActual || 'Sin fecha'}]. Ingresa la nueva fecha (AAAA-MM-DD):`, fechaActual);
+                if(nuevaFecha) {
+                    await updateDoc(doc(db, "actividades", idActividad), { fecha: nuevaFecha });
+                    alert("📅 Fecha límite actualizada.");
+                    cargarAlumnosYTabla();
+                }
+            } else if (accion === "BORRAR") {
+                const confirmarBorrar = prompt(`⚠️ ¡ALERTA DE LIMPIEZA PROFUNDA!\nEsto eliminará permanentemente la tarea, sus palomitas y sus ajustes manuales de internet.\n\nPara confirmar, escribe exactamente: BORRAR`);
+                if (confirmarBorrar === "BORRAR") {
+                    // 1. Eliminar documento base de la actividad
+                    await deleteDoc(doc(db, "actividades", idActividad));
+                    
+                    // 2. Limpiar registros de códigos QR escaneados vinculados a esta tarea
+                    const qQR = query(collection(db, "codigos_qr"), where("grupo", "==", grupo), where("actividad", "==", nombreActividad));
+                    const snapQR = await getDocs(qQR);
+                    const promesasQR = snapQR.docs.map(d => deleteDoc(doc(db, "codigos_qr", d.id)));
+                    await Promise.all(promesasQR);
+
+                    // 3. Limpiar los ajustes manuales vinculados a esta tarea
+                    const qAjustes = query(collection(db, "ajustes_manuales"), where("grupo", "==", grupo), where("actividad", "==", nombreActividad));
+                    const snapAjustes = await getDocs(qAjustes);
+                    const promesasAjustes = snapAjustes.docs.map(d => deleteDoc(doc(db, "ajustes_manuales", d.id)));
+                    await Promise.all(promesasAjustes);
+
+                    alert("🗑️ Actividad y todo su historial eliminados con éxito.");
+                    cargarAlumnosYTabla();
+                }
+            } else {
+                alert("Opción no válida.");
+            }
+        }
+
         window.ajusteManualPuntos = async function(nombreAlumno, nombreActividad) {
             const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
-            const puntos = prompt(`Modificación manual para ${nombreAlumno} en la actividad "${nombreActividad}":\n\nIngresa los puntos extras (+puntos) o penalizaciones (-puntos):`, "0");
+            const puntos = prompt(`Modificación manual para ${nombreAlumno} en "${nombreActividad}":\n\nIngresa puntos extra (+5) o penalización (-3):`, "0");
             if (puntos === null) return;
             
             const valorAjuste = parseInt(puntos) || 0;
@@ -203,7 +252,7 @@
                         </div>
                         <div class="flex gap-1">
                             <button onclick="abrirEscaner('${data.nombre}')" class="bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1 rounded-lg font-bold transition">Escanear</button>
-                            <button onclick="eliminarAlumnoDeBase('${data.nombre}', '${data.grupo}')" class="bg-slate-600 hover:bg-red-600 text-slate-300 hover:text-white px-2 py-1 rounded-lg font-bold transition" title="Eliminar Alumno">🗑️</button>
+                            <button onclick="eliminarAlumnoDeBase('${data.nombre}', '${data.grupo}')" class="bg-slate-600 hover:bg-red-600 text-slate-300 hover:text-white px-2 py-1 rounded-lg font-bold transition">🗑️</button>
                         </div>
                     </div>`;
             });
@@ -219,8 +268,8 @@
                 const act = doc.data();
                 listaActividades.push(act);
                 header.innerHTML += `
-                    <th class="p-1 border-b border-slate-600 border-l text-center min-w-[80px]">
-                        <div class="text-blue-400 font-bold tracking-tight">${act.nombre}</div>
+                    <th onclick="gestionarActividad('${act.nombre}', ${act.valor}, '${act.fecha || ''}')" class="p-1 border-b border-slate-600 border-l text-center min-w-[85px] cursor-pointer bg-slate-700/40 hover:bg-slate-600 transition select-none" title="Toca para editar o borrar esta tarea">
+                        <div class="text-blue-400 font-bold tracking-tight underline decoration-dotted">${act.nombre}</div>
                         <div class="text-[9px] text-yellow-500 font-medium">[${act.valor} pts]</div>
                     </th>`;
             });
@@ -277,7 +326,7 @@
                     });
                     
                     if(arrayAlumnos.length === 0) {
-                        tbody.innerHTML = `<tr><td class="p-4 text-slate-500 italic" colspan="${listaActividades.length + 2}">No hay alumnos registrados en el grupo ${grupo}. En la parte superior puedes inscribirlos.</td></tr>`;
+                        tbody.innerHTML = `<tr><td class="p-4 text-slate-500 italic" colspan="${listaActividades.length + 2}">No hay alumnos en el grupo ${grupo}. Inscríbelos arriba.</td></tr>`;
                     }
                 });
             });
@@ -289,7 +338,7 @@
             document.getElementById("seccionEscaner").classList.remove("hidden");
             html5QrcodeScanner = new Html5Qrcode("reader");
             html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 200, height: 200 } }, onScanSuccess)
-                .catch(err => { alert("Error al encender la cámara del dispositivo móvil."); cerrarEscaner(); });
+                .catch(err => { alert("Error al encender la cámara."); cerrarEscaner(); });
         }
 
         window.cerrarEscaner = function() {
@@ -308,15 +357,15 @@
                 if (docSnap.exists()) {
                     const datosQR = docSnap.data();
                     if (datosQR.alumno !== alumnoActual) {
-                        alert(`❌ ERROR DE IDENTIDAD:\nEste QR le pertenece a ${datosQR.alumno}, no a ${alumnoActual}.`); return;
+                        alert(`❌ ERROR DE IDENTIDAD:\nEste QR le pertenece a ${datosQR.alumno}.`); return;
                     }
                     if (datosQR.estado === "Escaneado") {
-                        alert("❌ TOKEN EXPIRADO:\nEste código QR ya fue escaneado."); return;
+                        alert("❌ TOKEN EXPIRADO:\nEste código QR ya fue usado."); return;
                     }
                     await updateDoc(docRef, { estado: "Escaneado", fechaEscaneo: new Date() });
                     alert(`✅ ¡Entrega procesada con éxito para ${alumnoActual}!`);
-                } else { alert("❌ CÓDIGO INVÁLIDO:\nEl token escaneado no existe."); }
-            } catch (error) { alert("Error de comunicación de red."); }
+                } else { alert("❌ CÓDIGO INVÁLIDO."); }
+            } catch (error) { alert("Error de red."); }
         }
     </script>
 </body>
