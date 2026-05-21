@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Alumno - QR-Grade</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 p-4 min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full bg-slate-800 p-6 rounded-2xl shadow-2xl border border-slate-700 text-center">
+        <h1 class="text-2xl font-black text-emerald-400 mb-1 flex items-center justify-center gap-2">
+            <span>📲</span> Portal de Entrega
+        </h1>
+        <p class="text-xs text-slate-400 mb-6">Genera tu token dinámico para revisión</p>
+        
+        <div class="mb-4 text-left">
+            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wide">Tu Grupo Exacto:</label>
+            <input id="grupoAlumno" type="text" placeholder="Ej: 4TPROG-Am" oninput="buscarTareasDelGrupo()" class="w-full p-3 text-sm rounded-xl bg-slate-700 border border-slate-600 mt-1 text-white font-bold uppercase placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+        </div>
+
+        <div class="mb-4 text-left">
+            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wide">Tu Nombre Completo:</label>
+            <input id="nombreAlumno" type="text" placeholder="Tal cual estás en la lista" class="w-full p-3 text-sm rounded-xl bg-slate-700 border border-slate-600 mt-1 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+        </div>
+
+        <div class="mb-6 text-left">
+            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wide">Selecciona la Actividad:</label>
+            <select id="selectActividad" class="w-full p-3 text-sm rounded-xl bg-slate-700 border border-slate-600 mt-1 text-white font-semibold focus:outline-none focus:border-emerald-500">
+                <option value="">Escribe tu grupo arriba primero...</option>
+            </select>
+        </div>
+
+        <button onclick="generarCodigoEntrega()" class="w-full bg-emerald-500 text-slate-950 p-3 rounded-xl font-extrabold text-md shadow-lg hover:bg-emerald-400 transition transform active:scale-95">
+            Generar Código QR Único
+        </button>
+
+        <div class="mt-6 flex flex-col items-center justify-center">
+            <div id="qrcode" class="p-4 bg-white rounded-xl shadow-inner min-h-[200px] w-[200px] flex items-center justify-center text-slate-400 text-xs font-medium">
+                Esperando datos...
+            </div>
+            <p id="instrucciones" class="text-xs text-red-400 mt-4 font-semibold hidden animate-pulse">
+                ⚠️ Token de seguridad creado. Si se comparte o se escanea dos veces, se invalidará.
+            </p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDL0CybhUR13A8yd_S7HPUHoKwOzz96S6A",
+            authDomain: "firmadigitalmaestra.firebaseapp.com",
+            projectId: "firmadigitalmaestra",
+            storageBucket: "firmadigitalmaestra.firebasestorage.app",
+            messagingSenderId: "60938874327",
+            appId: "1:60938874327:web:9c23f797239a5e02092f92",
+            measurementId: "G-649ZFMSP3J"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let qrContenedor = document.getElementById("qrcode");
+
+        // BUSCAR TAREAS ACTIVAS EN FIREBASE CUANDO EL ALUMNO ESCRIBE SU GRUPO
+        window.buscarTareasDelGrupo = async function() {
+            const grupo = document.getElementById("grupoAlumno").value.trim().toUpperCase();
+            const select = document.getElementById("selectActividad");
+            
+            if (grupo.length < 3) return; // Esperar a que escriba bien el grupo
+
+            try {
+                const q = query(collection(db, "actividades"), where("grupo", "==", grupo));
+                const snap = await getDocs(q);
+                
+                select.innerHTML = '<option value="">-- Selecciona la Tarea --</option>';
+                
+                if (snap.empty) {
+                    select.innerHTML = '<option value="">Sin tareas creadas para este grupo</option>';
+                    return;
+                }
+
+                snap.forEach(doc => {
+                    const act = doc.data();
+                    select.innerHTML += `<option value="${act.nombre}">${act.nombre} [${act.parcial.replace('_', ' ')}]</option>`;
+                });
+            } catch (e) {
+                console.error("Error cargando tareas", e);
+            }
+        }
+
+        // GENERAR TOKEN QR EN LA BASE DE DATOS
+        window.generarCodigoEntrega = async function() {
+            const grupo = document.getElementById("grupoAlumno").value.trim().toUpperCase();
+            const nombre = document.getElementById("nombreAlumno").value.trim();
+            const actividad = document.getElementById("selectActividad").value;
+
+            if(!grupo || !nombre || !actividad) {
+                alert("Por favor llena todos los campos del formulario.");
+                return;
+            }
+
+            // Generamos un ID único usando milisegundos para evitar duplicados
+            const idUnico = `${nombre.replace(/\s+/g, '_')}_${actividad.replace(/\s+/g, '_')}_${Date.now()}`;
+
+            try {
+                await setDoc(doc(db, "codigos_qr", idUnico), {
+                    alumno: nombre,
+                    grupo: grupo,
+                    actividad: actividad,
+                    estado: "Pendiente",
+                    fechaCreacion: new Date()
+                });
+
+                qrContenedor.innerHTML = "";
+                new QRCode(qrContenedor, { text: idUnico, width: 200, height: 200 });
+                document.getElementById("instrucciones").classList.remove("hidden");
+            } catch (error) { 
+                alert("Error de conexión al generar el token."); 
+            }
+        }
+    </script>
+</body>
+</html>
