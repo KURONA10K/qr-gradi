@@ -3,46 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Alumno - QR-Grade</title>
+    <title>Generador de Firmas QR - Alumnos</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 p-4 min-h-screen flex items-center justify-center">
+<body class="bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center p-4 font-sans">
+
     <div class="max-w-md w-full bg-slate-800 p-6 rounded-2xl shadow-2xl border border-slate-700 text-center">
-        <h1 class="text-2xl font-black text-emerald-400 mb-1 flex items-center justify-center gap-2">
-            <span>📲</span> Portal de Entrega
-        </h1>
-        <p class="text-xs text-slate-400 mb-6">Genera tu token dinámico para revisión</p>
         
-        <div class="mb-4 text-left">
-            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wide">Tu Grupo Exacto:</label>
-            <input id="grupoAlumno" type="text" placeholder="Ej: 4TPROG-Am" oninput="buscarTareasDelGrupo()" class="w-full p-3 text-sm rounded-xl bg-slate-700 border border-slate-600 mt-1 text-white font-bold uppercase placeholder-slate-500 focus:outline-none focus:border-emerald-500">
-        </div>
+        <h1 class="text-2xl font-extrabold text-blue-400 mb-1 flex items-center justify-center gap-2">
+            <span>📲</span> QR-Grade Alumnos
+        </h1>
+        <p class="text-xs text-slate-400 mb-6">Selecciona tus datos oficiales para generar tu código QR.</p>
 
-        <div class="mb-4 text-left">
-            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wide">Tu Nombre Completo:</label>
-            <input id="nombreAlumno" type="text" placeholder="Tal cual estás en la lista" class="w-full p-3 text-sm rounded-xl bg-slate-700 border border-slate-600 mt-1 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
-        </div>
-
-        <div class="mb-6 text-left">
-            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wide">Selecciona la Actividad:</label>
-            <select id="selectActividad" class="w-full p-3 text-sm rounded-xl bg-slate-700 border border-slate-600 mt-1 text-white font-semibold focus:outline-none focus:border-emerald-500">
-                <option value="">Escribe tu grupo arriba primero...</option>
-            </select>
-        </div>
-
-        <button onclick="generarCodigoEntrega()" class="w-full bg-emerald-500 text-slate-950 p-3 rounded-xl font-extrabold text-md shadow-lg hover:bg-emerald-400 transition transform active:scale-95">
-            Generar Código QR Único
-        </button>
-
-        <div class="mt-6 flex flex-col items-center justify-center">
-            <div id="qrcode" class="p-4 bg-white rounded-xl shadow-inner min-h-[200px] w-[200px] flex items-center justify-center text-slate-400 text-xs font-medium">
-                Esperando datos...
+        <div class="space-y-4 text-left">
+            
+            <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1 uppercase tracking-wider">1. Tu Grupo:</label>
+                <input id="alumnoGrupo" type="text" placeholder="Ej: 4TPROG-Am" oninput="buscarAlumnosDeMiGrupo()" class="w-full p-3 rounded-xl bg-slate-700 border border-slate-600 text-white font-bold uppercase focus:outline-none focus:border-blue-500 transition">
+                <p id="msgBuscandoGrupo" class="text-[10px] text-blue-400 mt-1 hidden">🔍 Buscando lista de alumnos en este grupo...</p>
             </div>
-            <p id="instrucciones" class="text-xs text-red-400 mt-4 font-semibold hidden animate-pulse">
-                ⚠️ Token de seguridad creado. Si se comparte o se escanea dos veces, se invalidará.
-            </p>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1 uppercase tracking-wider">2. Selecciona tu Nombre:</label>
+                <select id="alumnoNombreSelect" disabled class="w-full p-3 rounded-xl bg-slate-700 border border-slate-600 text-white font-semibold focus:outline-none focus:border-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    <option value="">-- Escribe primero tu grupo arriba --</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1 uppercase tracking-wider">3. Nombre de la Actividad / Tareas:</label>
+                <input id="actividadNombre" type="text" placeholder="Ej: Tarea 1" class="w-full p-3 rounded-xl bg-slate-700 border border-slate-600 text-white focus:outline-none focus:border-blue-500 transition">
+            </div>
+
+            <button id="btnGenerar" onclick="generarTokenQR()" class="w-full bg-blue-600 hover:bg-blue-500 text-white p-3 rounded-xl font-bold text-sm tracking-wide shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
+                <span id="textBtn">Generar Código QR</span>
+                <span id="spinnerBtn" class="hidden animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent text-white rounded-full"></span>
+            </button>
         </div>
+
+        <div id="contenedorQR" class="hidden mt-6 p-4 bg-white rounded-2xl inline-block shadow-inner mx-auto">
+            <div id="qrcode" class="mx-auto"></div>
+            <p class="text-slate-900 font-black text-xs mt-3 uppercase tracking-wider">Muestra este código a la maestra</p>
+        </div>
+
+        <p id="msgEstado" class="text-xs text-yellow-500 font-medium mt-3 hidden"></p>
+
     </div>
 
     <script type="module">
@@ -62,51 +68,100 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let qrContenedor = document.getElementById("qrcode");
+        let timeoutBusqueda = null;
 
-        // BUSCAR TAREAS ACTIVAS EN FIREBASE CUANDO EL ALUMNO ESCRIBE SU GRUPO
-        window.buscarTareasDelGrupo = async function() {
-            const grupo = document.getElementById("grupoAlumno").value.trim().toUpperCase();
-            const select = document.getElementById("selectActividad");
-            
-            if (grupo.length < 3) return; // Esperar a que escriba bien el grupo
+        // FUNCIÓN AUTOMÁTICA: Busca la lista de alumnos inscritos al escribir el grupo
+        window.buscarAlumnosDeMiGrupo = function() {
+            clearTimeout(timeoutBusqueda);
+            const grupo = document.getElementById("alumnoGrupo").value.trim().toUpperCase();
+            const selectNombre = document.getElementById("alumnoNombreSelect");
+            const msgGrupo = document.getElementById("msgBuscandoGrupo");
 
-            try {
-                const q = query(collection(db, "actividades"), where("grupo", "==", grupo));
-                const snap = await getDocs(q);
-                
-                select.innerHTML = '<option value="">-- Selecciona la Tarea --</option>';
-                
-                if (snap.empty) {
-                    select.innerHTML = '<option value="">Sin tareas creadas para este grupo</option>';
-                    return;
-                }
-
-                snap.forEach(doc => {
-                    const act = doc.data();
-                    select.innerHTML += `<option value="${act.nombre}">${act.nombre} [${act.parcial.replace('_', ' ')}]</option>`;
-                });
-            } catch (e) {
-                console.error("Error cargando tareas", e);
-            }
-        }
-
-        // GENERAR TOKEN QR EN LA BASE DE DATOS
-        window.generarCodigoEntrega = async function() {
-            const grupo = document.getElementById("grupoAlumno").value.trim().toUpperCase();
-            const nombre = document.getElementById("nombreAlumno").value.trim();
-            const actividad = document.getElementById("selectActividad").value;
-
-            if(!grupo || !nombre || !actividad) {
-                alert("Por favor llena todos los campos del formulario.");
+            if (!grupo) {
+                selectNombre.innerHTML = '<option value="">-- Escribe primero tu grupo arriba --</option>';
+                selectNombre.disabled = true;
+                msgGrupo.classList.add("hidden");
                 return;
             }
 
-            // Generamos un ID único usando milisegundos para evitar duplicados
-            const idUnico = `${nombre.replace(/\s+/g, '_')}_${actividad.replace(/\s+/g, '_')}_${Date.now()}`;
+            msgGrupo.classList.remove("hidden");
+
+            // Debounce de 600ms para no saturar las lecturas de Firebase mientras escriben
+            timeoutBusqueda = setTimeout(async () => {
+                try {
+                    const q = query(collection(db, "alumnos"), where("grupo", "==", grupo));
+                    const querySnapshot = await getDocs(q);
+                    
+                    selectNombre.innerHTML = "";
+
+                    if (querySnapshot.empty) {
+                        selectNombre.innerHTML = '<option value="">⚠️ No hay alumnos inscritos en este grupo</option>';
+                        selectNombre.disabled = true;
+                    } else {
+                        selectNombre.innerHTML = '<option value="">-- Selecciona tu Nombre Oficial --</option>';
+                        querySnapshot.forEach((doc) => {
+                            const alumno = doc.data();
+                            selectNombre.innerHTML += `<option value="${alumno.nombre}">${alumno.nombre}</option>`;
+                        });
+                        selectNombre.disabled = false;
+                        
+                        // Si el alumno ya había seleccionado su nombre antes en este cel, lo auto-selecciona
+                        const nombreGuardado = localStorage.getItem('qr_nombre_lista');
+                        if (nombreGuardado && selectNombre.querySelector(`option[value="${nombreGuardado}"]`)) {
+                            selectNombre.value = nombreGuardado;
+                        }
+                    }
+                } catch (error) {
+                    selectNombre.innerHTML = '<option value="">❌ Error al cargar lista</option>';
+                } finally {
+                    msgGrupo.classList.add("hidden");
+                }
+            }, 600);
+        }
+
+        // Cargar grupo por defecto si ya existe en memoria
+        window.addEventListener('DOMContentLoaded', () => {
+            const grupoGuardado = localStorage.getItem('qr_grupo');
+            if (grupoGuardado) {
+                document.getElementById("alumnoGrupo").value = grupoGuardado;
+                buscarAlumnosDeMiGrupo();
+            }
+        });
+
+        // GENERAR EL TOKEN QR
+        window.generarTokenQR = async function() {
+            const grupo = document.getElementById("alumnoGrupo").value.trim().toUpperCase();
+            const nombre = document.getElementById("alumnoNombreSelect").value;
+            const actividad = document.getElementById("actividadNombre").value.trim();
+
+            const btn = document.getElementById("btnGenerar");
+            const txtBtn = document.getElementById("textBtn");
+            const spinner = document.getElementById("spinnerBtn");
+            const msg = document.getElementById("msgEstado");
+            const divQR = document.getElementById("contenedorQR");
+
+            if (!grupo || !nombre || !actividad) {
+                alert("⚠️ Por favor completa todos los pasos del formulario.");
+                return;
+            }
+
+            // Bloqueo visual de carga
+            btn.disabled = true;
+            btn.classList.add("bg-blue-800", "cursor-not-allowed");
+            txtBtn.innerText = "Sincronizando token...";
+            spinner.classList.remove("hidden");
+            msg.classList.remove("hidden");
+            msg.innerText = "⏳ Creando pase de lista seguro...";
+            divQR.classList.add("hidden");
+
+            // Recordar los datos para la próxima clase
+            localStorage.setItem('qr_grupo', grupo);
+            localStorage.setItem('qr_nombre_lista', nombre);
+
+            const tokenID = `TK_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
 
             try {
-                await setDoc(doc(db, "codigos_qr", idUnico), {
+                await setDoc(doc(db, "codigos_qr", tokenID), {
                     alumno: nombre,
                     grupo: grupo,
                     actividad: actividad,
@@ -114,11 +169,30 @@
                     fechaCreacion: new Date()
                 });
 
-                qrContenedor.innerHTML = "";
-                new QRCode(qrContenedor, { text: idUnico, width: 200, height: 200 });
-                document.getElementById("instrucciones").classList.remove("hidden");
-            } catch (error) { 
-                alert("Error de conexión al generar el token."); 
+                const qrContenedor = document.getElementById("qrcode");
+                qrContenedor.innerHTML = ""; 
+                new QRCode(qrContenedor, {
+                    text: tokenID,
+                    width: 180,
+                    height: 180,
+                    colorDark : "#0f172a",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+
+                divQR.classList.remove("hidden");
+                msg.innerText = "✅ ¡Token verificado y listo para escaneo!";
+                msg.classList.replace("text-yellow-500", "text-green-400");
+
+            } catch (error) {
+                msg.innerText = "❌ Error de conexión con Google Firebase.";
+                msg.classList.replace("text-yellow-500", "text-red-400");
+                alert("Ocurrió un problema de red. Intenta de nuevo.");
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove("bg-blue-800", "cursor-not-allowed");
+                txtBtn.innerText = "Generar Código QR";
+                spinner.classList.add("hidden");
             }
         }
     </script>
