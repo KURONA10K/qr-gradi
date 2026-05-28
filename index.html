@@ -3,52 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Firmas QR - Alumnos</title>
+    <title>Generador QR - Alumnos V3</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center p-4 font-sans">
 
     <div class="max-w-md w-full bg-slate-800 p-6 rounded-2xl shadow-2xl border border-slate-700 text-center">
-        
         <h1 class="text-2xl font-extrabold text-blue-400 mb-1 flex items-center justify-center gap-2">
             <span>📲</span> QR-Grade Alumnos
         </h1>
-        <p class="text-xs text-slate-400 mb-6">Selecciona tus datos oficiales para generar tu código QR.</p>
+        <p class="text-xs text-slate-400 mb-6">Pase de lista y entrega de trabajos oficial.</p>
 
         <div class="space-y-4 text-left">
-            
             <div>
-                <label class="block text-xs font-bold text-slate-300 mb-1 uppercase tracking-wider">1. Tu Grupo:</label>
-                <input id="alumnoGrupo" type="text" placeholder="Ej: 4TPROG-Am" oninput="buscarAlumnosDeMiGrupo()" class="w-full p-3 rounded-xl bg-slate-700 border border-slate-600 text-white font-bold uppercase focus:outline-none focus:border-blue-500 transition">
-                <p id="msgBuscandoGrupo" class="text-[10px] text-blue-400 mt-1 hidden">🔍 Buscando lista de alumnos en este grupo...</p>
+                <label class="block text-xs font-bold text-slate-300 mb-1 uppercase">1. Tu Grupo:</label>
+                <input id="alumnoGrupo" type="text" placeholder="Ej: 4TPROG-Am" oninput="buscarAlumnosDeMiGrupo()" class="w-full p-3 rounded-xl bg-slate-700 border border-slate-600 text-white font-bold uppercase focus:outline-none focus:border-blue-500">
+                <p id="msgBuscandoGrupo" class="text-[10px] text-blue-400 mt-1 hidden">🔍 Cargando lista de alumnos...</p>
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-300 mb-1 uppercase tracking-wider">2. Selecciona tu Nombre:</label>
-                <select id="alumnoNombreSelect" disabled class="w-full p-3 rounded-xl bg-slate-700 border border-slate-600 text-white font-semibold focus:outline-none focus:border-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                    <option value="">-- Escribe primero tu grupo arriba --</option>
+                <label class="block text-xs font-bold text-slate-300 mb-1 uppercase">2. Selecciona tu Nombre:</label>
+                <select id="alumnoNombreSelect" disabled class="w-full p-3 rounded-xl bg-slate-700 border border-slate-600 text-white font-semibold focus:outline-none focus:border-blue-500 disabled:opacity-50">
+                    <option value="">-- Escribe tu grupo arriba --</option>
                 </select>
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-300 mb-1 uppercase tracking-wider">3. Nombre de la Actividad / Tareas:</label>
-                <input id="actividadNombre" type="text" placeholder="Ej: Tarea 1" class="w-full p-3 rounded-xl bg-slate-700 border border-slate-600 text-white focus:outline-none focus:border-blue-500 transition">
+                <label class="block text-xs font-bold text-slate-300 mb-1 uppercase">3. ¿Qué vas a registrar?</label>
+                <select id="tipoRegistro" onchange="alternarTipoRegistro()" class="w-full p-3 rounded-xl bg-slate-700 border border-slate-600 text-white font-bold focus:outline-none focus:border-blue-500">
+                    <option value="Trabajo">📝 Entregar Trabajo / Tarea</option>
+                    <option value="Asistencia">⏱️ Tomar Asistencia del Día</option>
+                </select>
             </div>
 
-            <button id="btnGenerar" onclick="generarTokenQR()" class="w-full bg-blue-600 hover:bg-blue-500 text-white p-3 rounded-xl font-bold text-sm tracking-wide shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
+            <div id="contenedorActividad">
+                <label class="block text-xs font-bold text-slate-300 mb-1 uppercase">4. Nombre de la Tarea:</label>
+                <input id="actividadNombre" type="text" placeholder="Ej: Tarea 1" class="w-full p-3 rounded-xl bg-slate-700 border border-slate-600 text-white focus:outline-none focus:border-blue-500">
+            </div>
+
+            <button id="btnGenerar" onclick="generarTokenQR()" class="w-full bg-blue-600 hover:bg-blue-500 text-white p-3 rounded-xl font-bold text-sm shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
                 <span id="textBtn">Generar Código QR</span>
-                <span id="spinnerBtn" class="hidden animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent text-white rounded-full"></span>
+                <span id="spinnerBtn" class="hidden animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full"></span>
             </button>
         </div>
 
         <div id="contenedorQR" class="hidden mt-6 p-4 bg-white rounded-2xl inline-block shadow-inner mx-auto">
             <div id="qrcode" class="mx-auto"></div>
-            <p class="text-slate-900 font-black text-xs mt-3 uppercase tracking-wider">Muestra este código a la maestra</p>
+            <p id="qrFooterTexto" class="text-slate-900 font-black text-xs mt-3 uppercase tracking-wider">Muestra este código a la maestra</p>
         </div>
 
         <p id="msgEstado" class="text-xs text-yellow-500 font-medium mt-3 hidden"></p>
-
     </div>
 
     <script type="module">
@@ -61,78 +66,66 @@
             projectId: "firmadigitalmaestra",
             storageBucket: "firmadigitalmaestra.firebasestorage.app",
             messagingSenderId: "60938874327",
-            appId: "1:60938874327:web:9c23f797239a5e02092f92",
-            measurementId: "G-649ZFMSP3J"
+            appId: "1:60938874327:web:9c23f797239a5e02092f92"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
         let timeoutBusqueda = null;
 
-        // FUNCIÓN AUTOMÁTICA: Busca la lista de alumnos inscritos al escribir el grupo
         window.buscarAlumnosDeMiGrupo = function() {
             clearTimeout(timeoutBusqueda);
             const grupo = document.getElementById("alumnoGrupo").value.trim().toUpperCase();
             const selectNombre = document.getElementById("alumnoNombreSelect");
             const msgGrupo = document.getElementById("msgBuscandoGrupo");
 
-            if (!grupo) {
-                selectNombre.innerHTML = '<option value="">-- Escribe primero tu grupo arriba --</option>';
-                selectNombre.disabled = true;
-                msgGrupo.classList.add("hidden");
-                return;
-            }
-
+            if (!grupo) { selectNombre.innerHTML = '<option value="">-- Escribe tu grupo arriba --</option>'; selectNombre.disabled = true; return; }
             msgGrupo.classList.remove("hidden");
 
-            // Debounce de 600ms para no saturar las lecturas de Firebase mientras escriben
             timeoutBusqueda = setTimeout(async () => {
                 try {
                     const q = query(collection(db, "alumnos"), where("grupo", "==", grupo));
-                    const querySnapshot = await getDocs(q);
-                    
+                    const snapshot = await getDocs(q);
                     selectNombre.innerHTML = "";
-
-                    if (querySnapshot.empty) {
-                        selectNombre.innerHTML = '<option value="">⚠️ No hay alumnos inscritos en este grupo</option>';
+                    if (snapshot.empty) {
+                        selectNombre.innerHTML = '<option value="">⚠️ No hay alumnos en este grupo</option>';
                         selectNombre.disabled = true;
                     } else {
-                        selectNombre.innerHTML = '<option value="">-- Selecciona tu Nombre Oficial --</option>';
-                        querySnapshot.forEach((doc) => {
-                            const alumno = doc.data();
-                            selectNombre.innerHTML += `<option value="${alumno.nombre}">${alumno.nombre}</option>`;
-                        });
+                        selectNombre.innerHTML = '<option value="">-- Selecciona tu Nombre --</option>';
+                        snapshot.forEach((doc) => { selectNombre.innerHTML += `<option value="${doc.data().nombre}">${doc.data().nombre}</option>`; });
                         selectNombre.disabled = false;
-                        
-                        // Si el alumno ya había seleccionado su nombre antes en este cel, lo auto-selecciona
-                        const nombreGuardado = localStorage.getItem('qr_nombre_lista');
-                        if (nombreGuardado && selectNombre.querySelector(`option[value="${nombreGuardado}"]`)) {
-                            selectNombre.value = nombreGuardado;
-                        }
+                        const guardado = localStorage.getItem('qr_nombre_lista');
+                        if (guardado && selectNombre.querySelector(`option[value="${guardado}"]`)) selectNombre.value = guardado;
                     }
-                } catch (error) {
-                    selectNombre.innerHTML = '<option value="">❌ Error al cargar lista</option>';
-                } finally {
-                    msgGrupo.classList.add("hidden");
-                }
+                } catch (e) { selectNombre.innerHTML = '<option value="">❌ Error al cargar</option>'; }
+                finally { msgGrupo.classList.add("hidden"); }
             }, 600);
         }
 
-        // Cargar grupo por defecto si ya existe en memoria
+        window.alternarTipoRegistro = function() {
+            const tipo = document.getElementById("tipoRegistro").value;
+            const contenedor = document.getElementById("contenedorActividad");
+            if(tipo === "Asistencia") {
+                contenedor.classList.add("hidden");
+                // Generar una clave de fecha de hoy AAAA-MM-DD
+                const hoy = new Date().toISOString().split('T')[0];
+                document.getElementById("actividadNombre").value = `Asistencia_${hoy}`;
+            } else {
+                contenedor.classList.remove("hidden");
+                document.getElementById("actividadNombre").value = "";
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             const grupoGuardado = localStorage.getItem('qr_grupo');
-            if (grupoGuardado) {
-                document.getElementById("alumnoGrupo").value = grupoGuardado;
-                buscarAlumnosDeMiGrupo();
-            }
+            if (grupoGuardado) { document.getElementById("alumnoGrupo").value = grupoGuardado; buscarAlumnosDeMiGrupo(); }
         });
 
-        // GENERAR EL TOKEN QR
         window.generarTokenQR = async function() {
             const grupo = document.getElementById("alumnoGrupo").value.trim().toUpperCase();
             const nombre = document.getElementById("alumnoNombreSelect").value;
             const actividad = document.getElementById("actividadNombre").value.trim();
+            const tipo = document.getElementById("tipoRegistro").value;
 
             const btn = document.getElementById("btnGenerar");
             const txtBtn = document.getElementById("textBtn");
@@ -140,21 +133,13 @@
             const msg = document.getElementById("msgEstado");
             const divQR = document.getElementById("contenedorQR");
 
-            if (!grupo || !nombre || !actividad) {
-                alert("⚠️ Por favor completa todos los pasos del formulario.");
-                return;
-            }
+            if (!grupo || !nombre || !actividad) { alert("⚠️ Completa los campos."); return; }
 
-            // Bloqueo visual de carga
             btn.disabled = true;
-            btn.classList.add("bg-blue-800", "cursor-not-allowed");
-            txtBtn.innerText = "Sincronizando token...";
             spinner.classList.remove("hidden");
             msg.classList.remove("hidden");
-            msg.innerText = "⏳ Creando pase de lista seguro...";
-            divQR.classList.add("hidden");
+            msg.innerText = "⏳ Creando pase digital seguro...";
 
-            // Recordar los datos para la próxima clase
             localStorage.setItem('qr_grupo', grupo);
             localStorage.setItem('qr_nombre_lista', nombre);
 
@@ -162,36 +147,21 @@
 
             try {
                 await setDoc(doc(db, "codigos_qr", tokenID), {
-                    alumno: nombre,
-                    grupo: grupo,
-                    actividad: actividad,
-                    estado: "Pendiente",
-                    fechaCreacion: new Date()
+                    alumno: nombre, grupo: grupo, actividad: actividad, tipo: tipo, estado: "Pendiente", fechaCreacion: new Date()
                 });
 
                 const qrContenedor = document.getElementById("qrcode");
                 qrContenedor.innerHTML = ""; 
-                new QRCode(qrContenedor, {
-                    text: tokenID,
-                    width: 180,
-                    height: 180,
-                    colorDark : "#0f172a",
-                    colorLight : "#ffffff",
-                    correctLevel : QRCode.CorrectLevel.H
-                });
+                new QRCode(qrContenedor, { text: tokenID, width: 180, height: 180, colorDark : "#0f172a", colorLight : "#ffffff" });
 
                 divQR.classList.remove("hidden");
-                msg.innerText = "✅ ¡Token verificado y listo para escaneo!";
-                msg.classList.replace("text-yellow-500", "text-green-400");
-
+                document.getElementById("qrFooterTexto").innerText = tipo === "Asistencia" ? "Pase de Lista Activo" : "Muestra el QR de tu tarea";
+                msg.innerText = "✅ ¡Listo para escaneo de la Maestra!";
+                msg.className = "text-xs text-green-400 font-medium mt-3";
             } catch (error) {
-                msg.innerText = "❌ Error de conexión con Google Firebase.";
-                msg.classList.replace("text-yellow-500", "text-red-400");
-                alert("Ocurrió un problema de red. Intenta de nuevo.");
+                msg.innerText = "❌ Error de conexión.";
             } finally {
                 btn.disabled = false;
-                btn.classList.remove("bg-blue-800", "cursor-not-allowed");
-                txtBtn.innerText = "Generar Código QR";
                 spinner.classList.add("hidden");
             }
         }
