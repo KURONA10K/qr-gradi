@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control Escolar - Maestra</title>
+    <title>Panel de Control Escolar - Maestra V4.5</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <style>
@@ -12,7 +12,7 @@
             50% { top: 100%; }
             100% { top: 0%; }
         }
-        .anim-laser { animation: laser 2.5s linear infinite; }
+        .anim-laser { animation: laser 2s linear infinite; }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-2 sm:p-4 pb-20 font-sans">
@@ -20,7 +20,7 @@
         
         <div class="flex flex-col gap-3 border-b border-slate-700 pb-4 mb-4">
             <h1 class="text-xl sm:text-2xl font-extrabold text-blue-400 flex items-center gap-2">
-                <span>🛠️</span> Control Escolar V4.0 (Sólo Tareas)
+                <span>🛠️</span> Control Escolar V4.5
             </h1>
             <div class="grid grid-cols-2 gap-2 w-full">
                 <div>
@@ -61,24 +61,27 @@
                     <button onclick="crearActividad()" class="w-full bg-blue-600 hover:bg-blue-500 p-2 rounded font-bold cursor-pointer transition">Publicar Actividad</button>
                 </div>
             </div>
-            <div class="bg-purple-950/20 p-3 rounded-xl border border-purple-900/40 text-xs relative flex flex-col justify-between">
+            <div class="bg-purple-950/20 p-3 rounded-xl border border-purple-900/40 text-xs flex flex-col justify-between">
                 <div>
-                    <h3 class="font-bold text-purple-400 mb-2 flex items-center gap-1">🤖 Corrector de Libretas Google Lens IA</h3>
-                    <input id="fotoFormulaInput" type="file" accept="image/*" class="hidden" onchange="procesarFotoFormula()">
-                    <label for="fotoFormulaInput" class="bg-purple-700 hover:bg-purple-600 text-white p-2.5 rounded block text-center font-bold cursor-pointer transition shadow-md">📸 Capturar / Subir Foto</label>
+                    <h3 class="font-bold text-purple-400 mb-2 flex items-center gap-1">🤖 Corrector Directo Google Lens IA</h3>
+                    
+                    <input id="fotoFormulaInput" type="file" accept="image/*" capture="environment" class="hidden" onchange="procesarFotoFormula()">
+                    <label for="fotoFormulaInput" class="bg-purple-700 hover:bg-purple-600 text-white p-2.5 rounded block text-center font-bold cursor-pointer transition shadow-md animate-pulse">
+                        📸 TOMAR FOTO A LIBRETA
+                    </label>
                 </div>
                 
-                <div id="contenedorLens" class="hidden mt-3 relative w-full h-32 bg-slate-950 rounded-lg overflow-hidden border border-purple-500/40">
-                    <img id="vistaPreviaLibreta" class="w-full h-full object-cover opacity-60" src="" alt="Libreta">
-                    <div class="absolute inset-4 border-2 border-dashed border-purple-400/70 rounded-md"></div>
-                    <div class="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-purple-400"></div>
-                    <div class="absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-purple-400"></div>
-                    <div class="absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 border-purple-400"></div>
-                    <div class="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-purple-400"></div>
-                    <div class="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-purple-400 to-transparent shadow-[0_0_8px_#c084fc] anim-laser"></div>
+                <div id="contenedorLens" class="hidden mt-3 relative w-full h-36 bg-slate-950 rounded-lg overflow-hidden border border-purple-500">
+                    <img id="vistaPreviaLibreta" class="w-full h-full object-cover opacity-50" src="" alt="Escaneo">
+                    <div class="absolute inset-3 border-2 border-dashed border-purple-400/60 rounded-md"></div>
+                    <div class="absolute top-1 left-1 w-3 h-3 border-t-2 border-l-2 border-purple-400"></div>
+                    <div class="absolute top-1 right-1 w-3 h-3 border-t-2 border-r-2 border-purple-400"></div>
+                    <div class="absolute bottom-1 left-1 w-3 h-3 border-b-2 border-l-2 border-purple-400"></div>
+                    <div class="absolute bottom-1 right-1 w-3 h-3 border-b-2 border-r-2 border-purple-400"></div>
+                    <div class="absolute left-0 right-0 h-0.5 bg-purple-400 shadow-[0_0_10px_#c084fc] anim-laser"></div>
                 </div>
 
-                <div id="resultadoIA" class="hidden mt-2 p-2 bg-slate-900 rounded max-h-20 overflow-y-auto font-mono text-[10px] text-purple-300 whitespace-pre-line border border-slate-700"></div>
+                <div id="resultadoIA" class="hidden mt-2 p-2 bg-slate-900 rounded max-h-32 overflow-y-auto font-mono text-[11px] text-purple-300 whitespace-pre-line border border-purple-900/60"></div>
             </div>
         </div>
 
@@ -91,8 +94,7 @@
 
         <div>
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-1">
-                <h3 class="text-base font-bold text-blue-400 flex items-center gap-1">📊 Matriz General de Calificaciones y Tareas</h3>
-                <span class="text-[10px] text-slate-400">💡 Tip: Clic en columnas de tareas para editar/borrar. Clic en "Examen" para calificar.</span>
+                <h3 class="text-base font-bold text-blue-400 flex items-center gap-1">📊 Matriz General de Calificaciones</h3>
             </div>
             <div class="overflow-x-auto rounded-xl border border-slate-700">
                 <table class="w-full text-center text-xs">
@@ -124,7 +126,8 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const GEMINI_API_KEY = "AIzaSyCeCnBTgwLU98w8hxrt-ac2Mb_4ZlNYcGc"; 
+        // 🔑 PEGA TU API KEY DE GEMINI AQUÍ ABAJO:
+        const GEMINI_API_KEY = "TU_API_KEY_AQUI"; 
 
         const firebaseConfig = {
             apiKey: "AIzaSyDL0CybhUR13A8yd_S7HPUHoKwOzz96S6A",
@@ -179,10 +182,8 @@
                         const data = d.data();
                         globalPalomitas[`${data.alumno}_${data.actividad}`] = true;
                     });
-
                     globalExamenes = {};
                     snapEx.forEach(d => { globalExamenes[d.data().alumno] = d.data().nota; });
-
                     montarYRenderizarTodo();
                 });
             });
@@ -199,7 +200,7 @@
                 maxPuntosRelativos += t.valor;
                 const fEntrega = t.fecha ? `<br><span class="text-[8px] text-emerald-400 font-medium">📅 ${t.fecha}</span>` : "<br><span class='text-[8px] text-slate-500'>S/F</span>";
                 subCabecerasTareas += `
-                    <th onclick="gestionarActividad('${t.idFirestore}', '${t.nombre}', ${t.valor}, '${t.fecha || ''}')" class="p-1 border-l border-slate-600 bg-slate-700/30 cursor-pointer min-w-[90px] font-semibold text-blue-400 underline decoration-dotted text-center">
+                    <th onclick="gestionarActividad('${t.idFirestore}', '${t.nombre}', ${t.valor}, '${t.fecha || ''}')" class="p-1 border-l border-slate-600 bg-slate-700/30 cursor-pointer min-w-[90px] font-semibold text-blue-400 text-center">
                         ${t.nombre}${fEntrega}<br><span class="text-[9px] text-slate-400">[${t.valor} pts]</span>
                     </th>`;
             });
@@ -236,19 +237,58 @@
                         <td class="p-2 text-left border-b border-slate-700 font-semibold">${al.recuperacion ? '⚠️ ' : ''}${al.nombre}</td>
                         ${celdasTareas}
                         <td class="p-2 border-b border-slate-700 border-l bg-slate-800/40 font-bold text-blue-400 text-center">${notaTrabajosEscala50} / 50</td>
-                        <td onclick="capturarExamenA_Mano('${al.nombre}', ${notaExamen})" class="p-2 border-b border-slate-700 border-l bg-amber-950/20 text-amber-400 font-black cursor-pointer hover:bg-amber-900/40 transition select-none underline decoration-dashed text-center">${notaExamen} / 50</td>
+                        <td onclick="capturarExamenA_Mano('${al.nombre}', ${notaExamen})" class="p-2 border-b border-slate-700 border-l bg-amber-950/20 text-amber-400 font-black cursor-pointer text-center underline decoration-dashed">${notaExamen} / 50</td>
                         <td class="p-2 border-b border-slate-700 border-l bg-slate-800 font-black text-sm text-yellow-400 text-center">${notaFinalPromedio} / 100</td>
                         <td class="p-2 border-b border-slate-700 border-l flex justify-center gap-1">
-                            <button onclick="alternarRecuperacion('${al.idFirestore}', ${al.recuperacion || false})" class="bg-yellow-600/80 hover:bg-yellow-600 px-1.5 py-0.5 rounded text-[10px] font-bold cursor-pointer text-white">Recu</button>
-                            <button onclick="borrarAlumnoCompleto('${al.idFirestore}', '${al.nombre}')" class="bg-red-700 hover:bg-red-600 px-1.5 py-0.5 rounded text-[10px] font-bold cursor-pointer text-white">Borrar</button>
+                            <button onclick="alternarRecuperacion('${al.idFirestore}', ${al.recuperacion || false})" class="bg-yellow-600/80 hover:bg-yellow-600 px-1.5 py-0.5 rounded text-[10px] text-white font-bold">Recu</button>
+                            <button onclick="borrarAlumnoCompleto('${al.idFirestore}', '${al.nombre}')" class="bg-red-700 hover:bg-red-600 px-1.5 py-0.5 rounded text-[10px] text-white font-bold">Borrar</button>
                         </td>
                     </tr>`;
                 bTrab.innerHTML += filaTrab;
             });
         }
 
+        window.procesarFotoFormula = function() {
+            const archivoInput = document.getElementById("fotoFormulaInput").files[0];
+            const divLens = document.getElementById("contenedorLens");
+            const imgPrev = document.getElementById("vistaPreviaLibreta");
+            const divResultado = document.getElementById("resultadoIA");
+            
+            if (!archivoInput) return;
+            
+            divLens.classList.remove("hidden");
+            divResultado.classList.remove("hidden");
+            divResultado.className = "mt-2 p-2 bg-slate-900 rounded text-[11px] text-yellow-400 font-bold border border-yellow-600/50";
+            divResultado.innerText = "🔍 Google Lens IA: Escaneando y auditando libreta...";
+            imgPrev.src = URL.createObjectURL(archivoInput);
+
+            const lectorBase64 = new FileReader();
+            lectorBase64.onloadend = async function() {
+                const base64Data = lectorBase64.result.split(',')[1];
+                
+                // 📝 PROMPT OPTIMIZADO PARA DETECTAR ERRORES EXACTOS
+                const instruccionesPrompt = "Actúa como un profesor exigente de libreta escolar. Analiza detalladamente el texto, apuntes o ejercicio matemático/código de la imagen. REGLAS:\n1. Identifica y describe EXCLUSIVAMENTE los errores de lógica, sintaxis, cálculo o mala estructura.\n2. Especifica en qué parte o renglón exacto se visualiza la falla.\n3. Prohibido dar el resultado final correcto, solo explica por qué está mal para que el alumno lo corrija.";
+                
+                try {
+                    const respuesta = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: instruccionesPrompt }, { inlineData: { mimeType: archivoInput.type, data: base64Data } }] }] })
+                    });
+                    const jsonResult = await respuesta.json();
+                    
+                    divResultado.className = "mt-2 p-2 bg-slate-900 rounded max-h-32 overflow-y-auto font-mono text-[11px] text-purple-300 whitespace-pre-line border border-purple-900/60";
+                    divResultado.innerText = jsonResult.candidates[0].content.parts[0].text;
+                } catch (e) { 
+                    divResultado.className = "mt-2 p-2 bg-red-950/40 text-red-400 rounded text-xs border border-red-900";
+                    divResultado.innerText = "❌ Error en los servidores de la IA de Google o API Key inválida."; 
+                }
+            };
+            lectorBase64.readAsDataURL(archivoInput);
+        }
+
         window.gestionarActividad = async function(idFirestore, nombreActual, valorActual, fechaActual) {
-            const accion = prompt(`⚙️ Modificar Tarea: "${nombreActual}"\n\n- Para BORRAR escribe: BORRAR\n- Para CAMBIAR PUNTOS o FECHA escribe los nuevos datos separados por coma.\nEjemplo: Tarea Modificada, 15, 2026-06-05`, `${nombreActual}, ${valorActual}, ${fechaActual}`);
+            const accion = prompt(`⚙️ Modificar Tarea: "${nombreActual}"\n\n- Para BORRAR escribe: BORRAR\n- Para CAMBIAR PUNTOS o FECHA escribe los nuevos datos separados por coma.`, `${nombreActual}, ${valorActual}, ${fechaActual}`);
             if(!accion) return;
             if(accion.trim().toUpperCase() === "BORRAR") {
                 if(confirm(`¿Seguro que deseas eliminar permanentemente la actividad "${nombreActual}"?`)) {
@@ -319,37 +359,6 @@
             await setDoc(doc(db, "alumnos", id), { nombre, group: grupo, grupo, recuperacion: false });
             document.getElementById("newAlumnoNombre").value = "";
             alert("Alumno inscrito"); cargarTodoSistema();
-        }
-
-        window.procesarFotoFormula = function() {
-            const archivoInput = document.getElementById("fotoFormulaInput").files[0];
-            const divLens = document.getElementById("contenedorLens");
-            const imgPrev = document.getElementById("vistaPreviaLibreta");
-            const divResultado = document.getElementById("resultadoIA");
-            
-            if (!archivoInput) return;
-            
-            // Efecto Visual Lens activo
-            divLens.classList.remove("hidden");
-            divResultado.classList.remove("hidden");
-            divResultado.innerText = "⏳ Google Lens IA Analizando libreta...";
-            imgPrev.src = URL.createObjectURL(archivoInput);
-
-            const lectorBase64 = new FileReader();
-            lectorBase64.onloadend = async function() {
-                const base64Data = lectorBase64.result.split(',')[1];
-                const instruccionesPrompt = "Analiza el ejercicio de esta imagen. Lista únicamente los ERRORES sintácticos o de lógica. REGLAS: 1. NO des el resultado correcto. 2. NO expliques la solución. Señala solo dónde falló.";
-                try {
-                    const respuesta = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: instruccionesPrompt }, { inlineData: { mimeType: archivoInput.type, data: base64Data } }] }] })
-                    });
-                    const jsonResult = await respuesta.json();
-                    divResultado.innerText = jsonResult.candidates[0].content.parts[0].text;
-                } catch (e) { divResultado.innerText = "❌ Error en la IA."; }
-            };
-            lectorBase64.readAsDataURL(archivoInput);
         }
 
         window.abrirEscaner = function(nombreAlumno) {
