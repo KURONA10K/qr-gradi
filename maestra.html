@@ -85,7 +85,7 @@
 
         <div id="pestanaFinal" class="seccion-pestana hidden">
             <h3 class="text-sm font-bold text-slate-200 mb-1">🎓 Concentrado Evaluativo de Acta</h3>
-            <p class="text-[10px] text-slate-400 mb-2">💡 Tip: Da un toque a la celda de la columna "Examen" para capturar la nota sobre 50 puntos a mano.</p>
+            <p class="text-[10px] text-slate-400 mb-2">💡 Tip: Toca el **Nombre** para borrarlo o marcar Recuperación. Toca **Examen** para poner su calificación manual.</p>
             <div class="overflow-x-auto rounded-xl border border-slate-700">
                 <table class="w-full text-center text-xs">
                     <thead>
@@ -169,7 +169,7 @@
             const divBotones = document.getElementById("listaAlumnosBotones");
             divBotones.innerHTML = "";
             snapAl.forEach(d => {
-                globalAlumnos.push(d.data());
+                globalAlumnos.push({ idFirestore: d.id, ...d.data() });
                 divBotones.innerHTML += `
                     <div class="p-1 bg-slate-700/60 border border-slate-600 rounded flex justify-between items-center text-[10px]">
                         <span class="truncate max-w-[60%] font-medium">${d.data().nombre}</span>
@@ -238,8 +238,10 @@
             hAsis.innerHTML += '<th class="p-2 bg-teal-900 text-yellow-400 min-w-[70px]">% Asis</th>';
 
             globalAlumnos.forEach(al => {
+                const colorRecuFila = al.recuperacion ? 'bg-red-950/40 text-red-200 hover:bg-red-900/30' : 'hover:bg-slate-700/30';
+                
                 let puntosAlumnoRelativos = 0;
-                let filaTrab = `<tr class="hover:bg-slate-700/30"><td class="p-2 text-left border-b border-slate-700">${al.nombre}</td>`;
+                let filaTrab = `<tr class="${colorRecuFila}"><td class="p-2 text-left border-b border-slate-700 font-medium">${al.recuperacion ? '⚠️ ' : ''}${al.nombre}</td>`;
                 
                 globalTrabajos.forEach(t => {
                     const key = `${al.nombre}_${t.nombre}`;
@@ -252,11 +254,11 @@
                 });
                 
                 let notaTrabajosEscala50 = maxPuntosRelativos > 0 ? parseFloat(((puntosAlumnoRelativos * 50) / maxPuntosRelativos).toFixed(1)) : 0;
-                filaTrab += `<td class="p-2 border-b border-slate-700 border-l bg-slate-800 font-bold text-yellow-400">${notaTrabajosEscala50} / 50</td></tr>`;
+                filaTrab += `<td class="p-2 border-b border-slate-700 border-l bg-slate-800/60 font-bold text-yellow-400">${notaTrabajosEscala50} / 50</td></tr>`;
                 bTrab.innerHTML += filaTrab;
 
                 let conteoAsistenciasAlumno = 0;
-                let filaAsis = `<tr class="hover:bg-slate-700/30"><td class="p-2 text-left border-b border-slate-700">${al.nombre}</td>`;
+                let filaAsis = `<tr class="${colorRecuFila}"><td class="p-2 text-left border-b border-slate-700 font-medium">${al.recuperacion ? '⚠️ ' : ''}${al.nombre}</td>`;
                 globalAsistenciasColumnas.forEach(col => {
                     const key = `${al.nombre}_${col}`;
                     if(globalPalomitas[key]) {
@@ -267,24 +269,49 @@
                     }
                 });
                 let porcentajeAsistencia = globalAsistenciasColumnas.length > 0 ? Math.round((conteoAsistenciasAlumno * 100) / globalAsistenciasColumnas.length) : 100;
-                filaAsis += `<td class="p-2 border-b border-slate-700 border-l bg-slate-800 font-bold text-teal-400">${porcentajeAsistencia}%</td></tr>`;
+                filaAsis += `<td class="p-2 border-b border-slate-700 border-l bg-slate-800/60 font-bold text-teal-400">${porcentajeAsistencia}%</td></tr>`;
                 bAsis.innerHTML += filaAsis;
 
-                // NUEVA FÓRMULA DIRECTA: TRABAJOS (HASTA 50 PTS) + EXAMEN (HASTA 50 PTS) = 100 PTS
                 let notaExamen = globalExamenes[al.nombre] !== undefined ? globalExamenes[al.nombre] : 0;
                 let notaFinalPromedio = parseFloat((notaTrabajosEscala50 + notaExamen).toFixed(1));
                 if(notaFinalPromedio > 100) notaFinalPromedio = 100;
 
                 let filaFinal = `
-                    <tr class="hover:bg-slate-700/30">
-                        <td class="p-3 text-left border-b border-slate-700 font-medium">${al.nombre}</td>
-                        <td class="p-3 border-b border-slate-700 text-blue-400 bg-blue-950/20">${notaTrabajosEscala50} / 50 pts</td>
-                        <td class="p-3 border-b border-slate-700 text-teal-400 bg-slate-900/40">${porcentajeAsistencia}%</td>
-                        <td onclick="capturarExamenA_Mano('${al.nombre}', ${notaExamen})" class="p-3 border-b border-slate-700 text-amber-400 bg-amber-950/20 font-bold cursor-pointer hover:bg-amber-900/40 transition select-none underline decoration-dashed">${notaExamen} / 50</td>
-                        <td class="p-3 border-b border-slate-700 bg-slate-800 text-yellow-400 font-black text-sm">${notaFinalPromedio} / 100</td>
+                    <tr class="${colorRecuFila}">
+                        <td onclick="abrirGestionAlumno('${al.idFirestore}', '${al.nombre}', ${al.recuperacion || false})" class="p-3 text-left border-b border-slate-700 font-semibold cursor-pointer underline decoration-dotted decoration-slate-500 hover:text-blue-300 transition select-none">
+                            ${al.recuperacion ? '⚠️ ' : ''}${al.nombre} <span class="text-[9px] text-slate-400 font-normal">(Gestionar)</span>
+                        </td>
+                        <td class="p-3 border-b border-slate-700 text-blue-400 bg-blue-950/10">${notaTrabajosEscala50} / 50 pts</td>
+                        <td class="p-3 border-b border-slate-700 text-teal-400 bg-slate-900/20">${porcentajeAsistencia}%</td>
+                        <td onclick="capturarExamenA_Mano('${al.nombre}', ${notaExamen})" class="p-3 border-b border-slate-700 text-amber-400 bg-amber-950/10 font-bold cursor-pointer hover:bg-amber-900/40 transition select-none underline decoration-dashed">${notaExamen} / 50</td>
+                        <td class="p-3 border-b border-slate-700 bg-slate-800 font-black text-sm text-yellow-400">${notaFinalPromedio} / 100</td>
                     </tr>`;
                 bFinal.innerHTML += filaFinal;
             });
+        }
+
+        window.abrirGestionAlumno = async function(idFirestore, nombre, estadoRecuActual) {
+            const seleccion = prompt(`⚙️ Panel de Alumno: "${nombre}"\n\n¿Qué deseas hacer?\nEscribe "RECUPERACION" para cambiar su estado.\nEscribe "BORRAR" para eliminarlo de la lista por completo:`, estadoRecuActual ? "QUITAR RECUPERACION" : "RECUPERACION");
+            
+            if(!seleccion) return;
+            const accion = seleccion.toUpperCase().trim();
+
+            if(accion === "RECUPERACION") {
+                await updateDoc(doc(db, "alumnos", idFirestore), { recuperacion: true });
+                alert("⚠️ Alumno marcado como Recuperación (Fila Roja).");
+                cargarTodoSistema();
+            } else if(accion === "QUITAR RECUPERACION" || accion === "QUITAR") {
+                await updateDoc(doc(db, "alumnos", idFirestore), { recuperacion: false });
+                alert("✨ Alumno restaurado a estado regular.");
+                cargarTodoSistema();
+            } else if(accion === "BORRAR") {
+                const conf = confirm(`❌ ¿Seguro que deseas eliminar a ${nombre} de la base de datos?\nEsta acción es irreversible.`);
+                if(conf) {
+                    await deleteDoc(doc(db, "alumnos", idFirestore));
+                    alert("🗑️ Alumno eliminado correctamente.");
+                    cargarTodoSistema();
+                }
+            }
         }
 
         window.capturarExamenA_Mano = async function(nombreAlumno, notaActual) {
@@ -329,7 +356,7 @@
             const grupo = document.getElementById("newAlumnoGrupo").value.trim().toUpperCase();
             if(!nombre || !grupo){ alert("Datos obligatorios"); return; }
             const id = `${grupo}_${nombre.replace(/\s+/g, '_')}`;
-            await setDoc(doc(db, "alumnos", id), { nombre, grupo });
+            await setDoc(doc(db, "alumnos", id), { nombre, grupo, recuperacion: false });
             document.getElementById("newAlumnoNombre").value = "";
             alert("Alumno guardado"); cargarTodoSistema();
         }
