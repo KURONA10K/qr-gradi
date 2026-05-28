@@ -3,57 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador QR - Alumnos V3</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>Generador QR - Alumnos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center p-4 font-sans">
-
-    <div class="max-w-md w-full bg-slate-800 p-6 rounded-2xl shadow-2xl border border-slate-700 text-center">
-        <h1 class="text-2xl font-extrabold text-blue-400 mb-1 flex items-center justify-center gap-2">
-            <span>📲</span> QR-Grade Alumnos
+    <div class="w-full max-w-md bg-slate-800 p-6 rounded-2xl shadow-2xl border border-slate-700 text-center">
+        
+        <h1 class="text-xl font-black text-blue-400 mb-1 flex items-center justify-center gap-2">
+            🔑 QR-Grade Token Alumno
         </h1>
-        <p class="text-xs text-slate-400 mb-6">Pase de lista y entrega de trabajos oficial.</p>
+        <p class="text-xs text-slate-400 mb-5">Selecciona tu tarea y genera tu firma digital.</p>
 
-        <div class="space-y-4 text-left">
-            <div>
-                <label class="block text-xs font-bold text-slate-300 mb-1 uppercase">1. Tu Grupo:</label>
-                <input id="alumnoGrupo" type="text" placeholder="Ej: 4TPROG-Am" oninput="buscarAlumnosDeMiGrupo()" class="w-full p-3 rounded-xl bg-slate-700 border border-slate-600 text-white font-bold uppercase focus:outline-none focus:border-blue-500">
-                <p id="msgBuscandoGrupo" class="text-[10px] text-blue-400 mt-1 hidden">🔍 Cargando lista de alumnos...</p>
+        <div class="space-y-3 text-left text-xs">
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-slate-400 mb-1 font-semibold">Grupo Académico:</label>
+                    <input id="alGrupo" type="text" placeholder="4TPROG-Am" oninput="buscarTareasVigentes()" class="w-full p-2.5 bg-slate-700 border border-slate-600 rounded-xl text-white font-bold uppercase focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1 font-semibold">Parcial Actual:</label>
+                    <select id="alParcial" onchange="buscarTareasVigentes()" class="w-full p-2.5 bg-slate-700 border border-slate-600 rounded-xl text-white font-bold focus:outline-none focus:border-blue-500">
+                        <option value="Parcial_1">1er Parcial</option>
+                        <option value="Parcial_2">2do Parcial</option>
+                        <option value="Parcial_3">3er Parcial</option>
+                    </select>
+                </div>
             </div>
-
             <div>
-                <label class="block text-xs font-bold text-slate-300 mb-1 uppercase">2. Selecciona tu Nombre:</label>
-                <select id="alumnoNombreSelect" disabled class="w-full p-3 rounded-xl bg-slate-700 border border-slate-600 text-white font-semibold focus:outline-none focus:border-blue-500 disabled:opacity-50">
-                    <option value="">-- Escribe tu grupo arriba --</option>
+                <label class="block text-slate-400 mb-1 font-semibold">Tu Nombre Completo (Exacto):</label>
+                <input id="alNombre" type="text" placeholder="Ej: JUAN PEREZ LOPEZ" class="w-full p-2.5 bg-slate-700 border border-slate-600 rounded-xl text-white font-semibold focus:outline-none focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block text-slate-400 mb-1 font-semibold">Selecciona la Tarea a Entregar:</label>
+                <select id="alActividadSelect" class="w-full p-2.5 bg-slate-700 border border-slate-600 rounded-xl text-white font-medium focus:outline-none focus:border-blue-500">
+                    <option value="">⚠️ Escribe tu grupo arriba para cargar tareas...</option>
                 </select>
             </div>
-
-            <div>
-                <label class="block text-xs font-bold text-slate-300 mb-1 uppercase">3. ¿Qué vas a registrar?</label>
-                <select id="tipoRegistro" onchange="alternarTipoRegistro()" class="w-full p-3 rounded-xl bg-slate-700 border border-slate-600 text-white font-bold focus:outline-none focus:border-blue-500">
-                    <option value="Trabajo">📝 Entregar Trabajo / Tarea</option>
-                    <option value="Asistencia">⏱️ Tomar Asistencia del Día</option>
-                </select>
-            </div>
-
-            <div id="contenedorActividad">
-                <label class="block text-xs font-bold text-slate-300 mb-1 uppercase">4. Nombre de la Tarea:</label>
-                <input id="actividadNombre" type="text" placeholder="Ej: Tarea 1" class="w-full p-3 rounded-xl bg-slate-700 border border-slate-600 text-white focus:outline-none focus:border-blue-500">
-            </div>
-
-            <button id="btnGenerar" onclick="generarTokenQR()" class="w-full bg-blue-600 hover:bg-blue-500 text-white p-3 rounded-xl font-bold text-sm shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
-                <span id="textBtn">Generar Código QR</span>
-                <span id="spinnerBtn" class="hidden animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full"></span>
-            </button>
         </div>
 
-        <div id="contenedorQR" class="hidden mt-6 p-4 bg-white rounded-2xl inline-block shadow-inner mx-auto">
-            <div id="qrcode" class="mx-auto"></div>
-            <p id="qrFooterTexto" class="text-slate-900 font-black text-xs mt-3 uppercase tracking-wider">Muestra este código a la maestra</p>
-        </div>
+        <button onclick="solicitarFirmaFiel()" class="mt-5 w-full bg-blue-600 hover:bg-blue-500 text-white p-3 rounded-xl font-bold text-sm transition cursor-pointer">
+            ✨ Generar Código QR Seguro
+        </button>
 
-        <p id="msgEstado" class="text-xs text-yellow-500 font-medium mt-3 hidden"></p>
+        <div id="areaQR" class="hidden mt-6 p-4 bg-white rounded-2xl inline-block mx-auto">
+            <div id="qrcode"></div>
+        </div>
+        <p id="txtToken" class="hidden mt-2 text-[10px] text-slate-500 font-mono break-all"></p>
+
     </div>
 
     <script type="module">
@@ -71,98 +68,66 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        let timeoutBusqueda = null;
 
-        window.buscarAlumnosDeMiGrupo = function() {
-            clearTimeout(timeoutBusqueda);
-            const grupo = document.getElementById("alumnoGrupo").value.trim().toUpperCase();
-            const selectNombre = document.getElementById("alumnoNombreSelect");
-            const msgGrupo = document.getElementById("msgBuscandoGrupo");
+        // BUSCADOR AUTOMÁTICO DE TAREAS PARA EL SELECT DESPLEGABLE
+        window.buscarTareasVigentes = async function() {
+            const grupo = document.getElementById("alGrupo").value.trim().toUpperCase();
+            const parcial = document.getElementById("alParcial").value;
+            const selectAct = document.getElementById("alActividadSelect");
 
-            if (!grupo) { selectNombre.innerHTML = '<option value="">-- Escribe tu grupo arriba --</option>'; selectNombre.disabled = true; return; }
-            msgGrupo.classList.remove("hidden");
+            if(!grupo) {
+                selectAct.innerHTML = '<option value="">⚠️ Escribe tu grupo arriba para cargar tareas...</option>';
+                return;
+            }
 
-            timeoutBusqueda = setTimeout(async () => {
-                try {
-                    const q = query(collection(db, "alumnos"), where("grupo", "==", grupo));
-                    const snapshot = await getDocs(q);
-                    selectNombre.innerHTML = "";
-                    if (snapshot.empty) {
-                        selectNombre.innerHTML = '<option value="">⚠️ No hay alumnos en este grupo</option>';
-                        selectNombre.disabled = true;
-                    } else {
-                        selectNombre.innerHTML = '<option value="">-- Selecciona tu Nombre --</option>';
-                        snapshot.forEach((doc) => { selectNombre.innerHTML += `<option value="${doc.data().nombre}">${doc.data().nombre}</option>`; });
-                        selectNombre.disabled = false;
-                        const guardado = localStorage.getItem('qr_nombre_lista');
-                        if (guardado && selectNombre.querySelector(`option[value="${guardado}"]`)) selectNombre.value = guardado;
-                    }
-                } catch (e) { selectNombre.innerHTML = '<option value="">❌ Error al cargar</option>'; }
-                finally { msgGrupo.classList.add("hidden"); }
-            }, 600);
-        }
+            try {
+                const q = query(collection(db, "actividades"), where("grupo", "==", grupo), where("parcial", "==", parcial));
+                const snap = await getDocs(q);
+                
+                if(snap.empty) {
+                    selectAct.innerHTML = '<option value="">❌ No hay tareas públicas para este parcial</option>';
+                    return;
+                }
 
-        window.alternarTipoRegistro = function() {
-            const tipo = document.getElementById("tipoRegistro").value;
-            const contenedor = document.getElementById("contenedorActividad");
-            if(tipo === "Asistencia") {
-                contenedor.classList.add("hidden");
-                // Generar una clave de fecha de hoy AAAA-MM-DD
-                const hoy = new Date().toISOString().split('T')[0];
-                document.getElementById("actividadNombre").value = `Asistencia_${hoy}`;
-            } else {
-                contenedor.classList.remove("hidden");
-                document.getElementById("actividadNombre").value = "";
+                let opciones = '<option value="">📋 Selecciona una actividad...</option>';
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    opciones += `<option value="${data.nombre}">${data.nombre} (${data.valor} Pts)</option>`;
+                });
+                selectAct.innerHTML = opciones;
+            } catch(e) {
+                selectAct.innerHTML = '<option value="">❌ Error al conectar con tareas</option>';
             }
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            const grupoGuardado = localStorage.getItem('qr_grupo');
-            if (grupoGuardado) { document.getElementById("alumnoGrupo").value = grupoGuardado; buscarAlumnosDeMiGrupo(); }
-        });
+        window.solicitarFirmaFiel = async function() {
+            const grupo = document.getElementById("alGrupo").value.trim().toUpperCase();
+            const alumno = document.getElementById("alNombre").value.trim();
+            const actividad = document.getElementById("alActividadSelect").value;
 
-        window.generarTokenQR = async function() {
-            const grupo = document.getElementById("alumnoGrupo").value.trim().toUpperCase();
-            const nombre = document.getElementById("alumnoNombreSelect").value;
-            const actividad = document.getElementById("actividadNombre").value.trim();
-            const tipo = document.getElementById("tipoRegistro").value;
+            if(!grupo || !alumno || !actividad) { alert("Por favor completa todos tus campos y elige una tarea."); return; }
 
-            const btn = document.getElementById("btnGenerar");
-            const txtBtn = document.getElementById("textBtn");
-            const spinner = document.getElementById("spinnerBtn");
-            const msg = document.getElementById("msgEstado");
-            const divQR = document.getElementById("contenedorQR");
-
-            if (!grupo || !nombre || !actividad) { alert("⚠️ Completa los campos."); return; }
-
-            btn.disabled = true;
-            spinner.classList.remove("hidden");
-            msg.classList.remove("hidden");
-            msg.innerText = "⏳ Creando pase digital seguro...";
-
-            localStorage.setItem('qr_grupo', grupo);
-            localStorage.setItem('qr_nombre_lista', nombre);
-
-            const tokenID = `TK_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
-
+            const tokenUnico = `TK_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+            
             try {
-                await setDoc(doc(db, "codigos_qr", tokenID), {
-                    alumno: nombre, grupo: grupo, actividad: actividad, tipo: tipo, estado: "Pendiente", fechaCreacion: new Date()
+                await setDoc(doc(db, "codigos_qr", tokenUnico), {
+                    id: tokenUnico,
+                    grupo: grupo,
+                    alumno: alumno,
+                    tipo: "Trabajo",
+                    actividad: actividad,
+                    estado: "Pendiente"
                 });
 
-                const qrContenedor = document.getElementById("qrcode");
-                qrContenedor.innerHTML = ""; 
-                new QRCode(qrContenedor, { text: tokenID, width: 180, height: 180, colorDark : "#0f172a", colorLight : "#ffffff" });
-
-                divQR.classList.remove("hidden");
-                document.getElementById("qrFooterTexto").innerText = tipo === "Asistencia" ? "Pase de Lista Activo" : "Muestra el QR de tu tarea";
-                msg.innerText = "✅ ¡Listo para escaneo de la Maestra!";
-                msg.className = "text-xs text-green-400 font-medium mt-3";
-            } catch (error) {
-                msg.innerText = "❌ Error de conexión.";
-            } finally {
-                btn.disabled = false;
-                spinner.classList.add("hidden");
+                const divQr = document.getElementById("qrcode");
+                divQr.innerHTML = "";
+                new QRCode(divQr, { text: tokenUnico, width: 180, height: 180 });
+                
+                document.getElementById("areaQR").classList.remove("hidden");
+                document.getElementById("txtToken").classList.remove("hidden");
+                document.getElementById("txtToken").innerText = `ID Firma: ${tokenUnico}`;
+            } catch(e) {
+                alert("Error al conectar con la base de datos.");
             }
         }
     </script>
