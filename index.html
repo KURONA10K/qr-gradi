@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador QR - Alumnos</title>
+    <title>Generador QR - Alumnos V5.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -13,36 +13,40 @@
         <h1 class="text-xl font-black text-blue-400 mb-1 flex items-center justify-center gap-2">
             🔑 QR-Grade Token Alumno
         </h1>
-        <p class="text-xs text-slate-400 mb-5">Selecciona tu tarea y genera tu firma digital.</p>
+        <p class="text-xs text-slate-400 mb-5">Selecciona tus datos y genera tu firma digital.</p>
 
-        <div class="space-y-3 text-left text-xs">
+        <div class="space-y-4 text-left text-xs">
             <div class="grid grid-cols-2 gap-2">
                 <div>
                     <label class="block text-slate-400 mb-1 font-semibold">Grupo Académico:</label>
-                    <input id="alGrupo" type="text" placeholder="4TPROG-Am" oninput="buscarTareasVigentes()" class="w-full p-2.5 bg-slate-700 border border-slate-600 rounded-xl text-white font-bold uppercase focus:outline-none focus:border-blue-500">
+                    <input id="alGrupo" type="text" placeholder="Ej: 4TPROG-Am" oninput="cargarDatosGrupoDinamico()" class="w-full p-2.5 bg-slate-700 border border-slate-600 rounded-xl text-white font-bold uppercase focus:outline-none focus:border-blue-500">
                 </div>
                 <div>
                     <label class="block text-slate-400 mb-1 font-semibold">Parcial Actual:</label>
-                    <select id="alParcial" onchange="buscarTareasVigentes()" class="w-full p-2.5 bg-slate-700 border border-slate-600 rounded-xl text-white font-bold focus:outline-none focus:border-blue-500">
+                    <select id="alParcial" onchange="cargarDatosGrupoDinamico()" class="w-full p-2.5 bg-slate-700 border border-slate-600 rounded-xl text-white font-bold focus:outline-none focus:border-blue-500">
                         <option value="Parcial_1">1er Parcial</option>
                         <option value="Parcial_2">2do Parcial</option>
                         <option value="Parcial_3">3er Parcial</option>
                     </select>
                 </div>
             </div>
+
             <div>
-                <label class="block text-slate-400 mb-1 font-semibold">Tu Nombre Completo (Exacto):</label>
-                <input id="alNombre" type="text" placeholder="Ej: JUAN PEREZ LOPEZ" class="w-full p-2.5 bg-slate-700 border border-slate-600 rounded-xl text-white font-semibold focus:outline-none focus:border-blue-500">
+                <label class="block text-slate-400 mb-1 font-semibold">Selecciona tu Nombre:</label>
+                <select id="alNombreSelect" class="w-full p-2.5 bg-slate-700 border border-slate-600 rounded-xl text-white font-semibold focus:outline-none focus:border-blue-500">
+                    <option value="">⚠️ Escribe el grupo arriba para cargar alumnos...</option>
+                </select>
             </div>
+
             <div>
                 <label class="block text-slate-400 mb-1 font-semibold">Selecciona la Tarea a Entregar:</label>
                 <select id="alActividadSelect" class="w-full p-2.5 bg-slate-700 border border-slate-600 rounded-xl text-white font-medium focus:outline-none focus:border-blue-500">
-                    <option value="">⚠️ Escribe tu grupo arriba para cargar tareas...</option>
+                    <option value="">⚠️ Escribe el grupo arriba para cargar tareas...</option>
                 </select>
             </div>
         </div>
 
-        <button onclick="solicitarFirmaFiel()" class="mt-5 w-full bg-blue-600 hover:bg-blue-500 text-white p-3 rounded-xl font-bold text-sm transition cursor-pointer">
+        <button onclick="solicitarFirmaFiel()" class="mt-6 w-full bg-blue-600 hover:bg-blue-500 text-white p-3 rounded-xl font-bold text-sm transition shadow-lg cursor-pointer">
             ✨ Generar Código QR Seguro
         </button>
 
@@ -69,43 +73,69 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // BUSCADOR AUTOMÁTICO DE TAREAS PARA EL SELECT DESPLEGABLE
-        window.buscarTareasVigentes = async function() {
+        // FUNCIÓN QUE DESCARGA TANTO ALUMNOS COMO TAREAS EN TIEMPO REAL
+        window.cargarDatosGrupoDinamico = async function() {
             const grupo = document.getElementById("alGrupo").value.trim().toUpperCase();
             const parcial = document.getElementById("alParcial").value;
-            const selectAct = document.getElementById("alActividadSelect");
+            
+            const selectAlumnos = document.getElementById("alNombreSelect");
+            const selectTareas = document.getElementById("alActividadSelect");
 
             if(!grupo) {
-                selectAct.innerHTML = '<option value="">⚠️ Escribe tu grupo arriba para cargar tareas...</option>';
+                selectAlumnos.innerHTML = '<option value="">⚠️ Escribe el grupo arriba para cargar alumnos...</option>';
+                selectTareas.innerHTML = '<option value="">⚠️ Escribe el grupo arriba para cargar tareas...</option>';
                 return;
             }
 
             try {
-                const q = query(collection(db, "actividades"), where("grupo", "==", grupo), where("parcial", "==", parcial));
-                const snap = await getDocs(q);
+                // 1. Descargar y llenar la lista de alumnos inscritos
+                const qAlumnos = query(collection(db, "alumnos"), where("grupo", "==", grupo));
+                const snapAlumnos = await getDocs(qAlumnos);
                 
-                if(snap.empty) {
-                    selectAct.innerHTML = '<option value="">❌ No hay tareas públicas para este parcial</option>';
-                    return;
+                if(snapAlumnos.empty) {
+                    selectAlumnos.innerHTML = '<option value="">❌ No hay alumnos inscritos en este grupo</option>';
+                } else {
+                    let opcionesAl = '<option value="">👤 Selecciona tu nombre de la lista...</option>';
+                    // Ordenar alfabéticamente por comodidad
+                    let listaOrdenada = [];
+                    snapAlumnos.forEach(doc => listaOrdenada.push(doc.data().nombre));
+                    listaOrdenada.sort().forEach(nombre => {
+                        opcionesAl += `<option value="${nombre}">${nombre}</option>`;
+                    });
+                    selectAlumnos.innerHTML = opcionesAl;
                 }
 
-                let opciones = '<option value="">📋 Selecciona una actividad...</option>';
-                snap.forEach(doc => {
-                    const data = doc.data();
-                    opciones += `<option value="${data.nombre}">${data.nombre} (${data.valor} Pts)</option>`;
-                });
-                selectAct.innerHTML = opciones;
+                // 2. Descargar y llenar la lista de actividades/tareas creadas
+                const qTareas = query(collection(db, "actividades"), where("grupo", "==", grupo), where("parcial", "==", parcial));
+                const snapTareas = await getDocs(qTareas);
+                
+                if(snapTareas.empty) {
+                    selectTareas.innerHTML = '<option value="">❌ No hay tareas publicadas para este parcial</option>';
+                } else {
+                    let opcionesTar = '<option value="">📋 Selecciona la actividad a entregar...</option>';
+                    snapTareas.forEach(doc => {
+                        const data = doc.data();
+                        opcionesTar += `<option value="${data.nombre}">${data.nombre} (${data.valor} Pts)</option>`;
+                    });
+                    selectTareas.innerHTML = opcionesTar;
+                }
+
             } catch(e) {
-                selectAct.innerHTML = '<option value="">❌ Error al conectar con tareas</option>';
+                console.error(e);
+                selectAlumnos.innerHTML = '<option value="">❌ Error de conexión al cargar alumnos</option>';
+                selectTareas.innerHTML = '<option value="">❌ Error de conexión al cargar tareas</option>';
             }
         }
 
         window.solicitarFirmaFiel = async function() {
             const grupo = document.getElementById("alGrupo").value.trim().toUpperCase();
-            const alumno = document.getElementById("alNombre").value.trim();
+            const alumno = document.getElementById("alNombreSelect").value;
             const actividad = document.getElementById("alActividadSelect").value;
 
-            if(!grupo || !alumno || !actividad) { alert("Por favor completa todos tus campos y elige una tarea."); return; }
+            if(!grupo || !alumno || !actividad) { 
+                alert("Por favor asegúrate de seleccionar tu nombre y la tarea correspondiente."); 
+                return; 
+            }
 
             const tokenUnico = `TK_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
             
@@ -127,7 +157,7 @@
                 document.getElementById("txtToken").classList.remove("hidden");
                 document.getElementById("txtToken").innerText = `ID Firma: ${tokenUnico}`;
             } catch(e) {
-                alert("Error al conectar con la base de datos.");
+                alert("Error al guardar token de entrega en la base de datos.");
             }
         }
     </script>
