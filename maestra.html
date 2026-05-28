@@ -3,16 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control Escolar Supremo - Maestra</title>
+    <title>Panel de Control Escolar - Maestra</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    <style>
+        @keyframes laser {
+            0% { top: 0%; }
+            50% { top: 100%; }
+            100% { top: 0%; }
+        }
+        .anim-laser { animation: laser 2.5s linear infinite; }
+    </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-2 sm:p-4 pb-20 font-sans">
     <div class="max-w-6xl mx-auto bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-2xl border border-slate-700 mt-2">
         
         <div class="flex flex-col gap-3 border-b border-slate-700 pb-4 mb-4">
             <h1 class="text-xl sm:text-2xl font-extrabold text-blue-400 flex items-center gap-2">
-                <span>🛠️</span> Panel de Control Escolar Integral V3.6
+                <span>🛠️</span> Control Escolar V4.0 (Sólo Tareas)
             </h1>
             <div class="grid grid-cols-2 gap-2 w-full">
                 <div>
@@ -40,38 +48,51 @@
                 </div>
             </div>
             <div class="bg-blue-950/20 p-3 rounded-xl border border-blue-900/40 text-xs">
-                <h3 class="font-bold text-blue-400 mb-2 flex items-center gap-1">📝 Publicar Actividad Completa</h3>
+                <h3 class="font-bold text-blue-400 mb-2 flex items-center gap-1">📝 Publicar Actividad</h3>
                 <div class="space-y-2">
                     <div class="grid grid-cols-2 gap-1">
-                        <input id="nomActividad" type="text" placeholder="Nombre: Ej Tarea 1" class="p-2 bg-slate-700 rounded text-white">
-                        <input id="valorActividad" type="number" placeholder="Puntos: Ej 10" class="p-2 bg-slate-700 rounded text-white">
+                        <input id="nomActividad" type="text" placeholder="Nombre: Tarea 1" class="p-2 bg-slate-700 rounded text-white">
+                        <input id="valorActividad" type="number" placeholder="Puntos: 10" class="p-2 bg-slate-700 rounded text-white">
                     </div>
                     <div>
-                        <label class="block text-[10px] text-slate-400 mb-0.5">Fecha límite de entrega:</label>
+                        <label class="block text-[10px] text-slate-400 mb-0.5">Fecha límite:</label>
                         <input id="fechaActividad" type="date" class="w-full p-2 bg-slate-700 rounded text-slate-200 font-medium">
                     </div>
                     <button onclick="crearActividad()" class="w-full bg-blue-600 hover:bg-blue-500 p-2 rounded font-bold cursor-pointer transition">Publicar Actividad</button>
                 </div>
             </div>
-            <div class="bg-purple-950/20 p-3 rounded-xl border border-purple-900/40 text-xs">
-                <h3 class="font-bold text-purple-400 mb-2 flex items-center gap-1">🤖 Corrector de Libretas IA</h3>
-                <input id="fotoFormulaInput" type="file" accept="image/*" class="hidden" onchange="procesarFotoFormula()">
-                <label class="bg-purple-700 hover:bg-purple-600 text-white p-2.5 rounded block text-center font-bold cursor-pointer transition">📸 Subir Foto Libreta</label>
-                <div id="resultadoIA" class="hidden mt-2 p-2 bg-slate-900 rounded max-h-20 overflow-y-auto font-mono text-[10px] text-slate-300 whitespace-pre-line"></div>
+            <div class="bg-purple-950/20 p-3 rounded-xl border border-purple-900/40 text-xs relative flex flex-col justify-between">
+                <div>
+                    <h3 class="font-bold text-purple-400 mb-2 flex items-center gap-1">🤖 Corrector de Libretas Google Lens IA</h3>
+                    <input id="fotoFormulaInput" type="file" accept="image/*" class="hidden" onchange="procesarFotoFormula()">
+                    <label for="fotoFormulaInput" class="bg-purple-700 hover:bg-purple-600 text-white p-2.5 rounded block text-center font-bold cursor-pointer transition shadow-md">📸 Capturar / Subir Foto</label>
+                </div>
+                
+                <div id="contenedorLens" class="hidden mt-3 relative w-full h-32 bg-slate-950 rounded-lg overflow-hidden border border-purple-500/40">
+                    <img id="vistaPreviaLibreta" class="w-full h-full object-cover opacity-60" src="" alt="Libreta">
+                    <div class="absolute inset-4 border-2 border-dashed border-purple-400/70 rounded-md"></div>
+                    <div class="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-purple-400"></div>
+                    <div class="absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-purple-400"></div>
+                    <div class="absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 border-purple-400"></div>
+                    <div class="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-purple-400"></div>
+                    <div class="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-purple-400 to-transparent shadow-[0_0_8px_#c084fc] anim-laser"></div>
+                </div>
+
+                <div id="resultadoIA" class="hidden mt-2 p-2 bg-slate-900 rounded max-h-20 overflow-y-auto font-mono text-[10px] text-purple-300 whitespace-pre-line border border-slate-700"></div>
             </div>
         </div>
 
         <div class="mb-6 bg-slate-850 p-3 rounded-xl border border-slate-700">
             <h2 class="text-xs font-bold text-slate-300 mb-2 uppercase tracking-wide">📷 Escanear QR Alumno (Fila de Clase)</h2>
             <div id="listaAlumnosBotones" class="grid grid-cols-2 sm:grid-cols-4 gap-2 max-h-28 overflow-y-auto">
-                <p class="text-slate-500 text-xs italic col-span-full">Escribe un grupo válido arriba para desplegar las cámaras de escaneo.</p>
+                <p class="text-slate-500 text-xs italic col-span-full">Ingresa un grupo válido arriba para desplegar las cámaras de escaneo.</p>
             </div>
         </div>
 
-        <div class="mb-8">
+        <div>
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-1">
-                <h3 class="text-base font-bold text-blue-400 flex items-center gap-1">📊 1. Lista de Actividades, Examen y Calificación Final</h3>
-                <span class="text-[10px] text-slate-400">💡 Tip: Clic a columnas de tareas para editar/borrar. Clic a "Examen" para calificar.</span>
+                <h3 class="text-base font-bold text-blue-400 flex items-center gap-1">📊 Matriz General de Calificaciones y Tareas</h3>
+                <span class="text-[10px] text-slate-400">💡 Tip: Clic en columnas de tareas para editar/borrar. Clic en "Examen" para calificar.</span>
             </div>
             <div class="overflow-x-auto rounded-xl border border-slate-700">
                 <table class="w-full text-center text-xs">
@@ -85,21 +106,6 @@
                         </tr>
                     </thead>
                     <tbody id="tabTrabCuerpo" class="divide-y divide-slate-700 bg-slate-850"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div>
-            <h3 class="text-base font-bold text-teal-400 mb-2 flex items-center gap-1">⏱️ 2. Lista de Asistencias Diarias</h3>
-            <div class="overflow-x-auto rounded-xl border border-slate-700">
-                <table class="w-full text-center text-xs">
-                    <thead>
-                        <tr id="tabAsisCabecera" class="bg-slate-700 text-white font-bold">
-                            <th class="p-2 text-left min-w-[150px]">Nombre Alumno</th>
-                            <th class="p-2 bg-teal-900 text-teal-200 min-w-[70px]">% Asis</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabAsisCuerpo" class="divide-y divide-slate-700 bg-slate-850"></tbody>
                 </table>
             </div>
         </div>
@@ -118,9 +124,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // ==========================================
-        // 🔑 PEGA TU API KEY DE GEMINI AQUÍ ABAJO:
-        // ==========================================
         const GEMINI_API_KEY = "AIzaSyCeCnBTgwLU98w8hxrt-ac2Mb_4ZlNYcGc"; 
 
         const firebaseConfig = {
@@ -136,7 +139,7 @@
         const db = getFirestore(app);
 
         let html5QrcodeScanner = null, alumnoActual = "", desuscripcionGlobal = null;
-        let globalAlumnos = [], globalTrabajos = [], globalAsistenciasColumnas = [];
+        let globalAlumnos = [], globalTrabajos = [];
         let globalPalomitas = {}, globalExamenes = {};
 
         window.cargarTodoSistema = async function() {
@@ -169,17 +172,12 @@
             const qQR = query(collection(db, "codigos_qr"), where("estado", "==", "Escaneado"), where("grupo", "==", grupo));
             const qEx = query(collection(db, "examenes"), where("grupo", "==", grupo), where("parcial", "==", parcial));
 
-            onSnapshot(qQR, (snapQR) => {
+            desuscripcionGlobal = onSnapshot(qQR, (snapQR) => {
                 onSnapshot(qEx, (snapEx) => {
                     globalPalomitas = {};
-                    globalAsistenciasColumnas = [];
-                    
                     snapQR.forEach(d => {
                         const data = d.data();
                         globalPalomitas[`${data.alumno}_${data.actividad}`] = true;
-                        if(data.tipo === "Asistencia" && !globalAsistenciasColumnas.includes(data.actividad)){
-                            globalAsistenciasColumnas.push(data.actividad);
-                        }
                     });
 
                     globalExamenes = {};
@@ -193,19 +191,15 @@
         function montarYRenderizarTodo() {
             const hTrab = document.getElementById("tabTrabCabecera");
             const bTrab = document.getElementById("tabTrabCuerpo");
-            const hAsis = document.getElementById("tabAsisCabecera");
-            const bAsis = document.getElementById("tabAsisCuerpo");
+            bTrab.innerHTML = "";
 
-            bTrab.innerHTML = ""; bAsis.innerHTML = "";
-
-            // Reconstruir Cabecera de Trabajos
             let maxPuntosRelativos = 0;
             let subCabecerasTareas = "";
             globalTrabajos.forEach(t => {
                 maxPuntosRelativos += t.valor;
                 const fEntrega = t.fecha ? `<br><span class="text-[8px] text-emerald-400 font-medium">📅 ${t.fecha}</span>` : "<br><span class='text-[8px] text-slate-500'>S/F</span>";
                 subCabecerasTareas += `
-                    <th onclick="gestionarActividad('${t.idFirestore}', '${t.nombre}', ${t.valor}, '${t.fecha || ''}')" class="p-1 border-l border-slate-600 bg-slate-700/30 cursor-pointer min-w-[90px] font-semibold text-blue-400 underline decoration-dotted">
+                    <th onclick="gestionarActividad('${t.idFirestore}', '${t.nombre}', ${t.valor}, '${t.fecha || ''}')" class="p-1 border-l border-slate-600 bg-slate-700/30 cursor-pointer min-w-[90px] font-semibold text-blue-400 underline decoration-dotted text-center">
                         ${t.nombre}${fEntrega}<br><span class="text-[9px] text-slate-400">[${t.valor} pts]</span>
                     </th>`;
             });
@@ -215,22 +209,10 @@
                 <th class="p-2 bg-blue-900 text-yellow-400 min-w-[85px]">Trabajos (50)<br><span class="text-[8px] text-slate-300">(Max: ${maxPuntosRelativos}p)</span></th>
                 <th class="p-2 bg-amber-900 text-amber-200 min-w-[85px]">Examen (50)</th>
                 <th class="p-2 bg-slate-600 text-yellow-300 font-extrabold min-w-[90px]">CALIF. FINAL</th>
-                <th class="p-2 bg-slate-700 min-w-[120px]">Acciones</th>`;
+                <th class="p-2 bg-slate-700 min-w-[120px]">Gestión</th>`;
 
-            // Reconstruir Cabecera de Asistencias
-            let subCabecerasAsis = "";
-            globalAsistenciasColumnas.sort().forEach(col => {
-                subCabecerasAsis += `<th class="p-1 border-l border-slate-600 font-medium text-[9px] text-slate-300 min-w-[65px]">${col.replace("Asistencia_", "")}</th>`;
-            });
-            hAsis.innerHTML = `
-                <th class="p-2 text-left min-w-[150px]">Nombre Alumno</th>
-                ${subCabecerasAsis}
-                <th class="p-2 bg-teal-900 text-teal-200 min-w-[70px]">% Asis</th>`;
-
-            // Renderizar filas de alumnos
             globalAlumnos.forEach(al => {
                 const colorRecuFila = al.recuperacion ? 'bg-red-950/30 text-red-200' : '';
-                
                 let puntosAlumnoRelativos = 0;
                 let celdasTareas = "";
                 
@@ -238,9 +220,9 @@
                     const key = `${al.nombre}_${t.nombre}`;
                     if(globalPalomitas[key]) {
                         puntosAlumnoRelativos += t.valor;
-                        celdasTareas += `<td class="p-1 border-b border-slate-700 border-l text-green-400 font-bold">✓</td>`;
+                        celdasTareas += `<td class="p-1 border-b border-slate-700 border-l text-green-400 font-bold text-center">✓</td>`;
                     } else {
-                        celdasTareas += `<td class="p-1 border-b border-slate-700 border-l text-slate-600">-</td>`;
+                        celdasTareas += `<td class="p-1 border-b border-slate-700 border-l text-slate-600 text-center">-</td>`;
                     }
                 });
                 
@@ -253,47 +235,31 @@
                     <tr class="hover:bg-slate-700/20 ${colorRecuFila}">
                         <td class="p-2 text-left border-b border-slate-700 font-semibold">${al.recuperacion ? '⚠️ ' : ''}${al.nombre}</td>
                         ${celdasTareas}
-                        <td class="p-2 border-b border-slate-700 border-l bg-slate-800/40 font-bold text-blue-400">${notaTrabajosEscala50} / 50</td>
-                        <td onclick="capturarExamenA_Mano('${al.nombre}', ${notaExamen})" class="p-2 border-b border-slate-700 border-l bg-amber-950/20 text-amber-400 font-black cursor-pointer hover:bg-amber-900/40 transition select-none underline decoration-dashed">${notaExamen} / 50</td>
-                        <td class="p-2 border-b border-slate-700 border-l bg-slate-800 font-black text-sm text-yellow-400">${notaFinalPromedio} / 100</td>
+                        <td class="p-2 border-b border-slate-700 border-l bg-slate-800/40 font-bold text-blue-400 text-center">${notaTrabajosEscala50} / 50</td>
+                        <td onclick="capturarExamenA_Mano('${al.nombre}', ${notaExamen})" class="p-2 border-b border-slate-700 border-l bg-amber-950/20 text-amber-400 font-black cursor-pointer hover:bg-amber-900/40 transition select-none underline decoration-dashed text-center">${notaExamen} / 50</td>
+                        <td class="p-2 border-b border-slate-700 border-l bg-slate-800 font-black text-sm text-yellow-400 text-center">${notaFinalPromedio} / 100</td>
                         <td class="p-2 border-b border-slate-700 border-l flex justify-center gap-1">
                             <button onclick="alternarRecuperacion('${al.idFirestore}', ${al.recuperacion || false})" class="bg-yellow-600/80 hover:bg-yellow-600 px-1.5 py-0.5 rounded text-[10px] font-bold cursor-pointer text-white">Recu</button>
                             <button onclick="borrarAlumnoCompleto('${al.idFirestore}', '${al.nombre}')" class="bg-red-700 hover:bg-red-600 px-1.5 py-0.5 rounded text-[10px] font-bold cursor-pointer text-white">Borrar</button>
                         </td>
                     </tr>`;
                 bTrab.innerHTML += filaTrab;
-
-                let conteoAsistenciasAlumno = 0;
-                let celdasAsis = "";
-                globalAsistenciasColumnas.forEach(col => {
-                    const key = `${al.nombre}_${col}`;
-                    if(globalPalomitas[key]) {
-                        conteoAsistenciasAlumno++;
-                        celdasAsis += `<td class="p-1 border-b border-slate-700 border-l text-teal-400 font-bold">✓</td>`;
-                    } else {
-                        celdasAsis += `<td class="p-1 border-b border-slate-700 border-l text-slate-600">-</td>`;
-                    }
-                });
-                let porcentajeAsistencia = globalAsistenciasColumnas.length > 0 ? Math.round((conteoAsistenciasAlumno * 100) / globalAsistenciasColumnas.length) : 100;
-                
-                let filaAsis = `
-                    <tr class="hover:bg-slate-700/20 ${colorRecuFila}">
-                        <td class="p-2 text-left border-b border-slate-700">${al.recuperacion ? '⚠️ ' : ''}${al.nombre}</td>
-                        ${celdasAsis}
-                        <td class="p-2 border-b border-slate-700 border-l bg-slate-800/40 font-bold text-teal-400">${porcentajeAsistencia}%</td>
-                    </tr>`;
-                bAsis.innerHTML += filaAsis;
             });
         }
 
         window.gestionarActividad = async function(idFirestore, nombreActual, valorActual, fechaActual) {
-            const accion = prompt(`⚙️ Modificar Tarea: "${nombreActual}"\n\n- Para BORRAR escribe: BORRAR\n- Para CAMBIAR PUNTOS o FECHA escribe los nuevos datos separados por coma.\nEjemplo: Tarea Modificada, 15, 2026-06-05\n(Nombre, Puntos, Fecha AAAA-MM-DD)`, `${nombreActual}, ${valorActual}, ${fechaActual}`);
-            
+            const accion = prompt(`⚙️ Modificar Tarea: "${nombreActual}"\n\n- Para BORRAR escribe: BORRAR\n- Para CAMBIAR PUNTOS o FECHA escribe los nuevos datos separados por coma.\nEjemplo: Tarea Modificada, 15, 2026-06-05`, `${nombreActual}, ${valorActual}, ${fechaActual}`);
             if(!accion) return;
             if(accion.trim().toUpperCase() === "BORRAR") {
-                if(confirm("¿Seguro que deseas eliminar permanentemente esta actividad?")) {
+                if(confirm(`¿Seguro que deseas eliminar permanentemente la actividad "${nombreActual}"?`)) {
+                    const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
                     await deleteDoc(doc(db, "actividades", idFirestore));
-                    alert("Actividad eliminada."); cargarTodoSistema();
+                    const qFirma = query(collection(db, "codigos_qr"), where("grupo", "==", grupo), where("actividad", "==", nombreActual));
+                    const snapFirma = await getDocs(qFirma);
+                    const promesas = [];
+                    snapFirma.forEach(d => promesas.push(deleteDoc(doc(db, "codigos_qr", d.id))));
+                    await Promise.all(promesas);
+                    alert("¡Actividad eliminada!"); cargarTodoSistema();
                 }
             } else {
                 const partes = accion.split(",");
@@ -302,11 +268,8 @@
                     const nuevoVal = parseInt(partes[1].trim());
                     const nuevaFec = partes[2] ? partes[2].trim() : "";
                     if(!nuevoNom || isNaN(nuevoVal)) { alert("Datos inválidos"); return; }
-                    
-                    await updateDoc(doc(db, "actividades", idFirestore), {
-                        nombre: nuevoNom, valor: nuevoVal, fecha: nuevaFec
-                    });
-                    alert("¡Actividad actualizada con éxito!"); cargarTodoSistema();
+                    await updateDoc(doc(db, "actividades", idFirestore), { nombre: nuevoNom, valor: nuevoVal, fecha: nuevaFec });
+                    alert("¡Actividad actualizada!"); cargarTodoSistema();
                 }
             }
         }
@@ -314,13 +277,10 @@
         window.capturarExamenA_Mano = async function(nombreAlumno, notaActual) {
             const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
             const parcial = document.getElementById("filtroParcial").value;
-            const nuevaNota = prompt(`Puntos de examen para ${nombreAlumno}:\n\nIngresa los puntos obtenidos (0 al 50):`, notaActual);
+            const nuevaNota = prompt(`Puntos de examen para ${nombreAlumno} (0 al 50):`, notaActual);
             if(nuevaNota === null || isNaN(nuevaNota)) return;
-
             const idExamen = `${grupo}_${parcial}_${nombreAlumno.replace(/\s+/g, '_')}`;
-            await setDoc(doc(db, "examenes", idExamen), {
-                alumno: nombreAlumno, grupo: grupo, parcial: parcial, nota: parseFloat(nuevaNota)
-            });
+            await setDoc(doc(db, "examenes", idExamen), { alumno: nombreAlumno, grupo: grupo, parcial: parcial, nota: parseFloat(nuevaNota) });
             cargarTodoSistema();
         }
 
@@ -330,7 +290,7 @@
         }
 
         window.borrarAlumnoCompleto = async function(idFirestore, nombre) {
-            if(confirm(`❌ ¿Seguro que deseas eliminar de forma permanente a: ${nombre}?`)) {
+            if(confirm(`❌ ¿Seguro que deseas eliminar a: ${nombre}?`)) {
                 await deleteDoc(doc(db, "alumnos", idFirestore));
                 cargarTodoSistema();
             }
@@ -343,13 +303,12 @@
             const valor = parseInt(document.getElementById("valorActividad").value) || 10;
             const fecha = document.getElementById("fechaActividad").value;
             if(!grupo || !nombre) { alert("Llena el grupo y nombre de la tarea"); return; }
-            
             const id = `${grupo}_${parcial}_${nombre.replace(/\s+/g, '_')}`;
             await setDoc(doc(db, "actividades", id), { nombre, grupo, parcial, valor, fecha });
             document.getElementById("nomActividad").value = "";
             document.getElementById("valorActividad").value = "";
             document.getElementById("fechaActividad").value = "";
-            alert("Actividad publicada exitosamente"); cargarTodoSistema();
+            alert("Actividad publicada"); cargarTodoSistema();
         }
 
         window.agregarAlumnoA_Base = async function() {
@@ -357,17 +316,24 @@
             const grupo = document.getElementById("newAlumnoGrupo").value.trim().toUpperCase();
             if(!nombre || !grupo){ alert("Llena los campos"); return; }
             const id = `${grupo}_${nombre.replace(/\s+/g, '_')}`;
-            await setDoc(doc(db, "alumnos", id), { nombre, grupo, recuperacion: false });
+            await setDoc(doc(db, "alumnos", id), { nombre, group: grupo, grupo, recuperacion: false });
             document.getElementById("newAlumnoNombre").value = "";
             alert("Alumno inscrito"); cargarTodoSistema();
         }
 
         window.procesarFotoFormula = function() {
             const archivoInput = document.getElementById("fotoFormulaInput").files[0];
+            const divLens = document.getElementById("contenedorLens");
+            const imgPrev = document.getElementById("vistaPreviaLibreta");
             const divResultado = document.getElementById("resultadoIA");
+            
             if (!archivoInput) return;
+            
+            // Efecto Visual Lens activo
+            divLens.classList.remove("hidden");
             divResultado.classList.remove("hidden");
-            divResultado.innerText = "⏳ Analizando libreta...";
+            divResultado.innerText = "⏳ Google Lens IA Analizando libreta...";
+            imgPrev.src = URL.createObjectURL(archivoInput);
 
             const lectorBase64 = new FileReader();
             lectorBase64.onloadend = async function() {
@@ -410,9 +376,9 @@
                     if (d.alumno !== alumnoActual) { alert("❌ QR incorrecto."); return; }
                     if (d.estado === "Escaneado") { alert("❌ QR expirado."); return; }
                     await updateDoc(docRef, { estado: "Escaneado", fechaEscaneo: new Date() });
-                    alert(`✅ Registro procesado para ${alumnoActual}`);
+                    alert(`✅ Trabajo recibido con éxito para ${alumnoActual}`);
                     cargarTodoSistema();
-                } else { alert("❌ No válido."); }
+                } else { alert("❌ Token No válido."); }
             } catch (e) { alert("Error de red."); }
         }
     </script>
