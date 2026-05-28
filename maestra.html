@@ -3,25 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control Escolar Pro - Maestra</title>
+    <title>Panel de Control Escolar Pro V3 - Maestra</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-2 sm:p-4 pb-20 font-sans">
-    <div class="max-w-4xl mx-auto bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-2xl border border-slate-700 mt-2">
+    <div class="max-w-5xl mx-auto bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-2xl border border-slate-700 mt-2">
         
         <div class="flex flex-col gap-3 border-b border-slate-700 pb-4 mb-4">
             <h1 class="text-xl sm:text-2xl font-extrabold text-blue-400 flex items-center gap-2">
-                <span>📊</span> QR-Grade (Prepa)
+                <span>📊</span> QR-Grade Global (Trabajos 50 / Examen 50)
             </h1>
             <div class="grid grid-cols-2 gap-2 w-full">
                 <div>
                     <label class="block text-[11px] text-slate-400 mb-1">Grupo Activo:</label>
-                    <input id="filtroGrupo" type="text" placeholder="Ej: 4TPROG-Am" oninput="cargarAlumnosYTabla()" class="w-full p-2 text-sm rounded-lg bg-slate-700 border border-slate-600 text-white font-bold uppercase focus:outline-none focus:border-blue-500">
+                    <input id="filtroGrupo" type="text" placeholder="Ej: 4TPROG-Am" oninput="cargarTodoSistema()" class="w-full p-2 text-sm rounded-lg bg-slate-700 border border-slate-600 text-white font-bold uppercase focus:outline-none focus:border-blue-500">
                 </div>
                 <div>
-                    <label class="block text-[11px] text-slate-400 mb-1">Filtrar Parcial:</label>
-                    <select id="filtroParcial" onchange="cargarAlumnosYTabla()" class="w-full p-2 text-sm rounded-lg bg-slate-700 border border-slate-600 text-white font-bold focus:outline-none focus:border-blue-500">
+                    <label class="block text-[11px] text-slate-400 mb-1">Parcial:</label>
+                    <select id="filtroParcial" onchange="cargarTodoSistema()" class="w-full p-2 text-sm rounded-lg bg-slate-700 border border-slate-600 text-white font-bold focus:outline-none focus:border-blue-500">
                         <option value="Parcial_1">1er Parcial</option>
                         <option value="Parcial_2">2do Parcial</option>
                         <option value="Parcial_3">3er Parcial</option>
@@ -30,96 +30,92 @@
             </div>
         </div>
 
+        <div class="flex border-b border-slate-700 mb-4 bg-slate-850 rounded-t-xl overflow-hidden text-xs sm:text-sm">
+            <button onclick="cambiarPestana('pestanaTrabajos')" id="btn-pestanaTrabajos" class="flex-1 py-3 text-center font-bold bg-blue-600 text-white border-b-2 border-blue-400">📝 Trabajos (Base 50)</button>
+            <button onclick="cambiarPestana('pestanaAsistencia')" id="btn-pestanaAsistencia" class="flex-1 py-3 text-center font-bold text-slate-400 hover:bg-slate-700">⏱️ Lista Asistencia</button>
+            <button onclick="cambiarPestana('pestanaFinal')" id="btn-pestanaFinal" class="flex-1 py-3 text-center font-bold text-slate-400 hover:bg-slate-700">🎓 Acta Final (100 Pts)</button>
+            <button onclick="cambiarPestana('pestanaIA')" id="btn-pestanaIA" class="flex-1 py-3 text-center font-bold text-purple-400 hover:bg-slate-700">🤖 Escáner IA</button>
+        </div>
+
         <div class="space-y-3 mb-6">
-            
-            <details class="bg-purple-950/30 p-3 rounded-xl border border-purple-800/60 text-sm">
-                <summary class="font-bold text-purple-400 cursor-pointer focus:outline-none flex items-center gap-2">
-                    <span>🤖</span> Escáner de Fórmulas con IA (Detector de Errores)
-                </summary>
-                <div class="mt-3 space-y-3">
-                    <p class="text-xs text-slate-400">Tómale una foto a la fórmula o código del alumno. La IA detectará únicamente los errores sin dar el resultado.</p>
-                    
-                    <div class="flex flex-col sm:flex-row gap-2">
-                        <label class="flex-1 bg-purple-900/40 hover:bg-purple-900/60 border border-purple-700 text-purple-200 p-3 rounded-xl text-center font-bold cursor-pointer transition block">
-                            📸 Tomar Foto / Seleccionar Imagen
-                            <input id="fotoFormulaInput" type="file" accept="image/*" class="hidden" onchange="procesarFotoFormula()">
-                        </label>
-                    </div>
-
-                    <div id="contenedorPrevia" class="hidden text-center">
-                        <img id="vistaPreviaFoto" class="max-h-48 mx-auto rounded-xl border border-slate-600 shadow-md">
-                    </div>
-
-                    <div id="resultadoIA" class="hidden p-3 rounded-xl bg-slate-900 border border-purple-900/60 text-xs space-y-1">
-                        <h4 class="font-bold text-purple-400 border-b border-slate-800 pb-1 mb-1">🔍 Diagnóstico de Errores de la IA:</h4>
-                        <div id="textoErroresIA" class="text-slate-300 whitespace-pre-line font-mono leading-relaxed"></div>
-                    </div>
+            <details class="bg-slate-850 p-2 rounded-xl border border-slate-700 text-xs">
+                <summary class="font-bold text-slate-300 cursor-pointer">👤 Inscripción de Alumnos rápidos</summary>
+                <div class="mt-2 space-y-2">
+                    <input id="newAlumnoNombre" type="text" placeholder="Nombre completo" class="w-full p-2 bg-slate-700 rounded text-white">
+                    <input id="newAlumnoGrupo" type="text" placeholder="Grupo asignado" class="w-full p-2 bg-slate-700 uppercase rounded text-white">
+                    <button onclick="agregarAlumnoA_Base()" class="w-full bg-slate-600 p-2 rounded font-bold">Inscribir</button>
                 </div>
             </details>
-
-            <details class="bg-slate-850 p-3 rounded-xl border border-slate-700 text-sm">
-                <summary class="font-bold text-slate-300 cursor-pointer focus:outline-none">👤 Panel de Inscripción de Alumnos</summary>
-                <div class="mt-3 space-y-2">
-                    <input id="newAlumnoNombre" type="text" placeholder="Nombre completo del estudiante" class="w-full p-2 text-sm rounded bg-slate-700 border border-slate-600 text-white">
-                    <input id="newAlumnoGrupo" type="text" placeholder="Grupo asignado (Ej: 4TPROG-Am)" class="w-full p-2 text-sm rounded bg-slate-700 border border-slate-600 uppercase text-white">
-                    <label class="flex items-center space-x-2 text-xs text-red-400 font-medium py-1 cursor-pointer">
-                        <input id="isRecuperacion" type="checkbox" onchange="toggleNotaRecuperacion()" class="rounded bg-slate-700 border-slate-600">
-                        <span>¿Es alumno recursador / recuperación?</span>
-                    </label>
-                    <input id="notaRecuperacion" type="text" placeholder="Ej: Es de 6to semestre" class="hidden w-full p-2 text-sm rounded bg-slate-700 border border-slate-600 text-white">
-                    <button onclick="agregarAlumnoA_Base()" class="w-full bg-slate-600 hover:bg-slate-500 text-white p-2 rounded text-sm font-bold transition">Guardar en Base de Datos</button>
-                </div>
-            </details>
-
-            <details class="bg-blue-950/20 p-3 rounded-xl border border-blue-900/60 text-sm" open>
-                <summary class="font-bold text-blue-400 cursor-pointer focus:outline-none">📝 Diseñador de Actividades y Tareas</summary>
-                <div class="mt-3 space-y-2">
-                    <input id="nomActividad" type="text" placeholder="Nombre: Ej. Tarea 1, Examen, Asistencia" class="w-full p-2 text-sm rounded bg-slate-700 border border-slate-600 text-white">
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-[10px] text-slate-400 mb-0.5">Fecha de Entrega:</label>
-                            <input id="fechaActividad" type="date" class="w-full p-2 text-sm rounded bg-slate-700 border border-slate-600 text-white">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] text-slate-400 mb-0.5">Valor Máximo (Pts):</label>
-                            <input id="valorActividad" type="number" placeholder="Ej: 10" class="w-full p-2 text-sm rounded bg-slate-700 border border-slate-600 text-white">
-                        </div>
-                    </div>
-                    <button onclick="crearActividad()" class="w-full bg-blue-600 hover:bg-blue-500 text-white p-2 rounded text-sm font-bold transition">Publicar Actividad</button>
+            <details id="diseñadorActividades" class="bg-blue-950/20 p-2 rounded-xl border border-blue-900/40 text-xs" open>
+                <summary class="font-bold text-blue-400 cursor-pointer">📝 Publicador de Actividades</summary>
+                <div class="mt-2 space-y-2">
+                    <input id="nomActividad" type="text" placeholder="Nombre: Ej. Tarea 1" class="w-full p-2 bg-slate-700 rounded text-white">
+                    <input id="valorActividad" type="number" placeholder="Valor relativo (Ej: 10 pts)" class="w-full p-2 bg-slate-700 rounded text-white">
+                    <button onclick="crearActividad()" class="w-full bg-blue-600 p-2 rounded font-bold">Publicar Actividad</button>
                 </div>
             </details>
         </div>
 
         <div class="mb-6">
-            <h2 class="text-md font-bold text-slate-200 mb-2 flex items-center gap-1">📷 Fila de Validación por Alumno</h2>
-            <div id="listaAlumnosBotones" class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-40 overflow-y-auto pr-1">
-                <p class="text-slate-500 text-xs italic">Ingresa un grupo arriba para desplegar alumnos.</p>
+            <h2 class="text-xs font-bold text-slate-400 mb-1.5 uppercase">📷 Cámara y Escaneo de Fila</h2>
+            <div id="listaAlumnosBotones" class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-24 overflow-y-auto">
+                <p class="text-slate-500 text-xs italic col-span-full">Escribe un grupo válido para activar cámaras.</p>
             </div>
         </div>
 
-        <div class="mt-4">
-            <h2 class="text-md font-bold text-slate-200 mb-2 flex items-center gap-1">📊 Concentrado General de Palomitas y Ajustes</h2>
-            <div class="overflow-x-auto rounded-xl border border-slate-700 shadow-md">
-                <table class="w-full text-center border-collapse bg-slate-850 text-xs">
-                    <thead>
-                        <tr id="tablaCabecera" class="bg-slate-700 text-slate-200 font-bold uppercase">
-                            <th class="p-2 border-b border-slate-600 text-left min-w-[140px]">Estructura Alumno</th>
-                            <th class="p-2 border-b border-slate-600 bg-slate-600 text-yellow-400 font-black min-w-[70px]">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tablaCuerpo" class="text-slate-300 divide-y divide-slate-700">
-                        <tr><td class="p-4 text-slate-500 italic" colspan="20">Por favor, digita un grupo válido arriba para ajustar los datos del parcial.</td></tr>
-                    </tbody>
+        <div id="pestanaTrabajos" class="seccion-pestana">
+            <h3 class="text-sm font-bold text-slate-200 mb-2">📝 Tabla de Tareas y Firmas acumuladas</h3>
+            <div class="overflow-x-auto rounded-xl border border-slate-700">
+                <table class="w-full text-center text-xs">
+                    <thead><tr id="tabTrabCabecera" class="bg-slate-700 text-white font-bold"><th class="p-2 text-left">Alumno</th><th class="p-2 bg-blue-900">Escala (50 pts)</th></tr></thead>
+                    <tbody id="tabTrabCuerpo" class="divide-y divide-slate-700 bg-slate-850"></tbody>
                 </table>
             </div>
         </div>
 
+        <div id="pestanaAsistencia" class="seccion-pestana hidden">
+            <h3 class="text-sm font-bold text-slate-200 mb-2">⏱️ Registro de Asistencias Diarias</h3>
+            <div class="overflow-x-auto rounded-xl border border-slate-700">
+                <table class="w-full text-center text-xs">
+                    <thead><tr id="tabAsisCabecera" class="bg-slate-700 text-white font-bold"><th class="p-2 text-left">Alumno</th><th class="p-2 bg-teal-900">% Asis</th></tr></thead>
+                    <tbody id="tabAsisCuerpo" class="divide-y divide-slate-700 bg-slate-850"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="pestanaFinal" class="seccion-pestana hidden">
+            <h3 class="text-sm font-bold text-slate-200 mb-1">🎓 Concentrado Evaluativo de Acta</h3>
+            <p class="text-[10px] text-slate-400 mb-2">💡 Tip: Da un toque a la celda de la columna "Examen" para capturar la nota sobre 50 puntos a mano.</p>
+            <div class="overflow-x-auto rounded-xl border border-slate-700">
+                <table class="w-full text-center text-xs">
+                    <thead>
+                        <tr class="bg-slate-700 text-slate-200 font-bold">
+                            <th class="p-3 text-left">Nombre Alumno</th>
+                            <th class="p-3 bg-blue-950/60 text-blue-400">Trabajos (Max 50)</th>
+                            <th class="p-3 bg-teal-950/60 text-teal-400">Asistencia (%)</th>
+                            <th class="p-3 bg-amber-950/60 text-amber-400 cursor-pointer">Examen (Max 50)</th>
+                            <th class="p-3 bg-slate-600 text-yellow-400 font-black text-sm">PROMEDIO FINAL</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabFinalCuerpo" class="divide-y divide-slate-700 bg-slate-850"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="pestanaIA" class="seccion-pestana hidden space-y-3">
+            <div class="p-4 bg-purple-950/20 border border-purple-800/40 rounded-xl">
+                <h3 class="text-purple-400 font-bold mb-1">🤖 Diagnóstico IA de Errores en Libretas</h3>
+                <input id="fotoFormulaInput" type="file" accept="image/*" class="hidden" onchange="procesarFotoFormula()">
+                <label class="bg-purple-600 hover:bg-purple-500 text-white p-3 rounded-xl block text-center font-bold cursor-pointer transition">📸 Cargar Foto de Libreta</label>
+                <div id="resultadoIA" class="hidden mt-3 p-3 bg-slate-900 rounded-xl border font-mono text-xs text-slate-300 whitespace-pre-line"></div>
+            </div>
+        </div>
+
         <div id="seccionEscaner" class="hidden fixed inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 z-50">
-            <div class="bg-slate-800 w-full max-w-sm rounded-2xl p-4 text-center shadow-2xl border border-slate-700">
-                <h3 class="text-md font-bold text-white mb-1">Visor QR de Seguridad</h3>
-                <p class="text-xs text-slate-400 mb-3">Escaneando a: <span id="nombreAlumnoEscaneo" class="font-bold text-blue-400 text-sm"></span></p>
-                <div id="reader" class="w-full overflow-hidden rounded-xl bg-slate-900 border border-slate-700"></div>
-                <button onclick="cerrarEscaner()" class="mt-3 w-full bg-red-600 hover:bg-red-500 text-white py-2 rounded-xl text-xs font-bold transition">Cancelar Escaneo</button>
+            <div class="bg-slate-800 w-full max-w-sm rounded-2xl p-4 text-center border border-slate-700">
+                <h3 class="text-sm font-bold text-white mb-2">Escaneando a: <span id="nombreAlumnoEscaneo" class="text-blue-400"></span></h3>
+                <div id="reader" class="w-full overflow-hidden rounded-xl bg-slate-900"></div>
+                <button onclick="cerrarEscaner()" class="mt-3 w-full bg-red-600 text-white py-2 rounded-xl text-xs font-bold">Cancelar</button>
             </div>
         </div>
 
@@ -129,8 +125,10 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // CONFIGURACIÓN DE TU IA GEMINI (Pega aquí tu llave entre las comillas)
-        const GEMINI_API_KEY = "AIzaSyCeCnBTgwLU98w8hxrt-ac2Mb_4ZlNYcGc";
+        // ==========================================
+        // 🔑 PEGA TU API KEY DE GEMINI AQUÍ ABAJO:
+        // ==========================================
+        const GEMINI_API_KEY = "TU_API_KEY_AQUI"; 
 
         const firebaseConfig = {
             apiKey: "AIzaSyDL0CybhUR13A8yd_S7HPUHoKwOzz96S6A",
@@ -138,272 +136,225 @@
             projectId: "firmadigitalmaestra",
             storageBucket: "firmadigitalmaestra.firebasestorage.app",
             messagingSenderId: "60938874327",
-            appId: "1:60938874327:web:9c23f797239a5e02092f92",
-            measurementId: "G-649ZFMSP3J"
+            appId: "1:60938874327:web:9c23f797239a5e02092f92"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let html5QrcodeScanner = null;
-        let alumnoActual = "";
-        let desuscripciónTabla = null;
+        let html5QrcodeScanner = null, alumnoActual = "", desuscripcionGlobal = null;
+        let globalAlumnos = [], globalTrabajos = [], globalAsistenciasColumnas = [];
+        let globalPalomitas = {}, globalExamenes = {};
 
-        // FUNCIÓN DEL ESCÁNER DE IA (FOTO)
+        window.cambiarPestana = function(pestanaID) {
+            document.querySelectorAll(".seccion-pestana").forEach(el => el.classList.add("hidden"));
+            document.getElementById(pestanaID).classList.remove("hidden");
+            
+            document.querySelectorAll("[id^='btn-pestana']").forEach(btn => btn.className = "flex-1 py-3 text-center font-bold text-slate-400 hover:bg-slate-700");
+            const act = document.getElementById(`btn-${pestanaID}`);
+            if(pestanaID === "pestanaIA") act.className = "flex-1 py-3 text-center font-bold bg-purple-900 text-white border-b-2 border-purple-400";
+            else act.className = "flex-1 py-3 text-center font-bold bg-blue-600 text-white border-b-2 border-blue-400";
+
+            document.getElementById("diseñadorActividades").classList.toggle("hidden", pestanaID !== "pestanaTrabajos");
+        }
+
+        window.cargarTodoSistema = async function() {
+            const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
+            const parcial = document.getElementById("filtroParcial").value;
+            if(!grupo) return;
+
+            const qAl = query(collection(db, "alumnos"), where("grupo", "==", grupo));
+            const snapAl = await getDocs(qAl);
+            globalAlumnos = [];
+            const divBotones = document.getElementById("listaAlumnosBotones");
+            divBotones.innerHTML = "";
+            snapAl.forEach(d => {
+                globalAlumnos.push(d.data());
+                divBotones.innerHTML += `
+                    <div class="p-1 bg-slate-700/60 border border-slate-600 rounded flex justify-between items-center text-[10px]">
+                        <span class="truncate max-w-[60%] font-medium">${d.data().nombre}</span>
+                        <button onclick="abrirEscaner('${d.data().nombre}')" class="bg-blue-600 text-white px-2 py-0.5 rounded font-bold">Cam</button>
+                    </div>`;
+            });
+
+            const qAct = query(collection(db, "actividades"), where("grupo", "==", grupo), where("parcial", "==", parcial));
+            const snapAct = await getDocs(qAct);
+            globalTrabajos = [];
+            snapAct.forEach(d => globalTrabajos.push(d.data()));
+
+            montarCabecerasTablas();
+
+            if(desuscripcionGlobal) desuscripcionGlobal();
+
+            const qQR = query(collection(db, "codigos_qr"), where("estado", "==", "Escaneado"), where("grupo", "==", grupo));
+            const qEx = query(collection(db, "examenes"), where("grupo", "==", grupo), where("parcial", "==", parcial));
+
+            onSnapshot(qQR, (snapQR) => {
+                onSnapshot(qEx, (snapEx) => {
+                    globalPalomitas = {};
+                    globalAsistenciasColumnas = [];
+                    
+                    snapQR.forEach(d => {
+                        const data = d.data();
+                        globalPalomitas[`${data.alumno}_${data.actividad}`] = true;
+                        if(data.tipo === "Asistencia" && !globalAsistenciasColumnas.includes(data.actividad)){
+                            globalAsistenciasColumnas.push(data.actividad);
+                        }
+                    });
+
+                    globalExamenes = {};
+                    snapEx.forEach(d => { globalExamenes[d.data().alumno] = d.data().nota; });
+
+                    renderizarContenidosTablas();
+                });
+            });
+        }
+
+        function montarCabecerasTablas() {
+            const hTrab = document.getElementById("tabTrabCabecera");
+            hTrab.innerHTML = '<th class="p-2 text-left min-w-[140px]">Alumno</th>';
+            let maxPuntosRelativos = 0;
+            globalTrabajos.forEach(t => {
+                maxPuntosRelativos += t.valor;
+                hTrab.innerHTML += `<th onclick="gestionarActividad('${t.nombre}',${t.valor})" class="p-1 border-l border-slate-600 bg-slate-700/40 cursor-pointer min-w-[70px] font-medium text-blue-400 underline decoration-dotted">${t.nombre}<br><span class="text-[9px] text-slate-400">[${t.valor} pts]</span></th>`;
+            });
+            hTrab.innerHTML += `<th class="p-2 bg-blue-900 text-yellow-400 min-w-[80px]">Escala 50<br><span class="text-[9px] text-slate-200">(Max: ${maxPuntosRelativos} pts)</span></th>`;
+        }
+
+        function renderizarContenidosTablas() {
+            const bTrab = document.getElementById("tabTrabCuerpo");
+            const bAsis = document.getElementById("tabAsisCuerpo");
+            const bFinal = document.getElementById("tabFinalCuerpo");
+
+            bTrab.innerHTML = ""; bAsis.innerHTML = ""; bFinal.innerHTML = "";
+
+            const maxPuntosRelativos = globalTrabajos.reduce((acc, t) => acc + t.valor, 0);
+
+            const hAsis = document.getElementById("tabAsisCabecera");
+            hAsis.innerHTML = '<th class="p-2 text-left min-w-[140px]">Alumno</th>';
+            globalAsistenciasColumnas.forEach(col => {
+                hAsis.innerHTML += `<th class="p-1 border-l border-slate-600 font-normal text-[10px] text-slate-300">${col.replace("Asistencia_", "")}</th>`;
+            });
+            hAsis.innerHTML += '<th class="p-2 bg-teal-900 text-yellow-400 min-w-[70px]">% Asis</th>';
+
+            globalAlumnos.forEach(al => {
+                let puntosAlumnoRelativos = 0;
+                let filaTrab = `<tr class="hover:bg-slate-700/30"><td class="p-2 text-left border-b border-slate-700">${al.nombre}</td>`;
+                
+                globalTrabajos.forEach(t => {
+                    const key = `${al.nombre}_${t.nombre}`;
+                    if(globalPalomitas[key]) {
+                        puntosAlumnoRelativos += t.valor;
+                        filaTrab += `<td class="p-1 border-b border-slate-700 border-l text-green-400 font-bold">✓</td>`;
+                    } else {
+                        filaTrab += `<td class="p-1 border-b border-slate-700 border-l text-slate-600">-</td>`;
+                    }
+                });
+                
+                let notaTrabajosEscala50 = maxPuntosRelativos > 0 ? parseFloat(((puntosAlumnoRelativos * 50) / maxPuntosRelativos).toFixed(1)) : 0;
+                filaTrab += `<td class="p-2 border-b border-slate-700 border-l bg-slate-800 font-bold text-yellow-400">${notaTrabajosEscala50} / 50</td></tr>`;
+                bTrab.innerHTML += filaTrab;
+
+                let conteoAsistenciasAlumno = 0;
+                let filaAsis = `<tr class="hover:bg-slate-700/30"><td class="p-2 text-left border-b border-slate-700">${al.nombre}</td>`;
+                globalAsistenciasColumnas.forEach(col => {
+                    const key = `${al.nombre}_${col}`;
+                    if(globalPalomitas[key]) {
+                        conteoAsistenciasAlumno++;
+                        filaAsis += `<td class="p-1 border-b border-slate-700 border-l text-teal-400 font-bold">✓</td>`;
+                    } else {
+                        filaAsis += `<td class="p-1 border-b border-slate-700 border-l text-slate-600">-</td>`;
+                    }
+                });
+                let porcentajeAsistencia = globalAsistenciasColumnas.length > 0 ? Math.round((conteoAsistenciasAlumno * 100) / globalAsistenciasColumnas.length) : 100;
+                filaAsis += `<td class="p-2 border-b border-slate-700 border-l bg-slate-800 font-bold text-teal-400">${porcentajeAsistencia}%</td></tr>`;
+                bAsis.innerHTML += filaAsis;
+
+                // NUEVA FÓRMULA DIRECTA: TRABAJOS (HASTA 50 PTS) + EXAMEN (HASTA 50 PTS) = 100 PTS
+                let notaExamen = globalExamenes[al.nombre] !== undefined ? globalExamenes[al.nombre] : 0;
+                let notaFinalPromedio = parseFloat((notaTrabajosEscala50 + notaExamen).toFixed(1));
+                if(notaFinalPromedio > 100) notaFinalPromedio = 100;
+
+                let filaFinal = `
+                    <tr class="hover:bg-slate-700/30">
+                        <td class="p-3 text-left border-b border-slate-700 font-medium">${al.nombre}</td>
+                        <td class="p-3 border-b border-slate-700 text-blue-400 bg-blue-950/20">${notaTrabajosEscala50} / 50 pts</td>
+                        <td class="p-3 border-b border-slate-700 text-teal-400 bg-slate-900/40">${porcentajeAsistencia}%</td>
+                        <td onclick="capturarExamenA_Mano('${al.nombre}', ${notaExamen})" class="p-3 border-b border-slate-700 text-amber-400 bg-amber-950/20 font-bold cursor-pointer hover:bg-amber-900/40 transition select-none underline decoration-dashed">${notaExamen} / 50</td>
+                        <td class="p-3 border-b border-slate-700 bg-slate-800 text-yellow-400 font-black text-sm">${notaFinalPromedio} / 100</td>
+                    </tr>`;
+                bFinal.innerHTML += filaFinal;
+            });
+        }
+
+        window.capturarExamenA_Mano = async function(nombreAlumno, notaActual) {
+            const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
+            const parcial = document.getElementById("filtroParcial").value;
+            const nuevaNota = prompt(`Captura de examen para:\n${nombreAlumno}\n\nIngresa los puntos obtenidos en el examen (0 al 50):`, notaActual);
+            if(nuevaNota === null || isNaN(nuevaNota)) return;
+
+            const idExamen = `${grupo}_${parcial}_${nombreAlumno.replace(/\s+/g, '_')}`;
+            await setDoc(doc(db, "examenes", idExamen), {
+                alumno: nombreAlumno, grupo: grupo, parcial: parcial, nota: parseFloat(nuevaNota)
+            });
+            cargarTodoSistema();
+        }
+
         window.procesarFotoFormula = function() {
             const archivoInput = document.getElementById("fotoFormulaInput").files[0];
-            const divPrevia = document.getElementById("contenedorPrevia");
-            const imgPrevia = document.getElementById("vistaPreviaFoto");
             const divResultado = document.getElementById("resultadoIA");
-            const cajaTexto = document.getElementById("textoErroresIA");
-
             if (!archivoInput) return;
-
-            // Mostrar previsualización de la foto
-            const lector = new FileReader();
-            lector.onload = function(e) {
-                imgPrevia.src = e.target.result;
-                divPrevia.classList.remove("hidden");
-            }
-            lector.readAsDataURL(archivoInput);
-
-            // Preparar interfaz de carga
             divResultado.classList.remove("hidden");
-            cajaTexto.innerHTML = "⏳ Analizando trazos de la libreta con Inteligencia Artificial... Por favor espere.";
+            divResultado.innerText = "⏳ Analizando trazos de la libreta con Inteligencia Artificial... Por favor espere.";
 
-            // Convertir la imagen a base64 puro para enviársela a Google
             const lectorBase64 = new FileReader();
             lectorBase64.onloadend = async function() {
                 const base64Data = lectorBase64.result.split(',')[1];
-                
-                // Prompt pedagógico súper estricto: CUMPLE LA ORDEN DE LA MAESTRA
-                const instruccionesPrompt = "Analiza la fórmula o trozo de código escrito a mano en esta imagen. Tu única misión es listar de forma numerada los ERRORES de sintaxis, lógica, símbolos, variables o signos que encuentres. REGLAS CRÍTICAS: 1. NO des el resultado de la operación bajo ninguna circunstancia. 2. NO expliques el porqué ni des la solución correcta. 3. Solo limita tu respuesta a señalar puntualmente dónde está la falla o qué carácter/paso está roto para obligar al alumno a pensar. Si no hay errores, escribe únicamente: 'La fórmula está escrita correctamente.'";
-
+                const instruccionesPrompt = "Analiza el ejercicio de esta imagen. Lista únicamente los ERRORES sintácticos o de lógica. REGLAS: 1. NO des el resultado correcto. 2. NO expliques la solución. Señala solo dónde falló.";
                 try {
-                    const urlAPI = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-                    
-                    const respuesta = await fetch(urlAPI, {
+                    const respuesta = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            contents: [{
-                                parts: [
-                                    { text: instruccionesPrompt },
-                                    { inlineData: { mimeType: archivoInput.type, data: base64Data } }
-                                ]
-                            }]
-                        })
+                        body: JSON.stringify({ contents: [{ parts: [{ text: instruccionesPrompt }, { inlineData: { mimeType: archivoInput.type, data: base64Data } }] }] })
                     });
-
                     const jsonResult = await respuesta.json();
-                    const textoIA = jsonResult.candidates[0].content.parts[0].text;
-                    cajaTexto.innerText = textoIA;
-
-                } catch (err) {
-                    cajaTexto.innerText = "❌ Error de conexión con el motor de IA. Verifica tu API Key o la conexión a internet.";
-                }
+                    divResultado.innerText = jsonResult.candidates[0].content.parts[0].text;
+                } catch (e) { divResultado.innerText = "❌ Error en el motor de IA."; }
             };
             lectorBase64.readAsDataURL(archivoInput);
-        }
-
-        window.toggleNotaRecuperacion = function() {
-            document.getElementById("notaRecuperacion").classList.toggle("hidden", !document.getElementById("isRecuperacion").checked);
         }
 
         window.agregarAlumnoA_Base = async function() {
             const nombre = document.getElementById("newAlumnoNombre").value.trim();
             const grupo = document.getElementById("newAlumnoGrupo").value.trim().toUpperCase();
-            const esRecu = document.getElementById("isRecuperacion").checked;
-            const notaRecu = document.getElementById("notaRecuperacion").value.trim();
-
-            if(!nombre || !grupo){ alert("Nombre y grupo requeridos."); return; }
+            if(!nombre || !grupo){ alert("Datos obligatorios"); return; }
             const id = `${grupo}_${nombre.replace(/\s+/g, '_')}`;
-            await setDoc(doc(db, "alumnos", id), { nombre, group: grupo, recuperacion: esRecu, detallesRecuperacion: esRecu ? (notaRecu || "Recuperación") : "" });
-            alert("✅ Alumno registrado de forma exitosa.");
+            await setDoc(doc(db, "alumnos", id), { nombre, grupo });
             document.getElementById("newAlumnoNombre").value = "";
-            cargarAlumnosYTabla();
-        }
-
-        window.eliminarAlumnoDeBase = async function(nombreAlumno, grupoAlumno) {
-            const confirmar = confirm(`⚠️ ¿Seguro que deseas eliminar a ${nombreAlumno} del grupo ${grupoAlumno}?\nEsta acción no se puede deshacer.`);
-            if(!confirmar) return;
-
-            const idAlumno = `${grupoAlumno}_${nombreAlumno.replace(/\s+/g, '_')}`;
-            try {
-                await deleteDoc(doc(db, "alumnos", idAlumno));
-                alert("🗑️ Alumno eliminado correctamente.");
-                cargarAlumnosYTabla();
-            } catch (error) { alert("Error al intentar eliminar al alumno."); }
+            alert("Alumno guardado"); cargarTodoSistema();
         }
 
         window.crearActividad = async function() {
             const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
             const parcial = document.getElementById("filtroParcial").value;
             const nombre = document.getElementById("nomActividad").value.trim();
-            const fecha = document.getElementById("fechaActividad").value;
             const valor = parseInt(document.getElementById("valorActividad").value) || 10;
-
-            if(!grupo || !nombre) { alert("Anota grupo y nombre de la tarea."); return; }
+            if(!grupo || !nombre) return;
             const id = `${grupo}_${parcial}_${nombre.replace(/\s+/g, '_')}`;
-            await setDoc(doc(db, "actividades", id), { nombre, grupo, parcial, fecha, valor });
-            alert(`✅ Tarea "${nombre}" publicada.`);
+            await setDoc(doc(db, "actividades", id), { nombre, grupo, parcial, valor });
             document.getElementById("nomActividad").value = "";
-            cargarAlumnosYTabla();
+            alert("Actividad publicada"); cargarTodoSistema();
         }
 
-        window.gestionarActividad = async function(nombreActividad, valorActual, fechaActual) {
+        window.gestionarActividad = async function(nombreActividad, valorActual) {
             const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
             const parcial = document.getElementById("filtroParcial").value;
             const idActividad = `${grupo}_${parcial}_${nombreActividad.replace(/\s+/g, '_')}`;
-
-            const seleccion = prompt(`⚙️ Panel de Tarea: "${nombreActividad}"\n\n¿Qué deseas hacer?\nEscribe "PUNTOS" para cambiar el valor.\nEscribe "FECHA" para modificar la entrega.\nEscribe "BORRAR" para eliminar el trabajo por completo:`, "PUNTOS");
-            
-            if (!seleccion) return;
-            const accion = seleccion.toUpperCase().trim();
-
-            if (accion === "PUNTOS") {
-                const nuevoValor = prompt(`El valor actual es [${valorActual} pts]. Ingresa el nuevo valor numérico:`, valorActual);
-                if(nuevoValor && !isNaN(nuevoValor)) {
-                    await updateDoc(doc(db, "actividades", idActividad), { valor: parseInt(nuevoValor) });
-                    alert("✨ Puntos de la actividad actualizados.");
-                    cargarAlumnosYTabla();
-                }
-            } else if (accion === "FECHA") {
-                const nuevaFecha = prompt(`La fecha actual es [${fechaActual || 'Sin fecha'}]. Ingresa la nueva fecha (AAAA-MM-DD):`, fechaActual);
-                if(nuevaFecha) {
-                    await updateDoc(doc(db, "actividades", idActividad), { fecha: nuevaFecha });
-                    alert("📅 Fecha límite actualizada.");
-                    cargarAlumnosYTabla();
-                }
-            } else if (accion === "BORRAR") {
-                const confirmarBorrar = prompt(`⚠️ ¡ALERTA DE LIMPIEZA PROFUNDA!\nEsto eliminará permanentemente la tarea, sus palomitas y sus ajustes manuales de internet.\n\nPara confirmar, escribe exactamente: BORRAR`);
-                if (confirmarBorrar === "BORRAR") {
-                    await deleteDoc(doc(db, "actividades", idActividad));
-                    const qQR = query(collection(db, "codigos_qr"), where("grupo", "==", grupo), where("actividad", "==", nombreActividad));
-                    const snapQR = await getDocs(qQR);
-                    const promesasQR = snapQR.docs.map(d => deleteDoc(doc(db, "codigos_qr", d.id)));
-                    await Promise.all(promesasQR);
-
-                    const qAjustes = query(collection(db, "ajustes_manuales"), where("grupo", "==", grupo), where("actividad", "==", nombreActividad));
-                    const snapAjustes = await getDocs(qAjustes);
-                    const promesasAjustes = snapAjustes.docs.map(d => deleteDoc(doc(db, "ajustes_manuales", d.id)));
-                    await Promise.all(promesasAjustes);
-
-                    alert("🗑️ Actividad y todo su historial eliminados con éxito.");
-                    cargarAlumnosYTabla();
-                }
+            const conf = prompt(`Escribe "BORRAR" para eliminar permanentemente la tarea "${nombreActividad}":`);
+            if(conf === "BORRAR") {
+                await deleteDoc(doc(db, "actividades", idActividad));
+                alert("Eliminada"); cargarTodoSistema();
             }
-        }
-
-        window.ajusteManualPuntos = async function(nombreAlumno, nombreActividad) {
-            const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
-            const puntos = prompt(`Modificación manual para ${nombreAlumno} en "${nombreActividad}":\n\nIngresa puntos extra (+5) o penalización (-3):`, "0");
-            if (puntos === null) return;
-            
-            const valorAjuste = parseInt(puntos) || 0;
-            const idAjuste = `${grupo}_${nombreAlumno.replace(/\s+/g, '_')}_${nombreActividad.replace(/\s+/g, '_')}`;
-            
-            await setDoc(doc(db, "ajustes_manuales", idAjuste), {
-                alumno: nombreAlumno, actividad: nombreActividad, grupo: grupo, puntosAjuste: valorAjuste
-            });
-        }
-
-        window.cargarAlumnosYTabla = async function() {
-            const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
-            const parcial = document.getElementById("filtroParcial").value;
-            if(!grupo) return;
-
-            const qAlumnos = query(collection(db, "alumnos"), where("grupo", "==", grupo));
-            const snapAlumnos = await getDocs(qAlumnos);
-            const divBotones = document.getElementById("listaAlumnosBotones");
-            divBotones.innerHTML = "";
-            let arrayAlumnos = [];
-
-            snapAlumnos.forEach(doc => {
-                const data = doc.data();
-                arrayAlumnos.push(data);
-                divBotones.innerHTML += `
-                    <div class="p-2 bg-slate-700/60 rounded-xl flex justify-between items-center text-xs border border-slate-600">
-                        <div class="truncate max-w-[55%]">
-                            <span class="font-semibold block truncate">${data.nombre}</span>
-                            ${data.recuperacion ? `<span class="text-[9px] text-red-400 font-bold block truncate">⚠️ ${data.detallesRecuperacion}</span>`:''}
-                        </div>
-                        <div class="flex gap-1">
-                            <button onclick="abrirEscaner('${data.nombre}')" class="bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1 rounded-lg font-bold transition">Escanear</button>
-                            <button onclick="eliminarAlumnoDeBase('${data.nombre}', '${data.grupo}')" class="bg-slate-600 hover:bg-red-600 text-slate-300 hover:text-white px-2 py-1 rounded-lg font-bold transition">🗑️</button>
-                        </div>
-                    </div>`;
-            });
-
-            const qActividades = query(collection(db, "actividades"), where("grupo", "==", grupo), where("parcial", "==", parcial));
-            const snapActividades = await getDocs(qActividades);
-            let listaActividades = [];
-            
-            const header = document.getElementById("tablaCabecera");
-            header.innerHTML = '<th class="p-2 border-b border-slate-600 text-left">Alumno</th>';
-            
-            snapActividades.forEach(doc => {
-                const act = doc.data();
-                listaActividades.push(act);
-                header.innerHTML += `
-                    <th onclick="gestionarActividad('${act.nombre}', ${act.valor}, '${act.fecha || ''}')" class="p-1 border-b border-slate-600 border-l text-center min-w-[85px] cursor-pointer bg-slate-700/40 hover:bg-slate-600 transition select-none">
-                        <div class="text-blue-400 font-bold tracking-tight underline decoration-dotted">${act.nombre}</div>
-                        <div class="text-[9px] text-yellow-500 font-medium">[${act.valor} pts]</div>
-                    </th>`;
-            });
-            header.innerHTML += '<th class="p-2 border-b border-slate-600 bg-slate-700 text-yellow-400 font-black min-w-[70px]">Total</th>';
-
-            if(desuscripciónTabla) desuscripciónTabla();
-
-            const qQR = query(collection(db, "codigos_qr"), where("estado", "==", "Escaneado"), where("grupo", "==", grupo));
-            const qAjustes = query(collection(db, "ajustes_manuales"), where("grupo", "==", grupo));
-
-            onSnapshot(qQR, (snapQR) => {
-                onSnapshot(qAjustes, (snapAjustes) => {
-                    let entregas = {};
-                    snapQR.forEach(d => { entregas[`${d.data().alumno}_${d.data().actividad}`] = true; });
-
-                    let adjustments = {};
-                    snapAjustes.forEach(d => { adjustments[`${d.data().alumno}_${d.data().actividad}`] = d.data().puntosAjuste; });
-
-                    const tbody = document.getElementById("tablaCuerpo");
-                    tbody.innerHTML = "";
-
-                    arrayAlumnos.forEach(al => {
-                        let totalAcumulado = 0;
-                        const renColor = al.recuperacion ? 'bg-red-950/20' : '';
-                        
-                        let fila = `<tr class="${renColor} hover:bg-slate-700/30"><td class="p-2 text-left font-medium border-b border-slate-700">${al.nombre}</td>`;
-                        
-                        listaActividades.forEach(act => {
-                            let key = `${al.nombre}_${act.nombre}`;
-                            let puntosCelda = 0;
-                            let htmlCelda = "";
-
-                            if(entregas[key]) {
-                                puntosCelda += act.valor;
-                                htmlCelda += `<span class="text-green-400 font-black text-sm block">✓</span>`;
-                            }
-                            if(adjustments[key] !== undefined) {
-                                puntosCelda += adjustments[key];
-                                const cText = adjustments[key] < 0 ? 'text-red-400' : 'text-blue-400';
-                                htmlCelda += `<span class="${cText} text-[10px] font-bold block">${adjustments[key] < 0 ? '' : '+'}${adjustments[key]} pts</span>`;
-                            }
-
-                            totalAcumulado += puntosCelda;
-                            if (htmlCelda === "") htmlCelda = `<span class="text-slate-600">-</span>`;
-
-                            fila += `
-                                <td onclick="ajusteManualPuntos('${al.nombre}', '${act.nombre}')" class="p-1 border-b border-slate-700 border-l cursor-pointer hover:bg-slate-700/60 transition select-none">
-                                    ${htmlCelda}
-                                </td>`;
-                        });
-
-                        fila += `<td class="p-2 border-b border-slate-700 border-l bg-slate-800/80 font-black text-yellow-400">${totalAcumulado} pts</td></tr>`;
-                        tbody.innerHTML += fila;
-                    });
-                });
-            });
         }
 
         window.abrirEscaner = function(nombreAlumno) {
@@ -411,8 +362,7 @@
             document.getElementById("nombreAlumnoEscaneo").innerText = nombreAlumno;
             document.getElementById("seccionEscaner").classList.remove("hidden");
             html5QrcodeScanner = new Html5Qrcode("reader");
-            html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 200, height: 200 } }, onScanSuccess)
-                .catch(err => { alert("Error al encender la cámara."); cerrarEscaner(); });
+            html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 200, height: 200 } }, onScanSuccess);
         }
 
         window.cerrarEscaner = function() {
@@ -423,23 +373,18 @@
         async function onScanSuccess(decodedText) {
             if (html5QrcodeScanner) { await html5QrcodeScanner.stop(); html5QrcodeScanner = null; }
             document.getElementById("seccionEscaner").classList.add("hidden");
-
             try {
                 const docRef = doc(db, "codigos_qr", decodedText);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    const datosQR = docSnap.data();
-                    if (datosQR.alumno !== alumnoActual) {
-                        alert(`❌ ERROR DE IDENTIDAD:\nEste QR le pertenece a ${datosQR.alumno}.`); return;
-                    }
-                    if (datosQR.estado === "Escaneado") {
-                        alert("❌ TOKEN EXPIRADO:\nEste código QR ya fue usado."); return;
-                    }
+                const snap = await getDoc(docRef);
+                if (snap.exists()) {
+                    const d = snap.data();
+                    if (d.alumno !== alumnoActual) { alert("❌ QR incorrecto."); return; }
+                    if (d.estado === "Escaneado") { alert("❌ QR expirado."); return; }
                     await updateDoc(docRef, { estado: "Escaneado", fechaEscaneo: new Date() });
-                    alert(`✅ ¡Entrega procesada con éxito para ${alumnoActual}!`);
-                } else { alert("❌ CÓDIGO INVÁLIDO."); }
-            } catch (error) { alert("Error de red."); }
+                    alert(`✅ Registro procesado para ${alumnoActual}`);
+                    cargarTodoSistema();
+                } else { alert("❌ No válido."); }
+            } catch (e) { alert("Error de red."); }
         }
     </script>
 </body>
