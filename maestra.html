@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Maestra - Estilo Gemini V7.2</title>
+    <title>Panel Maestra - Ultra Edición V8.0</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <style>
         @keyframes laser {
-            0 { top: 0%; }
+            0% { top: 0%; }
             50% { top: 100%; }
             100% { top: 0%; }
         }
@@ -32,24 +32,44 @@
                 <div class="p-2 bg-slate-900/60 rounded-xl border border-slate-800 mb-2 space-y-2 menu-txt">
                     <div>
                         <label class="block text-[10px] text-slate-400 mb-1">Grupo Activo:</label>
-                        <input id="filtroGrupo" type="text" placeholder="Ej: 4TPROG-Am" oninput="cargarTodoSistema()" class="w-full p-1.5 text-xs rounded-lg bg-slate-880 border border-slate-700 text-white font-bold uppercase focus:outline-none focus:border-blue-500">
+                        <input id="filtroGrupo" type="text" placeholder="Ej: 4TPROG-AM" oninput="cargarTodoSistema()" class="w-full p-1.5 text-xs rounded-lg bg-slate-800 border border-slate-700 text-white font-bold uppercase focus:outline-none focus:border-blue-500">
                     </div>
-                    <div>
-                        <label class="block text-[10px] text-slate-400 mb-1">Parcial:</label>
-                        <select id="filtroParcial" onchange="cargarTodoSistema()" class="w-full p-1.5 text-xs rounded-lg bg-slate-880 border border-slate-700 text-white font-bold focus:outline-none">
-                            <option value="Parcial_1">1er Parcial</option>
-                            <option value="Parcial_2">2do Parcial</option>
-                            <option value="Parcial_3">3er Parcial</option>
-                        </select>
+                    <div class="flex gap-2">
+                        <div class="w-1/2">
+                            <label class="block text-[10px] text-slate-400 mb-1">Parcial:</label>
+                            <select id="filtroParcial" onchange="cargarTodoSistema()" class="w-full p-1.5 text-xs rounded-lg bg-slate-800 border border-slate-700 text-white font-bold focus:outline-none">
+                                <option value="Parcial_1">1er Parcial</option>
+                                <option value="Parcial_2">2do Parcial</option>
+                                <option value="Parcial_3">3er Parcial</option>
+                            </select>
+                        </div>
+                        <div class="w-1/2">
+                            <label class="block text-[10px] text-yellow-400 mb-1">Meta Firmas:</label>
+                            <input id="metaFirmasInput" type="number" value="10" oninput="montarYRenderizarTodo()" class="w-full p-1.5 text-xs rounded-lg bg-slate-800 border border-slate-700 text-yellow-400 font-bold focus:outline-none">
+                        </div>
                     </div>
                 </div>
 
-                <button onclick="abrirEscanerUnico()" class="w-full flex items-center gap-3 p-2.5 hover:bg-blue-600/20 text-blue-400 hover:text-blue-300 rounded-xl text-xs font-bold transition cursor-pointer text-left">
-                    <span>📷</span> <span class="menu-txt">Abrir Escáner QR</span>
+                <button id="btnVistaCalificaciones" onclick="cambiarVistaTabla('calificaciones')" class="w-full flex items-center gap-3 p-2.5 bg-blue-600/20 text-blue-400 rounded-xl text-xs font-bold transition cursor-pointer text-left">
+                    <span>📋</span> <span class="menu-txt">Tabla de Firmas y Califs</span>
+                </button>
+
+                <button id="btnVistaAsistencias" onclick="cambiarVistaTabla('asistencias')" class="w-full flex items-center gap-3 p-2.5 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-xs font-semibold transition cursor-pointer text-left">
+                    <span>📅</span> <span class="menu-txt">Control de Asistencias</span>
+                </button>
+
+                <div class="h-px bg-slate-800 my-2 menu-txt"></div>
+
+                <button onclick="abrirEscanerUnico()" class="w-full flex items-center gap-3 p-2.5 hover:bg-emerald-600/20 text-emerald-400 hover:text-emerald-300 rounded-xl text-xs font-bold transition cursor-pointer text-left">
+                    <span>📷</span> <span class="menu-txt">Abrir Escáner QR Único</span>
                 </button>
 
                 <button onclick="abrirModal('modalTarea')" class="w-full flex items-center gap-3 p-2.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition cursor-pointer text-left">
-                    <span>📝</span> <span class="menu-txt">Publicar Actividad</span>
+                    <span>📝</span> <span class="menu-txt">Publicar Trabajo (Firma)</span>
+                </button>
+
+                <button onclick="abrirModal('modalAsistencia')" class="w-full flex items-center gap-3 p-2.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition cursor-pointer text-left">
+                    <span>⏰</span> <span class="menu-txt">Habilitar Fecha Asistencia</span>
                 </button>
 
                 <button onclick="abrirModal('modalAlumno')" class="w-full flex items-center gap-3 p-2.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition cursor-pointer text-left">
@@ -63,22 +83,22 @@
         </div>
 
         <div class="p-4 border-t border-slate-800 text-[10px] text-slate-500 font-mono menu-txt">
-            V7.2 • Tablet Ed.
+            V8.0 • Decimal Engine
         </div>
     </aside>
 
     <main class="flex-1 h-screen overflow-y-auto p-4 sm:p-6 lg:p-8 flex flex-col">
         <div class="flex items-center gap-3 mb-4 lg:hidden">
             <button onclick="toggleSidebar()" class="p-2 bg-slate-800 rounded-lg text-white">☰</button>
-            <h1 class="text-lg font-bold text-blue-400">Panel Escolar</h1>
+            <h1 id="topBarTitle" class="text-lg font-bold text-blue-400">Firmas y Calificaciones</h1>
         </div>
 
         <div class="mb-6 flex justify-between items-center">
             <div>
-                <h2 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
+                <h2 id="mainSeccionTitulo" class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
                     📋 Sábanas de Calificaciones Dinámicas
                 </h2>
-                <p class="text-xs text-slate-400 mt-0.5">Orden alfabético de la A a la Z garantizado.</p>
+                <p id="mainSeccionSubtitulo" class="text-xs text-slate-400 mt-0.5">Firmas acumuladas con cálculo decimal proporcional sobre el 50%.</p>
             </div>
         </div>
 
@@ -86,17 +106,12 @@
             <div class="overflow-x-auto flex-1">
                 <table class="w-full text-center text-xs">
                     <thead>
-                        <tr id="tabTrabCabecera" class="bg-slate-700 text-white font-bold sticky top-0 z-10 shadow-sm">
-                            <th class="p-3 text-left min-w-[180px]">Nombre Alumno</th>
-                            <th class="p-3 bg-blue-900 text-yellow-400 min-w-[100px]">Trabajos (50 Pts)</th>
-                            <th class="p-3 bg-amber-900 text-amber-200 min-w-[100px]">Examen (50 Pts)</th>
-                            <th class="p-3 bg-slate-600 text-yellow-300 font-extrabold min-w-[110px]">CALIF. FINAL</th>
-                            <th class="p-3 bg-slate-700 min-w-[120px]">Gestión</th>
-                        </tr>
+                        <tr id="tabCabeceraDinamica" class="bg-slate-700 text-white font-bold sticky top-0 z-10 shadow-sm">
+                            </tr>
                     </thead>
-                    <tbody id="tabTrabCuerpo" class="divide-y divide-slate-700 bg-slate-850">
+                    <tbody id="tabCuerpoDinamico" class="divide-y divide-slate-700 bg-slate-850">
                         <tr>
-                            <td colspan="5" class="p-8 text-slate-500 italic text-xs">Ingresa las siglas de un Grupo en la barra lateral para desplegar la lista...</td>
+                            <td class="p-8 text-slate-500 italic text-xs">Escribe el Grupo en la barra lateral para desplegar los datos escolares...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -107,23 +122,35 @@
     <div id="modalTarea" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div class="bg-slate-800 border border-slate-700 w-full max-w-sm rounded-2xl p-5 shadow-2xl">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-sm text-emerald-400 flex items-center gap-1.5">📝 Publicar Nueva Actividad</h3>
+                <h3 class="font-bold text-sm text-blue-400 flex items-center gap-1.5">📝 Publicar Trabajo (Añadir Columna)</h3>
                 <button onclick="cerrarModal('modalTarea')" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
             </div>
             <div class="space-y-3 text-xs">
                 <div>
-                    <label class="block text-slate-400 mb-1">Nombre del Trabajo:</label>
-                    <input id="nomActividad" type="text" placeholder="Ej: Tarea 1 o Práctica 3" class="w-full p-2.5 bg-slate-700 rounded-xl text-white">
+                    <label class="block text-slate-400 mb-1">Identificador Corto del Trabajo:</label>
+                    <input id="nomActividad" type="text" placeholder="Ej: Tarea 1, Firma 3, Practica 2" class="w-full p-2.5 bg-slate-700 rounded-xl text-white">
                 </div>
                 <div>
-                    <label class="block text-slate-400 mb-1">Puntuación Base:</label>
-                    <input id="valorActividad" type="number" placeholder="Ej: 10" class="w-full p-2.5 bg-slate-700 rounded-xl text-white">
-                </div>
-                <div>
-                    <label class="block text-slate-400 mb-1">Fecha Límite:</label>
+                    <label class="block text-slate-400 mb-1">Fecha de Revisión:</label>
                     <input id="fechaActividad" type="date" class="w-full p-2.5 bg-slate-700 rounded-xl text-slate-200">
                 </div>
-                <button onclick="crearActividad()" class="w-full bg-emerald-600 hover:bg-emerald-500 p-2.5 rounded-xl font-bold transition mt-2 cursor-pointer">Publicar en el Grupo</button>
+                <button onclick="crearActividad()" class="w-full bg-blue-600 hover:bg-blue-500 p-2.5 rounded-xl font-bold transition mt-2 cursor-pointer">Inyectar Columna</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalAsistencia" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-sm rounded-2xl p-5 shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-sm text-emerald-400 flex items-center gap-1.5">⏰ Habilitar Día de Asistencia</h3>
+                <button onclick="cerrarModal('modalAsistencia')" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-slate-400 mb-1">Fecha Escolar:</label>
+                    <input id="fechaAsistenciaInput" type="date" class="w-full p-2.5 bg-slate-700 rounded-xl text-slate-200">
+                </div>
+                <button onclick="crearFechaAsistencia()" class="w-full bg-emerald-600 hover:bg-emerald-500 p-2.5 rounded-xl font-bold transition mt-2 cursor-pointer">Crear Columna Asistencia</button>
             </div>
         </div>
     </div>
@@ -131,23 +158,23 @@
     <div id="modalAlumno" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div class="bg-slate-800 border border-slate-700 w-full max-w-sm rounded-2xl p-5 shadow-2xl">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-sm text-slate-200 flex items-center gap-1.5">👤 Registrar Alumno en Base</h3>
+                <h3 class="font-bold text-sm text-slate-200 flex items-center gap-1.5">👤 Inscribir Alumno a la Lista</h3>
                 <button onclick="cerrarModal('modalAlumno')" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
             </div>
             <div class="space-y-4 text-xs">
                 <div>
-                    <label class="block text-slate-400 mb-1">Nombre Completo del Alumno (Empezar por Apellidos):</label>
-                    <input id="newAlumnoNombre" type="text" placeholder="Ej: PEREZ JUAN" class="w-full p-2.5 bg-slate-700 rounded-xl text-white uppercase">
+                    <label class="block text-slate-400 mb-1">Nombre Completo (Empezar por Apellidos):</label>
+                    <input id="newAlumnoNombre" type="text" placeholder="Ej: ACOSTA VALERIA" class="w-full p-2.5 bg-slate-700 rounded-xl text-white uppercase">
                 </div>
                 <div>
-                    <label class="block text-slate-400 mb-1">Confirmar Grupo:</label>
-                    <input id="newAlumnoGrupo" type="text" placeholder="Ej: 4TPROG-Am" class="w-full p-2.5 bg-slate-700 uppercase rounded-xl text-white">
+                    <label class="block text-slate-400 mb-1">Confirmar Grupo Destino:</label>
+                    <input id="newAlumnoGrupo" type="text" placeholder="Ej: 4TPROG-AM" class="w-full p-2.5 bg-slate-700 uppercase rounded-xl text-white">
                 </div>
                 <div class="flex items-center gap-2 bg-slate-900/50 p-2.5 rounded-xl border border-slate-700">
-                    <input id="newAlumnoRecuperacion" type="checkbox" class="w-4 h-4 rounded text-yellow-600 focus:ring-0 cursor-pointer bg-slate-700 border-slate-600">
+                    <input id="newAlumnoRecuperacion" type="checkbox" class="w-4 h-4 rounded text-yellow-600 bg-slate-700 border-slate-600">
                     <label for="newAlumnoRecuperacion" class="text-slate-300 font-semibold cursor-pointer select-none">⚠️ Inscribir directamente en Recuperación</label>
                 </div>
-                <button onclick="agregarAlumnoA_Base()" class="w-full bg-blue-600 hover:bg-blue-500 p-2.5 rounded-xl font-bold transition mt-2 cursor-pointer">Inscribir de Forma Permanente</button>
+                <button onclick="agregarAlumnoA_Base()" class="w-full bg-blue-600 hover:bg-blue-500 p-2.5 rounded-xl font-bold transition mt-2 cursor-pointer">Inscribir Permanentemente</button>
             </div>
         </div>
     </div>
@@ -158,19 +185,15 @@
                 <h3 class="font-bold text-sm text-purple-400 flex items-center gap-1.5">🤖 Corrector de Operaciones Google Lens</h3>
                 <button onclick="cerrarModal('modalIA')" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
             </div>
-            <div class="space-y-3 text-xs overflow-y-auto flex-1 pr-1">
-                <p class="text-slate-400 text-[11px]">Toma una foto de la libreta para que la IA audite el procedimiento matemático o lógico sin dar el resultado.</p>
-                
+            <div class="space-y-3 text-xs overflow-y-auto flex-1">
                 <input id="fotoFormulaInput" type="file" accept="image/*" capture="environment" class="hidden" onchange="procesarFotoFormula()">
                 <label for="fotoFormulaInput" class="bg-purple-700 hover:bg-purple-600 text-white p-3 rounded-xl block text-center font-bold cursor-pointer transition shadow-md">
-                    📸 ACTIVAR CÁMARA / SUBIR FOTO
+                    📸 TOMAR FOTO DE OPERACIÓN
                 </label>
-                
                 <div id="contenedorLens" class="hidden relative w-full h-40 bg-slate-950 rounded-xl overflow-hidden border border-purple-500">
                     <img id="vistaPreviaLibreta" class="w-full h-full object-cover opacity-60" src="" alt="Escaneo">
                     <div class="absolute left-0 right-0 h-0.5 bg-purple-400 shadow-[0_0_10px_#c084fc] anim-laser"></div>
                 </div>
-
                 <div id="resultadoIA" class="hidden p-3 bg-slate-900 rounded-xl font-mono text-[11px] text-purple-300 whitespace-pre-line border border-purple-900/60 max-h-48 overflow-y-auto"></div>
             </div>
         </div>
@@ -178,13 +201,10 @@
 
     <div id="seccionEscaner" class="hidden fixed inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 z-50">
         <div class="bg-slate-800 w-full max-w-sm rounded-2xl p-4 text-center border border-slate-700">
-            <h3 class="text-sm font-bold text-white mb-1">📷 Receptor de QR de Alumnos</h3>
-            <p class="text-[11px] text-slate-400 mb-3">Escaneo continuo para la fila de revisión</p>
-            
+            <h3 class="text-sm font-bold text-white mb-1">📷 Receptor de Asistencias y Trabajos QR</h3>
+            <p class="text-[11px] text-slate-400 mb-3">Escaneo ininterrumpido en tiempo real</p>
             <div id="reader" class="w-full overflow-hidden rounded-xl bg-slate-900 border border-slate-700"></div>
-            
-            <div id="alertaLecturaRapida" class="mt-3 p-2.5 bg-slate-900 text-emerald-400 text-xs font-bold rounded-xl border border-emerald-500/40 hidden"></div>
-            
+            <div id="alertaLecturaRapida" class="mt-3 p-2.5 bg-slate-900 text-emerald-400 text-xs font-bold rounded-xl border border-emerald-500/40 hidden whitespace-pre-line"></div>
             <button onclick="cerrarEscaner()" class="mt-4 w-full bg-red-600 text-white py-2 rounded-xl text-xs font-bold cursor-pointer">Apagar Cámara</button>
         </div>
     </div>
@@ -195,7 +215,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // 🔑 TU CLAVE DE GEMINI:
+        // 🔑 COLOCA TU API KEY DE GEMINI AQUÍ SI LA USAS:
         const GEMINI_API_KEY = "TU_API_KEY_AQUI"; 
 
         const firebaseConfig = {
@@ -211,14 +231,14 @@
         const db = getFirestore(app);
 
         let html5QrcodeScanner = null, desuscripcionGlobal = null;
-        let globalAlumnos = [], globalTrabajos = [];
-        let globalPalomitas = {}, globalExamenes = {};
+        let globalAlumnos = [], globalTrabajos = [], globalFechasAsistencias = [];
+        let globalPalomitas = {}, globalExamenes = {}, globalAsistenciasMarcadas = {};
+        let vistaActual = "calificaciones"; // Vistas posibles: 'calificaciones' o 'asistencias'
 
         window.toggleSidebar = function() {
             const side = document.getElementById("sidebar");
             const txts = document.querySelectorAll(".menu-txt");
             const title = document.getElementById("sidebarTitle");
-            
             if(side.classList.contains("w-64")) {
                 side.classList.replace("w-64", "w-16");
                 title.classList.add("hidden");
@@ -233,75 +253,185 @@
         window.abrirModal = function(id) { document.getElementById(id).classList.remove("hidden"); }
         window.cerrarModal = function(id) { document.getElementById(id).classList.add("hidden"); }
 
+        window.cambiarVistaTabla = function(tipo) {
+            vistaActual = tipo;
+            const btnCal = document.getElementById("btnVistaCalificaciones");
+            const btnAsi = document.getElementById("btnVistaAsistencias");
+            const tBar = document.getElementById("topBarTitle");
+            const mTit = document.getElementById("mainSeccionTitulo");
+            const mSub = document.getElementById("mainSeccionSubtitulo");
+
+            if(tipo === "calificaciones") {
+                btnCal.className = "w-full flex items-center gap-3 p-2.5 bg-blue-600/20 text-blue-400 rounded-xl text-xs font-bold transition text-left cursor-pointer";
+                btnAsi.className = "w-full flex items-center gap-3 p-2.5 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-xs font-semibold transition text-left cursor-pointer";
+                if(tBar) tBar.innerText = "Firmas y Calificaciones";
+                mTit.innerHTML = "📋 Sábanas de Calificaciones Dinámicas";
+                mSub.innerText = "Firmas acumuladas con cálculo decimal proporcional sobre el 50%.";
+            } else {
+                btnCal.className = "w-full flex items-center gap-3 p-2.5 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-xs font-semibold transition text-left cursor-pointer";
+                btnAsi.className = "w-full flex items-center gap-3 p-2.5 bg-emerald-600/20 text-emerald-400 rounded-xl text-xs font-bold transition text-left cursor-pointer";
+                if(tBar) tBar.innerText = "Control de Asistencias";
+                mTit.innerHTML = "📅 Bitácora de Asistencias por Fechas";
+                mSub.innerText = "Historial de asistencia diaria del grupo activo por códigos QR.";
+            }
+            montarYRenderizarTodo();
+        }
+
         window.cargarTodoSistema = async function() {
             const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
             const parcial = document.getElementById("filtroParcial").value;
             if(!grupo) return;
 
+            // 1. Cargar alumnos del grupo (De la A a la Z)
             const qAl = query(collection(db, "alumnos"), where("grupo", "==", grupo));
             const snapAl = await getDocs(qAl);
             globalAlumnos = [];
             snapAl.forEach(d => globalAlumnos.push({ idFirestore: d.id, ...d.data() }));
-
-            // ✨ ORDENAR DE LA A A LA Z POR NOMBRE AUTOMÁTICAMENTE
             globalAlumnos.sort((a, b) => a.nombre.localeCompare(b.nombre));
 
+            // 2. Cargar trabajos publicados del parcial y grupo
             const qAct = query(collection(db, "actividades"), where("grupo", "==", grupo), where("parcial", "==", parcial));
             const snapAct = await getDocs(qAct);
             globalTrabajos = [];
             snapAct.forEach(d => globalTrabajos.push({ idFirestore: d.id, ...d.data() }));
 
+            // 3. Cargar fechas de asistencias registradas
+            const qAsiF = query(collection(db, "fechas_asistencias"), where("grupo", "==", grupo), where("parcial", "==", parcial));
+            const snapAsiF = await getDocs(qAsiF);
+            globalFechasAsistencias = [];
+            snapAsiF.forEach(d => globalFechasAsistencias.push({ idFirestore: d.id, ...d.data() }));
+            globalFechasAsistencias.sort((a,b) => a.fecha.localeCompare(b.fecha));
+
             if(desuscripcionGlobal) desuscripcionGlobal();
 
+            // Oidores de tiempo real para escaneos de QR y notas de examen
             const qQR = query(collection(db, "codigos_qr"), where("estado", "==", "Escaneado"), where("grupo", "==", grupo));
             const qEx = query(collection(db, "examenes"), where("grupo", "==", grupo), where("parcial", "==", parcial));
 
             desuscripcionGlobal = onSnapshot(qQR, (snapQR) => {
                 onSnapshot(qEx, (snapEx) => {
                     globalPalomitas = {};
-                    snapQR.forEach(d => { const data = d.data(); globalPalomitas[`${data.alumno}_${data.actividad}`] = true; });
+                    globalAsistenciasMarcadas = {};
+                    snapQR.forEach(d => {
+                        const data = d.data();
+                        if(data.tipo === "asistencia") {
+                            globalAsistenciasMarcadas[`${data.alumno}_${data.actividad}`] = true;
+                        } else {
+                            globalPalomitas[`${data.alumno}_${data.actividad}`] = true;
+                        }
+                    });
+
                     globalExamenes = {};
                     snapEx.forEach(d => { globalExamenes[d.data().alumno] = d.data().nota; });
+                    
                     montarYRenderizarTodo();
                 });
             });
         }
 
         function montarYRenderizarTodo() {
-            const hTrab = document.getElementById("tabTrabCabecera");
-            const bTrab = document.getElementById("tabTrabCuerpo");
-            bTrab.innerHTML = "";
-
-            let maxPuntosRelativos = 0;
-            let subCabecerasTareas = "";
-            globalTrabajos.forEach(t => {
-                maxPuntosRelativos += t.valor;
-                const fEntrega = t.fecha ? `<br><span class="text-[8px] text-emerald-400 font-medium">📅 ${t.fecha}</span>` : "<br><span class='text-[8px] text-slate-500'>S/F</span>";
-                subCabecerasTareas += `<th onclick="gestionarActividad('${t.idFirestore}', '${t.nombre}', ${t.valor}, '${t.fecha || ''}')" class="p-2 border-l border-slate-600 bg-slate-700/30 cursor-pointer min-w-[95px] font-semibold text-blue-400 text-center">${t.nombre}${fEntrega}<br><span class="text-[9px] text-slate-400">[${t.valor} pts]</span></th>`;
-            });
-            hTrab.innerHTML = `<th class="p-3 text-left min-w-[180px]">Nombre Alumno</th>${subCabecerasTareas}<th class="p-3 bg-blue-900 text-yellow-400 min-w-[95px]">Trabajos (50)<br><span class="text-[8px] text-slate-300">(Max: ${maxPuntosRelativos}p)</span></th><th class="p-3 bg-amber-900 text-amber-200 min-w-[95px]">Examen (50)</th><th class="p-3 bg-slate-600 text-yellow-300 font-black min-w-[110px]">CALIF. FINAL</th><th class="p-3 bg-slate-700 min-w-[120px]">Gestión</th>`;
-
+            const hTab = document.getElementById("tabCabeceraDinamica");
+            const bTab = document.getElementById("tabCuerpoDinamico");
             if(globalAlumnos.length === 0) {
-                bTrab.innerHTML = `<tr><td colspan="${globalTrabajos.length + 4}" class="p-6 text-slate-500 italic">No hay alumnos registrados en este grupo académico aún.</td></tr>`;
+                hTab.innerHTML = `<th class="p-3 text-left">Control Escolar</th>`;
+                bTab.innerHTML = `<tr><td class="p-8 text-slate-500 italic">No hay registros ni alumnos en el grupo especificado.</td></tr>`;
                 return;
             }
 
-            globalAlumnos.forEach(al => {
-                const colorRecuFila = al.recuperacion ? 'bg-red-950/30 text-red-200' : '';
-                let puntosAlumnoRelativos = 0;
-                let celdasTareas = "";
+            if (vistaActual === "calificaciones") {
+                // ==================== RECONSTRUCCIÓN: VISTA CALIFICACIONES CON LLAVE DECIMAL ====================
+                const metaFirmas = parseInt(document.getElementById("metaFirmasInput").value) || 1;
+                let columnasTareasHTML = "";
+                
                 globalTrabajos.forEach(t => {
-                    if(globalPalomitas[`${al.nombre}_${t.nombre}`]) { puntosAlumnoRelativos += t.valor; celdasTareas += `<td class="p-2 border-b border-slate-700 border-l text-green-400 font-bold text-center">✓</td>`; }
-                    else { celdasTareas += `<td class="p-2 border-b border-slate-700 border-l text-slate-600 text-center">-</td>`; }
+                    columnasTareasHTML += `<th onclick="eliminarTrabajoColumna('${t.idFirestore}','${t.nombre}')" class="p-2 border-l border-slate-600 bg-slate-700/30 text-blue-400 cursor-pointer min-w-[90px] hover:bg-red-950/30 transition text-center">${t.nombre}</th>`;
                 });
-                let notaTrabajosEscala50 = maxPuntosRelativos > 0 ? parseFloat(((puntosAlumnoRelativos * 50) / maxPuntosRelativos).toFixed(1)) : 0;
-                let notaExamen = globalExamenes[al.nombre] !== undefined ? globalExamenes[al.nombre] : 0;
-                let notaFinalPromedio = parseFloat((notaTrabajosEscala50 + notaExamen).toFixed(1));
 
-                bTrab.innerHTML += `<tr class="hover:bg-slate-700/20 ${colorRecuFila}"><td class="p-2.5 text-left border-b border-slate-700 font-semibold">${al.recuperacion ? '⚠️ ' : ''}${al.nombre}</td>${celdasTareas}<td class="p-2 border-b border-slate-700 border-l bg-slate-800/40 font-bold text-blue-400 text-center">${notaTrabajosEscala50} / 50</td><td onclick="capturarExamenA_Mano('${al.nombre}', ${notaExamen})" class="p-2 border-b border-slate-700 border-l bg-amber-950/20 text-amber-400 font-black cursor-pointer text-center underline decoration-dashed">${notaExamen} / 50</td><td class="p-2 border-b border-slate-700 border-l bg-slate-800 font-black text-sm text-yellow-400 text-center">${notaFinalPromedio} / 100</td><td class="p-2 border-b border-slate-700 border-l flex justify-center gap-1"><button onclick="alternarRecuperacion('${al.idFirestore}', ${al.recuperacion || false})" class="bg-yellow-600/80 hover:bg-yellow-600 px-2 py-0.5 rounded text-[10px] text-white font-bold">Recu</button><button onclick="borrarAlumnoCompleto('${al.idFirestore}', '${al.nombre}')" class="bg-red-700 hover:bg-red-600 px-2 py-0.5 rounded text-[10px] text-white font-bold">Borrar</button></td></tr>`;
-            });
+                hTab.innerHTML = `
+                    <th class="p-3 text-left min-w-[180px]">Nombre Alumno</th>
+                    ${columnasTareasHTML}
+                    <th class="p-3 bg-blue-900 text-yellow-400 min-w-[95px]">Firmas (50%)<br><span class="text-[9px] text-slate-300">Meta: ${metaFirmas}</span></th>
+                    <th class="p-3 bg-amber-900 text-amber-200 min-w-[95px]">Examen (50%)</th>
+                    <th class="p-3 bg-slate-600 text-yellow-300 font-black min-w-[105px]">CALIF. FINAL</th>
+                    <th class="p-3 bg-slate-700 min-w-[110px]">Gestión</th>
+                `;
+
+                bTab.innerHTML = "";
+                globalAlumnos.forEach(al => {
+                    const colorRecu = al.recuperacion ? 'bg-red-950/20 text-red-200' : '';
+                    let firmasContadas = 0;
+                    let celdasHTML = "";
+
+                    globalTrabajos.forEach(t => {
+                        if(globalPalomitas[`${al.nombre}_${t.nombre}`]) {
+                            firmasContadas++;
+                            celdasHTML += `<td class="p-2 border-b border-slate-700 border-l text-green-400 font-bold text-center">✓</td>`;
+                        } else {
+                            celdasHTML += `<td class="p-2 border-b border-slate-700 border-l text-slate-600 text-center">-</td>`;
+                        }
+                    });
+
+                    // CÁLCULO DECIMAL EXACTO PROPORCIONAL SOBRE EL 50%
+                    let calculoDecimalFirmas50 = parseFloat(((firmasContadas * 50) / metaFirmas).toFixed(1));
+                    if(calculoDecimalFirmas50 > 50) calculoDecimalFirmas50 = 50.0; // Topado a la escala de 50 pts
+
+                    let notaExamen = globalExamenes[al.nombre] !== undefined ? globalExamenes[al.nombre] : 0;
+                    let notaFinalPromedio = parseFloat((calculoDecimalFirmas50 + notaExamen).toFixed(1));
+
+                    bTab.innerHTML += `
+                        <tr class="hover:bg-slate-700/20 ${colorRecu}">
+                            <td class="p-2.5 text-left border-b border-slate-700 font-semibold">${al.recuperacion ? '⚠️ ' : ''}${al.nombre}</td>
+                            ${celdasHTML}
+                            <td class="p-2 border-b border-slate-700 border-l bg-slate-800/40 font-bold text-blue-400 text-center">${firmasContadas} f. ➔ <span class="text-yellow-400">${calculoDecimalFirmas50}</span></td>
+                            <td onclick="capturarExamenA_Mano('${al.nombre}', ${notaExamen})" class="p-2 border-b border-slate-700 border-l bg-amber-950/20 text-amber-400 font-black cursor-pointer text-center underline decoration-dashed">${notaExamen} / 50</td>
+                            <td class="p-2 border-b border-slate-700 border-l bg-slate-800 font-black text-sm text-yellow-400 text-center">${notaFinalPromedio} / 100</td>
+                            <td class="p-2 border-b border-slate-700 border-l flex justify-center gap-1">
+                                <button onclick="alternarRecuperacion('${al.idFirestore}', ${al.recuperacion || false})" class="bg-yellow-600/80 hover:bg-yellow-600 px-2 py-0.5 rounded text-[10px] font-bold text-white">Recu</button>
+                                <button onclick="borrarAlumnoCompleto('${al.idFirestore}', '${al.nombre}')" class="bg-red-700 hover:bg-red-600 px-2 py-0.5 rounded text-[10px] font-bold text-white">Quitar</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+            } else {
+                // ==================== RECONSTRUCCIÓN: VISTA CONTROL DE ASISTENCIAS ====================
+                let columnasAsistenciasHTML = "";
+                globalFechasAsistencias.forEach(f => {
+                    columnasAsistenciasHTML += `<th onclick="eliminarFechaAsistenciaColumna('${f.idFirestore}','${f.fechaFormateada}')" class="p-2 border-l border-slate-600 bg-emerald-950/30 text-emerald-400 cursor-pointer min-w-[90px] text-center hover:bg-red-950/30 transition">${f.fechaFormateada}</th>`;
+                });
+
+                hTab.innerHTML = `
+                    <th class="p-3 text-left min-w-[180px]">Nombre Alumno</th>
+                    ${columnasAsistenciasHTML}
+                    <th class="p-3 bg-emerald-900 text-white font-bold min-w-[110px]">Total Asistencias</th>
+                `;
+
+                bTab.innerHTML = "";
+                globalAlumnos.forEach(al => {
+                    let totalAsistenciasAlumno = 0;
+                    let celdasAsistenciasHTML = "";
+
+                    globalFechasAsistencias.forEach(f => {
+                        if(globalAsistenciasMarcadas[`${al.nombre}_${f.fechaFormateada}`]) {
+                            totalAsistenciasAlumno++;
+                            celdasAsistenciasHTML += `<td class="p-2 border-b border-slate-700 border-l text-emerald-400 font-bold text-center">✓</td>`;
+                        } else {
+                            celdasAsistenciasHTML += `<td class="p-2 border-b border-slate-700 border-l text-slate-600 text-center">-</td>`;
+                        }
+                    });
+
+                    bTab.innerHTML += `
+                        <tr class="hover:bg-slate-700/20">
+                            <td class="p-2.5 text-left border-b border-slate-700 font-semibold">${al.nombre}</td>
+                            ${celdasAsistenciasHTML}
+                            <td class="p-2 border-b border-slate-700 border-l bg-slate-800 font-bold text-center text-emerald-300 text-sm">${totalAsistenciasAlumno} asistencias</td>
+                        </tr>
+                    `;
+                });
+            }
         }
 
+        // ==================== RECEPTOR QR CONTINUO CON ALERTA DINÁMICA ====================
         window.abrirEscanerUnico = function() {
             document.getElementById("seccionEscaner").classList.remove("hidden");
             document.getElementById("alertaLecturaRapida").classList.add("hidden");
@@ -328,15 +458,107 @@
                     }
                     await updateDoc(docRef, { estado: "Escaneado", fechaEscaneo: new Date() });
                     alertBox.className = "mt-3 p-2.5 bg-slate-900 text-emerald-400 text-xs font-bold rounded-xl border border-emerald-500/40 block";
-                    alertBox.innerText = `✅ Recibido: ${d.alumno}\n📝 Tarea: ${d.actividad}`;
+                    
+                    if(d.tipo === "asistencia") {
+                        alertBox.innerText = `✅ ASISTENCIA REGISTRADA\n👤 Alumno: ${d.alumno}\n📅 Día: ${d.actividad}`;
+                    } else {
+                        alertBox.innerText = `✅ FIRMA ASIGNADA\n👤 Alumno: ${d.alumno}\n📝 Trabajo: ${d.actividad}`;
+                    }
                     cargarTodoSistema();
                 } else {
                     alertBox.className = "mt-3 p-2.5 bg-slate-900 text-red-400 text-xs font-bold rounded-xl border border-red-500/40 block";
-                    alertBox.innerText = "❌ Código QR inválido.";
+                    alertBox.innerText = "❌ Código QR inválido o falsificado.";
                 }
             } catch (e) {}
         }
 
+        // ==================== ACCIONES DE ACTUALIZACIÓN FIREBASE Y COLUMNAS ====================
+        window.crearActividad = async function() {
+            const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
+            const parcial = document.getElementById("filtroParcial").value;
+            const nombre = document.getElementById("nomActividad").value.trim();
+            if(!grupo || !nombre) { alert("Llena el grupo y nombre de trabajo."); return; }
+            
+            const id = `${grupo}_${parcial}_${nombre.replace(/\s+/g, '_')}`;
+            await setDoc(doc(db, "actividades", id), { nombre, grupo, parcial, valor: 1 });
+            
+            document.getElementById("nomActividad").value = "";
+            cerrarModal('modalTarea');
+            alert("Nueva columna de firmas inyectada.");
+            cargarTodoSistema();
+        }
+
+        window.crearFechaAsistencia = async function() {
+            const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
+            const parcial = document.getElementById("filtroParcial").value;
+            const rawFecha = document.getElementById("fechaAsistenciaInput").value;
+            if(!grupo || !rawFecha) { alert("Selecciona un grupo y una fecha válida."); return; }
+
+            const partes = rawFecha.split("-");
+            const fechaFormateada = `${partes[2]}-${partes[1]}`; // Guarda en formato DD-MM (ej: 25-05)
+            const id = `${grupo}_${parcial}_Asis_${fechaFormateada}`;
+
+            await setDoc(doc(db, "fechas_asistencias", id), { fecha: rawFecha, fechaFormateada, grupo, parcial });
+            document.getElementById("fechaAsistenciaInput").value = "";
+            cerrarModal('modalAsistencia');
+            alert(`Columna de asistencia del día ${fechaFormateada} creada.`);
+            cargarTodoSistema();
+        }
+
+        window.eliminarTrabajoColumna = async function(idFirestore, nombre) {
+            if(confirm(`¿Deseas cerrar/eliminar de la sábanas el trabajo "${nombre}" permanentemente?`)) {
+                await deleteDoc(doc(db, "actividades", idFirestore));
+                cargarTodoSistema();
+            }
+        }
+
+        window.eliminarFechaAsistenciaColumna = async function(idFirestore, fechaFormateada) {
+            if(confirm(`¿Deseas borrar la columna de asistencia del día ${fechaFormateada}?`)) {
+                await deleteDoc(doc(db, "fechas_asistencias", idFirestore));
+                cargarTodoSistema();
+            }
+        }
+
+        window.agregarAlumnoA_Base = async function() {
+            const nombre = document.getElementById("newAlumnoNombre").value.trim().toUpperCase();
+            const grupo = document.getElementById("newAlumnoGrupo").value.trim().toUpperCase();
+            const esRecuperacion = document.getElementById("newAlumnoRecuperacion").checked;
+            if(!nombre || !grupo) { alert("Llena los campos requeridos."); return; }
+
+            const id = `${grupo}_${nombre.replace(/\s+/g, '_')}`;
+            await setDoc(doc(db, "alumnos", id), { nombre, grupo, recuperacion: esRecuperacion });
+            
+            document.getElementById("newAlumnoNombre").value = "";
+            document.getElementById("newAlumnoRecuperacion").checked = false;
+            cerrarModal('modalAlumno');
+            alert("Alumno guardado en orden de lista.");
+            cargarTodoSistema();
+        }
+
+        window.capturarExamenA_Mano = async function(nombreAlumno, notaActual) {
+            const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
+            const parcial = document.getElementById("filtroParcial").value;
+            const nuevaNota = prompt(`Asignar nota de examen para ${nombreAlumno} (Escala 0 a 50):`, notaActual);
+            if(nuevaNota === null || isNaN(nuevaNota)) return;
+            
+            const idExamen = `${grupo}_${parcial}_${nombreAlumno.replace(/\s+/g, '_')}`;
+            await setDoc(doc(db, "examenes", idExamen), { alumno: nombreAlumno, grupo, parcial, nota: parseFloat(nuevaNota) });
+            cargarTodoSistema();
+        }
+
+        window.alternarRecuperacion = async function(idFirestore, estadoActual) {
+            await updateDoc(doc(db, "alumnos", idFirestore), { recuperacion: !estadoActual });
+            cargarTodoSistema();
+        }
+
+        window.borrarAlumnoCompleto = async function(idFirestore, nombre) {
+            if(confirm(`¿Quitar permanentemente a ${nombre}?`)) {
+                await deleteDoc(doc(db, "alumnos", idFirestore));
+                cargarTodoSistema();
+            }
+        }
+
+        // ==================== LENS IA PREPROCESADOR MOTOR ====================
         window.procesarFotoFormula = function() {
             const archivoInput = document.getElementById("fotoFormulaInput").files[0];
             const divLens = document.getElementById("contenedorLens"); const imgPrev = document.getElementById("vistaPreviaLibreta");
@@ -367,32 +589,6 @@
                 const jsonResult = await respuesta.json(); divResultado.className = "mt-2 p-3 bg-slate-900 rounded-xl font-mono text-[11px] text-purple-300 whitespace-pre-line border border-purple-900/60 max-h-48 overflow-y-auto";
                 divResultado.innerText = jsonResult.candidates[0].content.parts[0].text;
             } catch (e) { divResultado.innerText = "❌ Error de conexión."; }
-        }
-
-        window.gestionarActividad = async function(idFirestore, nombreActual, valorActual, fechaActual) { const accion = prompt(`⚙️ Modificar Tarea: "${nombreActual}"\nEscribe BORRAR para quitarla. O ajusta los valores separados por comas:`, `${nombreActual}, ${valorActual}, ${fechaActual}`); if(!accion) return; if(accion.trim().toUpperCase() === "BORRAR") { if(confirm(`¿Borrar permanentemente?`)) { const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase(); await deleteDoc(doc(db, "actividades", idFirestore)); const qF = query(collection(db, "codigos_qr"), where("grupo", "==", grupo), where("actividad", "comma", nombreActual)); const snapF = await getDocs(qF); const promesas = []; snapF.forEach(d => promesas.push(deleteDoc(doc(db, "codigos_qr", d.id)))); await Promise.all(promesas); alert("¡Eliminada!"); cargarTodoSistema(); } } else { const partes = accion.split(","); if(partes.length >= 2) { const nuevoNom = partes[0].trim(); const nuevoVal = parseInt(partes[1].trim()); const nuevaFec = partes[2] ? partes[2].trim() : ""; if(!nuevoNom || isNaN(nuevoVal)) return; await updateDoc(doc(db, "actividades", idFirestore), { nombre: nuevoNom, valor: nuevoVal, fecha: nuevaFec }); alert("¡Actualizada!"); cargarTodoSistema(); } } }
-        window.capturarExamenA_Mano = async function(nombreAlumno, notaActual) { const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase(); const parcial = document.getElementById("filtroParcial").value; const nuevaNota = prompt(`Nota examen para ${nombreAlumno} (0 a 50):`, notaActual); if(nuevaNota === null || isNaN(nuevaNota)) return; const idExamen = `${grupo}_${parcial}_${nombreAlumno.replace(/\s+/g, '_')}`; await setDoc(doc(db, "examenes", idExamen), { alumno: nombreAlumno, grupo: grupo, parcial: parcial, nota: parseFloat(nuevaNota) }); cargarTodoSistema(); }
-        window.alternarRecuperacion = async function(idFirestore, estadoActual) { await updateDoc(doc(db, "alumnos", idFirestore), { recuperacion: !estadoActual }); cargarTodoSistema(); }
-        window.borrarAlumnoCompleto = async function(idFirestore, nombre) { if(confirm(`❌ ¿Eliminar permanentemente a: ${nombre} de las listas?`)) { await deleteDoc(doc(db, "alumnos", idFirestore)); cargarTodoSistema(); } }
-        window.crearActividad = async function() { const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase(); const parcial = document.getElementById("filtroParcial").value; const nombre = document.getElementById("nomActividad").value.trim(); const valor = parseInt(document.getElementById("valorActividad").value) || 10; const fecha = document.getElementById("fechaActividad").value; if(!grupo || !nombre) { alert("Completa el grupo y nombre de actividad."); return; } const id = `${grupo}_${parcial}_${nombre.replace(/\s+/g, '_')}`; await setDoc(doc(db, "actividades", id), { nombre, grupo, parcial, valor, fecha }); document.getElementById("nomActividad").value = ""; document.getElementById("valorActividad").value = ""; cerrarModal('modalTarea'); alert("Actividad publicada"); cargarTodoSistema(); }
-        
-        window.agregarAlumnoA_Base = async function() {
-            const nombre = document.getElementById("newAlumnoNombre").value.trim().toUpperCase();
-            const grupo = document.getElementById("newAlumnoGrupo").value.trim().toUpperCase();
-            const esRecuperacion = document.getElementById("newAlumnoRecuperacion").checked; 
-
-            if(!nombre || !grupo) {
-                alert("Llena todos los campos obligatorios.");
-                return;
-            }
-
-            const id = `${grupo}_${nombre.replace(/\s+/g, '_')}`;
-            await setDoc(doc(db, "alumnos", id), { nombre, group: grupo, grupo, recuperacion: esRecuperacion });
-
-            document.getElementById("newAlumnoNombre").value = "";
-            document.getElementById("newAlumnoRecuperacion").checked = false; 
-            cerrarModal('modalAlumno');
-            alert("Alumno inscrito exitosamente en orden alfabético.");
-            cargarTodoSistema();
         }
     </script>
 </body>
