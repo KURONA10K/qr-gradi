@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Maestra - Estilo Gemini V7.0</title>
+    <title>Panel Maestra - Estilo Gemini V7.2</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <style>
         @keyframes laser {
-            0% { top: 0%; }
+            0 { top: 0%; }
             50% { top: 100%; }
             100% { top: 0%; }
         }
@@ -32,11 +32,11 @@
                 <div class="p-2 bg-slate-900/60 rounded-xl border border-slate-800 mb-2 space-y-2 menu-txt">
                     <div>
                         <label class="block text-[10px] text-slate-400 mb-1">Grupo Activo:</label>
-                        <input id="filtroGrupo" type="text" placeholder="Ej: 4TPROG-Am" oninput="cargarTodoSistema()" class="w-full p-1.5 text-xs rounded-lg bg-slate-800 border border-slate-700 text-white font-bold uppercase focus:outline-none focus:border-blue-500">
+                        <input id="filtroGrupo" type="text" placeholder="Ej: 4TPROG-Am" oninput="cargarTodoSistema()" class="w-full p-1.5 text-xs rounded-lg bg-slate-880 border border-slate-700 text-white font-bold uppercase focus:outline-none focus:border-blue-500">
                     </div>
                     <div>
                         <label class="block text-[10px] text-slate-400 mb-1">Parcial:</label>
-                        <select id="filtroParcial" onchange="cargarTodoSistema()" class="w-full p-1.5 text-xs rounded-lg bg-slate-800 border border-slate-700 text-white font-bold focus:outline-none">
+                        <select id="filtroParcial" onchange="cargarTodoSistema()" class="w-full p-1.5 text-xs rounded-lg bg-slate-880 border border-slate-700 text-white font-bold focus:outline-none">
                             <option value="Parcial_1">1er Parcial</option>
                             <option value="Parcial_2">2do Parcial</option>
                             <option value="Parcial_3">3er Parcial</option>
@@ -63,7 +63,7 @@
         </div>
 
         <div class="p-4 border-t border-slate-800 text-[10px] text-slate-500 font-mono menu-txt">
-            V7.0 • Tablet Ed.
+            V7.2 • Tablet Ed.
         </div>
     </aside>
 
@@ -78,7 +78,7 @@
                 <h2 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
                     📋 Sábanas de Calificaciones Dinámicas
                 </h2>
-                <p class="text-xs text-slate-400 mt-0.5">Control global de puntos acumulados, exámenes y promedios finales.</p>
+                <p class="text-xs text-slate-400 mt-0.5">Orden alfabético de la A a la Z garantizado.</p>
             </div>
         </div>
 
@@ -134,14 +134,18 @@
                 <h3 class="font-bold text-sm text-slate-200 flex items-center gap-1.5">👤 Registrar Alumno en Base</h3>
                 <button onclick="cerrarModal('modalAlumno')" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
             </div>
-            <div class="space-y-3 text-xs">
+            <div class="space-y-4 text-xs">
                 <div>
-                    <label class="block text-slate-400 mb-1">Nombre Completo del Alumno:</label>
-                    <input id="newAlumnoNombre" type="text" placeholder="Apellidos Nombre" class="w-full p-2.5 bg-slate-700 rounded-xl text-white">
+                    <label class="block text-slate-400 mb-1">Nombre Completo del Alumno (Empezar por Apellidos):</label>
+                    <input id="newAlumnoNombre" type="text" placeholder="Ej: PEREZ JUAN" class="w-full p-2.5 bg-slate-700 rounded-xl text-white uppercase">
                 </div>
                 <div>
                     <label class="block text-slate-400 mb-1">Confirmar Grupo:</label>
                     <input id="newAlumnoGrupo" type="text" placeholder="Ej: 4TPROG-Am" class="w-full p-2.5 bg-slate-700 uppercase rounded-xl text-white">
+                </div>
+                <div class="flex items-center gap-2 bg-slate-900/50 p-2.5 rounded-xl border border-slate-700">
+                    <input id="newAlumnoRecuperacion" type="checkbox" class="w-4 h-4 rounded text-yellow-600 focus:ring-0 cursor-pointer bg-slate-700 border-slate-600">
+                    <label for="newAlumnoRecuperacion" class="text-slate-300 font-semibold cursor-pointer select-none">⚠️ Inscribir directamente en Recuperación</label>
                 </div>
                 <button onclick="agregarAlumnoA_Base()" class="w-full bg-blue-600 hover:bg-blue-500 p-2.5 rounded-xl font-bold transition mt-2 cursor-pointer">Inscribir de Forma Permanente</button>
             </div>
@@ -210,7 +214,6 @@
         let globalAlumnos = [], globalTrabajos = [];
         let globalPalomitas = {}, globalExamenes = {};
 
-        // MANEJO VISUAL DE LA BARRA LATERAL (GEMINI STYLE)
         window.toggleSidebar = function() {
             const side = document.getElementById("sidebar");
             const txts = document.querySelectorAll(".menu-txt");
@@ -230,7 +233,6 @@
         window.abrirModal = function(id) { document.getElementById(id).classList.remove("hidden"); }
         window.cerrarModal = function(id) { document.getElementById(id).classList.add("hidden"); }
 
-        // SINCRONIZADOR CENTRAL BASE DE DATOS FIRESTORE
         window.cargarTodoSistema = async function() {
             const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
             const parcial = document.getElementById("filtroParcial").value;
@@ -240,6 +242,9 @@
             const snapAl = await getDocs(qAl);
             globalAlumnos = [];
             snapAl.forEach(d => globalAlumnos.push({ idFirestore: d.id, ...d.data() }));
+
+            // ✨ ORDENAR DE LA A A LA Z POR NOMBRE AUTOMÁTICAMENTE
+            globalAlumnos.sort((a, b) => a.nombre.localeCompare(b.nombre));
 
             const qAct = query(collection(db, "actividades"), where("grupo", "==", grupo), where("parcial", "==", parcial));
             const snapAct = await getDocs(qAct);
@@ -297,7 +302,6 @@
             });
         }
 
-        // 🎥 OPERACIÓN DE CÁMARA QR GENERAL COMODIDAD INTEGRAL
         window.abrirEscanerUnico = function() {
             document.getElementById("seccionEscaner").classList.remove("hidden");
             document.getElementById("alertaLecturaRapida").classList.add("hidden");
@@ -333,7 +337,6 @@
             } catch (e) {}
         }
 
-        // 🤖 MOTOR AUDITOR DE LIBRETAS GOOGLE LENS IA MATEMÁTICO
         window.procesarFotoFormula = function() {
             const archivoInput = document.getElementById("fotoFormulaInput").files[0];
             const divLens = document.getElementById("contenedorLens"); const imgPrev = document.getElementById("vistaPreviaLibreta");
@@ -366,13 +369,31 @@
             } catch (e) { divResultado.innerText = "❌ Error de conexión."; }
         }
 
-        // CONTROLADORES DE ALUMNOS, ACTIVIDADES Y EXÁMENES
-        window.gestionarActividad = async function(idFirestore, nombreActual, valorActual, fechaActual) { const accion = prompt(`⚙️ Modificar Tarea: "${nombreActual}"\nEscribe BORRAR para quitarla. O ajusta los valores separados por comas:`, `${nombreActual}, ${valorActual}, ${fechaActual}`); if(!accion) return; if(accion.trim().toUpperCase() === "BORRAR") { if(confirm(`¿Borrar permanentemente?`)) { const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase(); await deleteDoc(doc(db, "actividades", idFirestore)); const qF = query(collection(db, "codigos_qr"), where("grupo", "==", grupo), where("actividad", "==", nombreActual)); const snapF = await getDocs(qF); const promesas = []; snapF.forEach(d => promesas.push(deleteDoc(doc(db, "codigos_qr", d.id)))); await Promise.all(promesas); alert("¡Eliminada!"); cargarTodoSistema(); } } else { const partes = accion.split(","); if(partes.length >= 2) { const nuevoNom = partes[0].trim(); const nuevoVal = parseInt(partes[1].trim()); const nuevaFec = partes[2] ? partes[2].trim() : ""; if(!nuevoNom || isNaN(nuevoVal)) return; await updateDoc(doc(db, "actividades", idFirestore), { nombre: nuevoNom, valor: nuevoVal, fecha: nuevaFec }); alert("¡Actualizada!"); cargarTodoSistema(); } } }
+        window.gestionarActividad = async function(idFirestore, nombreActual, valorActual, fechaActual) { const accion = prompt(`⚙️ Modificar Tarea: "${nombreActual}"\nEscribe BORRAR para quitarla. O ajusta los valores separados por comas:`, `${nombreActual}, ${valorActual}, ${fechaActual}`); if(!accion) return; if(accion.trim().toUpperCase() === "BORRAR") { if(confirm(`¿Borrar permanentemente?`)) { const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase(); await deleteDoc(doc(db, "actividades", idFirestore)); const qF = query(collection(db, "codigos_qr"), where("grupo", "==", grupo), where("actividad", "comma", nombreActual)); const snapF = await getDocs(qF); const promesas = []; snapF.forEach(d => promesas.push(deleteDoc(doc(db, "codigos_qr", d.id)))); await Promise.all(promesas); alert("¡Eliminada!"); cargarTodoSistema(); } } else { const partes = accion.split(","); if(partes.length >= 2) { const nuevoNom = partes[0].trim(); const nuevoVal = parseInt(partes[1].trim()); const nuevaFec = partes[2] ? partes[2].trim() : ""; if(!nuevoNom || isNaN(nuevoVal)) return; await updateDoc(doc(db, "actividades", idFirestore), { nombre: nuevoNom, valor: nuevoVal, fecha: nuevaFec }); alert("¡Actualizada!"); cargarTodoSistema(); } } }
         window.capturarExamenA_Mano = async function(nombreAlumno, notaActual) { const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase(); const parcial = document.getElementById("filtroParcial").value; const nuevaNota = prompt(`Nota examen para ${nombreAlumno} (0 a 50):`, notaActual); if(nuevaNota === null || isNaN(nuevaNota)) return; const idExamen = `${grupo}_${parcial}_${nombreAlumno.replace(/\s+/g, '_')}`; await setDoc(doc(db, "examenes", idExamen), { alumno: nombreAlumno, grupo: grupo, parcial: parcial, nota: parseFloat(nuevaNota) }); cargarTodoSistema(); }
         window.alternarRecuperacion = async function(idFirestore, estadoActual) { await updateDoc(doc(db, "alumnos", idFirestore), { recuperacion: !estadoActual }); cargarTodoSistema(); }
         window.borrarAlumnoCompleto = async function(idFirestore, nombre) { if(confirm(`❌ ¿Eliminar permanentemente a: ${nombre} de las listas?`)) { await deleteDoc(doc(db, "alumnos", idFirestore)); cargarTodoSistema(); } }
         window.crearActividad = async function() { const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase(); const parcial = document.getElementById("filtroParcial").value; const nombre = document.getElementById("nomActividad").value.trim(); const valor = parseInt(document.getElementById("valorActividad").value) || 10; const fecha = document.getElementById("fechaActividad").value; if(!grupo || !nombre) { alert("Completa el grupo y nombre de actividad."); return; } const id = `${grupo}_${parcial}_${nombre.replace(/\s+/g, '_')}`; await setDoc(doc(db, "actividades", id), { nombre, grupo, parcial, valor, fecha }); document.getElementById("nomActividad").value = ""; document.getElementById("valorActividad").value = ""; cerrarModal('modalTarea'); alert("Actividad publicada"); cargarTodoSistema(); }
-        window.agregarAlumnoA_Base = async function() { const nombre = document.getElementById("newAlumnoNombre").value.trim(); const grupo = document.getElementById("newAlumnoGrupo").value.trim().toUpperCase(); if(!nombre || !grupo) { alert("Llena todos los campos."); return; } const id = `${grupo}_${nombre.replace(/\s+/g, '_')}`; await setDoc(doc(db, "alumnos", id), { nombre, group: grupo, grupo, recuperacion: false }); document.getElementById("newAlumnoNombre").value = ""; cerrarModal('modalAlumno'); alert("Alumno inscrito"); cargarTodoSistema(); }
+        
+        window.agregarAlumnoA_Base = async function() {
+            const nombre = document.getElementById("newAlumnoNombre").value.trim().toUpperCase();
+            const grupo = document.getElementById("newAlumnoGrupo").value.trim().toUpperCase();
+            const esRecuperacion = document.getElementById("newAlumnoRecuperacion").checked; 
+
+            if(!nombre || !grupo) {
+                alert("Llena todos los campos obligatorios.");
+                return;
+            }
+
+            const id = `${grupo}_${nombre.replace(/\s+/g, '_')}`;
+            await setDoc(doc(db, "alumnos", id), { nombre, group: grupo, grupo, recuperacion: esRecuperacion });
+
+            document.getElementById("newAlumnoNombre").value = "";
+            document.getElementById("newAlumnoRecuperacion").checked = false; 
+            cerrarModal('modalAlumno');
+            alert("Alumno inscrito exitosamente en orden alfabético.");
+            cargarTodoSistema();
+        }
     </script>
 </body>
 </html>
