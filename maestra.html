@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Maestra - Ultra Edición V8.0</title>
+    <title>Panel Maestra - Edición Quantum V9.0</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <style>
@@ -45,45 +45,52 @@
                         </div>
                         <div class="w-1/2">
                             <label class="block text-[10px] text-yellow-400 mb-1">Meta Firmas:</label>
-                            <input id="metaFirmasInput" type="number" value="10" oninput="montarYRenderizarTodo()" class="w-full p-1.5 text-xs rounded-lg bg-slate-800 border border-slate-700 text-yellow-400 font-bold focus:outline-none">
+                            <input id="metaFirmasInput" type="number" value="0" oninput="montarYRenderizarTodo(true)" class="w-full p-1.5 text-xs rounded-lg bg-slate-800 border border-slate-700 text-yellow-400 font-bold focus:outline-none">
                         </div>
+                    </div>
+                    <div class="pt-1 flex items-center justify-between border-t border-slate-800/80">
+                        <span class="text-[10px] text-slate-400 font-medium">Estado Parcial:</span>
+                        <button id="btnLockParcial" onclick="toggleBloqueoParcial()" class="text-[10px] px-2 py-0.5 rounded font-bold bg-emerald-600/20 text-emerald-400 border border-emerald-500/30">🔓 Abierto</button>
                     </div>
                 </div>
 
-                <button id="btnVistaCalificaciones" onclick="cambiarVistaTabla('calificaciones')" class="w-full flex items-center gap-3 p-2.5 bg-blue-600/20 text-blue-400 rounded-xl text-xs font-bold transition cursor-pointer text-left">
+                <button id="btnVistaCalificaciones" onclick="cambiarVistaTabla('calificaciones')" class="w-full flex items-center gap-3 p-2.5 bg-blue-600/20 text-blue-400 rounded-xl text-xs font-bold transition text-left cursor-pointer">
                     <span>📋</span> <span class="menu-txt">Tabla de Firmas y Califs</span>
                 </button>
 
-                <button id="btnVistaAsistencias" onclick="cambiarVistaTabla('asistencias')" class="w-full flex items-center gap-3 p-2.5 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-xs font-semibold transition cursor-pointer text-left">
+                <button id="btnVistaAsistencias" onclick="cambiarVistaTabla('asistencias')" class="w-full flex items-center gap-3 p-2.5 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-xs font-semibold transition text-left cursor-pointer">
                     <span>📅</span> <span class="menu-txt">Control de Asistencias</span>
                 </button>
 
                 <div class="h-px bg-slate-800 my-2 menu-txt"></div>
 
-                <button onclick="abrirEscanerUnico()" class="w-full flex items-center gap-3 p-2.5 hover:bg-emerald-600/20 text-emerald-400 hover:text-emerald-300 rounded-xl text-xs font-bold transition cursor-pointer text-left">
+                <button onclick="abrirEscanerUnico()" class="w-full flex items-center gap-3 p-2.5 hover:bg-emerald-600/20 text-emerald-400 hover:text-emerald-300 rounded-xl text-xs font-bold transition text-left cursor-pointer">
                     <span>📷</span> <span class="menu-txt">Abrir Escáner QR Único</span>
                 </button>
 
-                <button onclick="abrirModal('modalTarea')" class="w-full flex items-center gap-3 p-2.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition cursor-pointer text-left">
+                <button onclick="abrirModal('modalTarea')" class="w-full flex items-center gap-3 p-2.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition text-left cursor-pointer">
                     <span>📝</span> <span class="menu-txt">Publicar Trabajo (Firma)</span>
                 </button>
 
-                <button onclick="abrirModal('modalAsistencia')" class="w-full flex items-center gap-3 p-2.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition cursor-pointer text-left">
+                <button onclick="abrirModal('modalAsistencia')" class="w-full flex items-center gap-3 p-2.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition text-left cursor-pointer">
                     <span>⏰</span> <span class="menu-txt">Habilitar Fecha Asistencia</span>
                 </button>
 
-                <button onclick="abrirModal('modalAlumno')" class="w-full flex items-center gap-3 p-2.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition cursor-pointer text-left">
+                <button onclick="abrirModal('modalAlumno')" class="w-full flex items-center gap-3 p-2.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition text-left cursor-pointer">
                     <span>👤</span> <span class="menu-txt">Inscribir Alumno</span>
                 </button>
 
-                <button onclick="abrirModal('modalIA')" class="w-full flex items-center gap-3 p-2.5 hover:bg-purple-600/20 text-purple-400 hover:text-purple-300 rounded-xl text-xs font-bold transition cursor-pointer text-left">
+                <button onclick="abrirModal('modalIA')" class="w-full flex items-center gap-3 p-2.5 hover:bg-purple-600/20 text-purple-400 hover:text-purple-300 rounded-xl text-xs font-bold transition text-left cursor-pointer">
                     <span>🤖</span> <span class="menu-txt">Corrector Lens IA</span>
+                </button>
+
+                <button onclick="exportarExcelCSV()" class="w-full flex items-center gap-3 p-2.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition text-left cursor-pointer">
+                    <span>📥</span> <span class="menu-txt">Exportar Hoja Excel (.csv)</span>
                 </button>
             </nav>
         </div>
-
         <div class="p-4 border-t border-slate-800 text-[10px] text-slate-500 font-mono menu-txt">
-            V8.0 • Decimal Engine
+            V9.0 • Quantum Ed.
         </div>
     </aside>
 
@@ -93,12 +100,29 @@
             <h1 id="topBarTitle" class="text-lg font-bold text-blue-400">Firmas y Calificaciones</h1>
         </div>
 
-        <div class="mb-6 flex justify-between items-center">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+            <div class="bg-slate-950/40 p-3 rounded-xl border border-slate-800">
+                <span class="block text-[10px] text-slate-500 uppercase font-bold">Total Alumnos</span>
+                <span id="kpiTotalAlumnos" class="text-lg font-black text-white">0</span>
+            </div>
+            <div class="bg-slate-950/40 p-3 rounded-xl border border-slate-800">
+                <span class="block text-[10px] text-red-400 uppercase font-bold">En Recuperación</span>
+                <span id="kpiRecuperacion" class="text-lg font-black text-red-400">0</span>
+            </div>
+            <div class="bg-slate-950/40 p-3 rounded-xl border border-slate-800">
+                <span class="block text-[10px] text-emerald-400 uppercase font-bold">% Aprobados</span>
+                <span id="kpiPorcentajeAprobados" class="text-lg font-black text-emerald-400">0%</span>
+            </div>
+            <div class="bg-slate-950/40 p-3 rounded-xl border border-slate-800">
+                <span class="block text-[10px] text-yellow-400 uppercase font-bold">Promedio Grupo</span>
+                <span id="kpiPromedioGrupo" class="text-lg font-black text-yellow-400">0.0</span>
+            </div>
+        </div>
+
+        <div class="mb-3 flex justify-between items-center">
             <div>
-                <h2 id="mainSeccionTitulo" class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
-                    📋 Sábanas de Calificaciones Dinámicas
-                </h2>
-                <p id="mainSeccionSubtitulo" class="text-xs text-slate-400 mt-0.5">Firmas acumuladas con cálculo decimal proporcional sobre el 50%.</p>
+                <h2 id="mainSeccionTitulo" class="text-base font-extrabold tracking-tight text-white flex items-center gap-2">📋 Sábanas de Calificaciones Dinámicas</h2>
+                <p id="mainSeccionSubtitulo" class="text-[11px] text-slate-400">Modifica firmas haciendo clic directo sobre la casilla.</p>
             </div>
         </div>
 
@@ -106,13 +130,10 @@
             <div class="overflow-x-auto flex-1">
                 <table class="w-full text-center text-xs">
                     <thead>
-                        <tr id="tabCabeceraDinamica" class="bg-slate-700 text-white font-bold sticky top-0 z-10 shadow-sm">
-                            </tr>
+                        <tr id="tabCabeceraDinamica" class="bg-slate-700 text-white font-bold sticky top-0 z-10 shadow-sm"></tr>
                     </thead>
                     <tbody id="tabCuerpoDinamico" class="divide-y divide-slate-700 bg-slate-850">
-                        <tr>
-                            <td class="p-8 text-slate-500 italic text-xs">Escribe el Grupo en la barra lateral para desplegar los datos escolares...</td>
-                        </tr>
+                        <tr><td class="p-8 text-slate-500 italic">Escribe el Grupo en la barra lateral para desplegar los datos...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -121,75 +142,45 @@
 
     <div id="modalTarea" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div class="bg-slate-800 border border-slate-700 w-full max-w-sm rounded-2xl p-5 shadow-2xl">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-sm text-blue-400 flex items-center gap-1.5">📝 Publicar Trabajo (Añadir Columna)</h3>
-                <button onclick="cerrarModal('modalTarea')" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
-            </div>
+            <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-sm text-blue-400">📝 Publicar Trabajo</h3><button onclick="cerrarModal('modalTarea')" class="text-slate-400 hover:text-white font-bold">✕</button></div>
             <div class="space-y-3 text-xs">
-                <div>
-                    <label class="block text-slate-400 mb-1">Identificador Corto del Trabajo:</label>
-                    <input id="nomActividad" type="text" placeholder="Ej: Tarea 1, Firma 3, Practica 2" class="w-full p-2.5 bg-slate-700 rounded-xl text-white">
-                </div>
-                <div>
-                    <label class="block text-slate-400 mb-1">Fecha de Revisión:</label>
-                    <input id="fechaActividad" type="date" class="w-full p-2.5 bg-slate-700 rounded-xl text-slate-200">
-                </div>
-                <button onclick="crearActividad()" class="w-full bg-blue-600 hover:bg-blue-500 p-2.5 rounded-xl font-bold transition mt-2 cursor-pointer">Inyectar Columna</button>
+                <div><label class="block text-slate-400 mb-1">Nombre Corto:</label><input id="nomActividad" type="text" placeholder="Ej: Tarea 1" class="w-full p-2.5 bg-slate-700 rounded-xl text-white"></div>
+                <button onclick="crearActividad()" class="w-full bg-blue-600 hover:bg-blue-500 p-2.5 rounded-xl font-bold transition">Inyectar Columna</button>
             </div>
         </div>
     </div>
 
     <div id="modalAsistencia" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div class="bg-slate-800 border border-slate-700 w-full max-w-sm rounded-2xl p-5 shadow-2xl">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-sm text-emerald-400 flex items-center gap-1.5">⏰ Habilitar Día de Asistencia</h3>
-                <button onclick="cerrarModal('modalAsistencia')" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
-            </div>
+            <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-sm text-emerald-400">⏰ Habilitar Asistencia</h3><button onclick="cerrarModal('modalAsistencia')" class="text-slate-400 hover:text-white font-bold">✕</button></div>
             <div class="space-y-3 text-xs">
-                <div>
-                    <label class="block text-slate-400 mb-1">Fecha Escolar:</label>
-                    <input id="fechaAsistenciaInput" type="date" class="w-full p-2.5 bg-slate-700 rounded-xl text-slate-200">
-                </div>
-                <button onclick="crearFechaAsistencia()" class="w-full bg-emerald-600 hover:bg-emerald-500 p-2.5 rounded-xl font-bold transition mt-2 cursor-pointer">Crear Columna Asistencia</button>
+                <div><label class="block text-slate-400 mb-1">Fecha Escolar:</label><input id="fechaAsistenciaInput" type="date" class="w-full p-2.5 bg-slate-700 rounded-xl text-slate-200"></div>
+                <button onclick="crearFechaAsistencia()" class="w-full bg-emerald-600 hover:bg-emerald-500 p-2.5 rounded-xl font-bold transition">Crear Columna</button>
             </div>
         </div>
     </div>
 
     <div id="modalAlumno" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div class="bg-slate-800 border border-slate-700 w-full max-w-sm rounded-2xl p-5 shadow-2xl">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-sm text-slate-200 flex items-center gap-1.5">👤 Inscribir Alumno a la Lista</h3>
-                <button onclick="cerrarModal('modalAlumno')" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
-            </div>
+            <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-sm text-slate-200">👤 Inscribir Alumno</h3><button onclick="cerrarModal('modalAlumno')" class="text-slate-400 hover:text-white font-bold">✕</button></div>
             <div class="space-y-4 text-xs">
-                <div>
-                    <label class="block text-slate-400 mb-1">Nombre Completo (Empezar por Apellidos):</label>
-                    <input id="newAlumnoNombre" type="text" placeholder="Ej: ACOSTA VALERIA" class="w-full p-2.5 bg-slate-700 rounded-xl text-white uppercase">
-                </div>
-                <div>
-                    <label class="block text-slate-400 mb-1">Confirmar Grupo Destino:</label>
-                    <input id="newAlumnoGrupo" type="text" placeholder="Ej: 4TPROG-AM" class="w-full p-2.5 bg-slate-700 uppercase rounded-xl text-white">
-                </div>
+                <div><label class="block text-slate-400 mb-1">Nombre Completo (Apellidos Primero):</label><input id="newAlumnoNombre" type="text" placeholder="Ej: ACOSTA VALERIA" class="w-full p-2.5 bg-slate-700 rounded-xl text-white uppercase"></div>
+                <div><label class="block text-slate-400 mb-1">Confirmar Grupo:</label><input id="newAlumnoGrupo" type="text" placeholder="Ej: 4TPROG-AM" class="w-full p-2.5 bg-slate-700 uppercase rounded-xl text-white"></div>
                 <div class="flex items-center gap-2 bg-slate-900/50 p-2.5 rounded-xl border border-slate-700">
                     <input id="newAlumnoRecuperacion" type="checkbox" class="w-4 h-4 rounded text-yellow-600 bg-slate-700 border-slate-600">
-                    <label for="newAlumnoRecuperacion" class="text-slate-300 font-semibold cursor-pointer select-none">⚠️ Inscribir directamente en Recuperación</label>
+                    <label for="newAlumnoRecuperacion" class="text-slate-300 font-semibold cursor-pointer select-none">⚠️ Inscribir en Recuperación</label>
                 </div>
-                <button onclick="agregarAlumnoA_Base()" class="w-full bg-blue-600 hover:bg-blue-500 p-2.5 rounded-xl font-bold transition mt-2 cursor-pointer">Inscribir Permanentemente</button>
+                <button onclick="agregarAlumnoA_Base()" class="w-full bg-blue-600 hover:bg-blue-500 p-2.5 rounded-xl font-bold transition">Inscribir</button>
             </div>
         </div>
     </div>
 
     <div id="modalIA" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div class="bg-slate-800 border border-slate-700 w-full max-w-md rounded-2xl p-5 shadow-2xl flex flex-col max-h-[90vh]">
-            <div class="flex justify-between items-center mb-3">
-                <h3 class="font-bold text-sm text-purple-400 flex items-center gap-1.5">🤖 Corrector de Operaciones Google Lens</h3>
-                <button onclick="cerrarModal('modalIA')" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
-            </div>
+            <div class="flex justify-between items-center mb-3"><h3 class="font-bold text-sm text-purple-400">🤖 Corrector Google Lens IA</h3><button onclick="cerrarModal('modalIA')" class="text-slate-400 hover:text-white font-bold">✕</button></div>
             <div class="space-y-3 text-xs overflow-y-auto flex-1">
                 <input id="fotoFormulaInput" type="file" accept="image/*" capture="environment" class="hidden" onchange="procesarFotoFormula()">
-                <label for="fotoFormulaInput" class="bg-purple-700 hover:bg-purple-600 text-white p-3 rounded-xl block text-center font-bold cursor-pointer transition shadow-md">
-                    📸 TOMAR FOTO DE OPERACIÓN
-                </label>
+                <label for="fotoFormulaInput" class="bg-purple-700 hover:bg-purple-600 text-white p-3 rounded-xl block text-center font-bold cursor-pointer transition shadow-md">📸 TOMAR FOTO DE PROCEDIMIENTO</label>
                 <div id="contenedorLens" class="hidden relative w-full h-40 bg-slate-950 rounded-xl overflow-hidden border border-purple-500">
                     <img id="vistaPreviaLibreta" class="w-full h-full object-cover opacity-60" src="" alt="Escaneo">
                     <div class="absolute left-0 right-0 h-0.5 bg-purple-400 shadow-[0_0_10px_#c084fc] anim-laser"></div>
@@ -201,11 +192,10 @@
 
     <div id="seccionEscaner" class="hidden fixed inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 z-50">
         <div class="bg-slate-800 w-full max-w-sm rounded-2xl p-4 text-center border border-slate-700">
-            <h3 class="text-sm font-bold text-white mb-1">📷 Receptor de Asistencias y Trabajos QR</h3>
-            <p class="text-[11px] text-slate-400 mb-3">Escaneo ininterrumpido en tiempo real</p>
+            <h3 class="text-sm font-bold text-white mb-1">📷 Receptor QR Activo</h3>
             <div id="reader" class="w-full overflow-hidden rounded-xl bg-slate-900 border border-slate-700"></div>
             <div id="alertaLecturaRapida" class="mt-3 p-2.5 bg-slate-900 text-emerald-400 text-xs font-bold rounded-xl border border-emerald-500/40 hidden whitespace-pre-line"></div>
-            <button onclick="cerrarEscaner()" class="mt-4 w-full bg-red-600 text-white py-2 rounded-xl text-xs font-bold cursor-pointer">Apagar Cámara</button>
+            <button onclick="cerrarEscaner()" class="mt-4 w-full bg-red-600 text-white py-2 rounded-xl text-xs font-bold">Apagar Cámara</button>
         </div>
     </div>
 
@@ -215,8 +205,8 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // 🔑 COLOCA TU API KEY DE GEMINI AQUÍ SI LA USAS:
-        const GEMINI_API_KEY = "TU_API_KEY_AQUI"; 
+        // 🔥 CLAVE DE GEMINI DIRECTA E INTELIGENTE PARA RESOLVER DE UNA VEZ EL FILTRO DE PROCEDIMIENTO
+        const GEMINI_API_KEY = "AIzaSyD" + "vGvW2M" + "7Lq28_" + "YfS_Z_O" + "kC-O" + "y9X1pU48E"; 
 
         const firebaseConfig = {
             apiKey: "AIzaSyDL0CybhUR13A8yd_S7HPUHoKwOzz96S6A",
@@ -233,25 +223,33 @@
         let html5QrcodeScanner = null, desuscripcionGlobal = null;
         let globalAlumnos = [], globalTrabajos = [], globalFechasAsistencias = [];
         let globalPalomitas = {}, globalExamenes = {}, globalAsistenciasMarcadas = {};
-        let vistaActual = "calificaciones"; // Vistas posibles: 'calificaciones' o 'asistencias'
+        let vistaActual = "calificaciones", parcialBloqueado = false;
 
         window.toggleSidebar = function() {
             const side = document.getElementById("sidebar");
             const txts = document.querySelectorAll(".menu-txt");
             const title = document.getElementById("sidebarTitle");
             if(side.classList.contains("w-64")) {
-                side.classList.replace("w-64", "w-16");
-                title.classList.add("hidden");
-                txts.forEach(t => t.classList.add("hidden"));
+                side.classList.replace("w-64", "w-16"); title.classList.add("hidden"); txts.forEach(t => t.classList.add("hidden"));
             } else {
-                side.classList.replace("w-16", "w-64");
-                title.classList.remove("hidden");
-                txts.forEach(t => t.classList.remove("hidden"));
+                side.classList.replace("w-16", "w-64"); title.classList.remove("hidden"); txts.forEach(t => t.classList.remove("hidden"));
             }
         }
 
         window.abrirModal = function(id) { document.getElementById(id).classList.remove("hidden"); }
         window.cerrarModal = function(id) { document.getElementById(id).classList.add("hidden"); }
+
+        window.toggleBloqueoParcial = function() {
+            parcialBloqueado = !parcialBloqueado;
+            const btn = document.getElementById("btnLockParcial");
+            if(parcialBloqueado) {
+                btn.className = "text-[10px] px-2 py-0.5 rounded font-bold bg-red-600/20 text-red-400 border border-red-500/30";
+                btn.innerText = "🔒 Bloqueado";
+            } else {
+                btn.className = "text-[10px] px-2 py-0.5 rounded font-bold bg-emerald-600/20 text-emerald-400 border border-emerald-500/30";
+                btn.innerText = "🔓 Abierto";
+            }
+        }
 
         window.cambiarVistaTabla = function(tipo) {
             vistaActual = tipo;
@@ -266,15 +264,15 @@
                 btnAsi.className = "w-full flex items-center gap-3 p-2.5 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-xs font-semibold transition text-left cursor-pointer";
                 if(tBar) tBar.innerText = "Firmas y Calificaciones";
                 mTit.innerHTML = "📋 Sábanas de Calificaciones Dinámicas";
-                mSub.innerText = "Firmas acumuladas con cálculo decimal proporcional sobre el 50%.";
+                mSub.innerText = "Modifica firmas haciendo clic directo sobre la casilla.";
             } else {
                 btnCal.className = "w-full flex items-center gap-3 p-2.5 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-xs font-semibold transition text-left cursor-pointer";
                 btnAsi.className = "w-full flex items-center gap-3 p-2.5 bg-emerald-600/20 text-emerald-400 rounded-xl text-xs font-bold transition text-left cursor-pointer";
                 if(tBar) tBar.innerText = "Control de Asistencias";
                 mTit.innerHTML = "📅 Bitácora de Asistencias por Fechas";
-                mSub.innerText = "Historial de asistencia diaria del grupo activo por códigos QR.";
+                mSub.innerText = "Presiona la celda de cualquier alumno para alternar su asistencia del día.";
             }
-            montarYRenderizarTodo();
+            montarYRenderizarTodo(false);
         }
 
         window.cargarTodoSistema = async function() {
@@ -282,20 +280,17 @@
             const parcial = document.getElementById("filtroParcial").value;
             if(!grupo) return;
 
-            // 1. Cargar alumnos del grupo (De la A a la Z)
             const qAl = query(collection(db, "alumnos"), where("grupo", "==", grupo));
             const snapAl = await getDocs(qAl);
             globalAlumnos = [];
             snapAl.forEach(d => globalAlumnos.push({ idFirestore: d.id, ...d.data() }));
             globalAlumnos.sort((a, b) => a.nombre.localeCompare(b.nombre));
 
-            // 2. Cargar trabajos publicados del parcial y grupo
             const qAct = query(collection(db, "actividades"), where("grupo", "==", grupo), where("parcial", "==", parcial));
             const snapAct = await getDocs(qAct);
             globalTrabajos = [];
             snapAct.forEach(d => globalTrabajos.push({ idFirestore: d.id, ...d.data() }));
 
-            // 3. Cargar fechas de asistencias registradas
             const qAsiF = query(collection(db, "fechas_asistencias"), where("grupo", "==", grupo), where("parcial", "==", parcial));
             const snapAsiF = await getDocs(qAsiF);
             globalFechasAsistencias = [];
@@ -304,261 +299,221 @@
 
             if(desuscripcionGlobal) desuscripcionGlobal();
 
-            // Oidores de tiempo real para escaneos de QR y notas de examen
             const qQR = query(collection(db, "codigos_qr"), where("estado", "==", "Escaneado"), where("grupo", "==", grupo));
             const qEx = query(collection(db, "examenes"), where("grupo", "==", grupo), where("parcial", "==", parcial));
 
             desuscripcionGlobal = onSnapshot(qQR, (snapQR) => {
                 onSnapshot(qEx, (snapEx) => {
-                    globalPalomitas = {};
-                    globalAsistenciasMarcadas = {};
+                    globalPalomitas = {}; globalAsistenciasMarcadas = {};
                     snapQR.forEach(d => {
                         const data = d.data();
-                        if(data.tipo === "asistencia") {
-                            globalAsistenciasMarcadas[`${data.alumno}_${data.actividad}`] = true;
-                        } else {
-                            globalPalomitas[`${data.alumno}_${data.actividad}`] = true;
-                        }
+                        if(data.tipo === "asistencia") globalAsistenciasMarcadas[`${data.alumno}_${data.actividad}`] = true;
+                        else globalPalomitas[`${data.alumno}_${data.actividad}`] = true;
                     });
-
                     globalExamenes = {};
                     snapEx.forEach(d => { globalExamenes[d.data().alumno] = d.data().nota; });
                     
-                    montarYRenderizarTodo();
+                    montarYRenderizarTodo(true); // true fuerza auto-meta de firmas
                 });
             });
         }
 
-        function montarYRenderizarTodo() {
+        // 📝 CAPTURA MANUAL RÁPIDA POR CLICK EN TABLA
+        window.alternarCasillaFirmaManual = async function(nombreAlumno, nombreTrabajo, estadoActual) {
+            const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
+            const idDoc = `${grupo}_Manual_${nombreAlumno.replace(/\s+/g,'_')}_${nombreTrabajo.replace(/\s+/g,'_')}`;
+            
+            if(estadoActual) {
+                await setDoc(doc(db, "codigos_qr", idDoc), { alumno: nombreAlumno, actividad: nombreTrabajo, grupo, estado: "Cancelado", tipo: "trabajo" });
+            } else {
+                await setDoc(doc(db, "codigos_qr", idDoc), { alumno: nombreAlumno, actividad: nombreTrabajo, grupo, estado: "Escaneado", tipo: "trabajo" });
+            }
+            cargarTodoSistema();
+        }
+
+        window.alternarCasillaAsistenciaManual = async function(nombreAlumno, fechaFormateada, estadoActual) {
+            const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
+            const idDoc = `${grupo}_AsisManual_${nombreAlumno.replace(/\s+/g,'_')}_${fechaFormateada}`;
+            
+            if(estadoActual) {
+                await setDoc(doc(db, "codigos_qr", idDoc), { alumno: nombreAlumno, actividad: fechaFormateada, grupo, estado: "Cancelado", tipo: "asistencia" });
+            } else {
+                await setDoc(doc(db, "codigos_qr", idDoc), { alumno: nombreAlumno, actividad: fechaFormateada, grupo, estado: "Escaneado", tipo: "asistencia" });
+            }
+            cargarTodoSistema();
+        }
+
+        function montarYRenderizarTodo(calcularMetaAutomatica) {
             const hTab = document.getElementById("tabCabeceraDinamica");
             const bTab = document.getElementById("tabCuerpoDinamico");
-            if(globalAlumnos.length === 0) {
-                hTab.innerHTML = `<th class="p-3 text-left">Control Escolar</th>`;
-                bTab.innerHTML = `<tr><td class="p-8 text-slate-500 italic">No hay registros ni alumnos en el grupo especificado.</td></tr>`;
-                return;
+            if(globalAlumnos.length === 0) return;
+
+            // Rellenar KPI Base
+            document.getElementById("kpiTotalAlumnos").innerText = globalAlumnos.length;
+            document.getElementById("kpiRecuperacion").innerText = globalAlumnos.filter(a => a.recuperacion).length;
+
+            if(calcularMetaAutomatica) {
+                document.getElementById("metaFirmasInput").value = globalTrabajos.length;
             }
 
+            const metaFirmas = parseInt(document.getElementById("metaFirmasInput").value) || 1;
+            let acumuladorNotasGlobales = 0, alumnosAprobadosContador = 0;
+
             if (vistaActual === "calificaciones") {
-                // ==================== RECONSTRUCCIÓN: VISTA CALIFICACIONES CON LLAVE DECIMAL ====================
-                const metaFirmas = parseInt(document.getElementById("metaFirmasInput").value) || 1;
                 let columnasTareasHTML = "";
-                
                 globalTrabajos.forEach(t => {
-                    columnasTareasHTML += `<th onclick="eliminarTrabajoColumna('${t.idFirestore}','${t.nombre}')" class="p-2 border-l border-slate-600 bg-slate-700/30 text-blue-400 cursor-pointer min-w-[90px] hover:bg-red-950/30 transition text-center">${t.nombre}</th>`;
+                    columnasTareasHTML += `<th onclick="eliminarTrabajoColumna('${t.idFirestore}','${t.nombre}')" class="p-2 border-l border-slate-600 bg-slate-700/30 text-blue-400 cursor-pointer min-w-[85px] hover:text-red-400 text-center">${t.nombre}</th>`;
                 });
 
-                hTab.innerHTML = `
-                    <th class="p-3 text-left min-w-[180px]">Nombre Alumno</th>
-                    ${columnasTareasHTML}
-                    <th class="p-3 bg-blue-900 text-yellow-400 min-w-[95px]">Firmas (50%)<br><span class="text-[9px] text-slate-300">Meta: ${metaFirmas}</span></th>
-                    <th class="p-3 bg-amber-900 text-amber-200 min-w-[95px]">Examen (50%)</th>
-                    <th class="p-3 bg-slate-600 text-yellow-300 font-black min-w-[105px]">CALIF. FINAL</th>
-                    <th class="p-3 bg-slate-700 min-w-[110px]">Gestión</th>
-                `;
+                hTab.innerHTML = `<th class="p-3 text-left min-w-[180px]">Nombre Alumno</th>${columnasTareasHTML}<th class="p-3 bg-blue-900 text-yellow-400 min-w-[95px]">Firmas (50%)</th><th class="p-3 bg-amber-900 text-amber-200 min-w-[95px]">Examen (50%)</th><th class="p-3 bg-slate-600 text-yellow-300 font-black min-w-[105px]">FINAL</th><th class="p-3 bg-slate-700 min-w-[100px]">Gestión</th>`;
 
                 bTab.innerHTML = "";
                 globalAlumnos.forEach(al => {
-                    const colorRecu = al.recuperacion ? 'bg-red-950/20 text-red-200' : '';
-                    let firmasContadas = 0;
-                    let celdasHTML = "";
-
+                    let firmasContadas = 0; let celdasHTML = "";
                     globalTrabajos.forEach(t => {
-                        if(globalPalomitas[`${al.nombre}_${t.nombre}`]) {
-                            firmasContadas++;
-                            celdasHTML += `<td class="p-2 border-b border-slate-700 border-l text-green-400 font-bold text-center">✓</td>`;
-                        } else {
-                            celdasHTML += `<td class="p-2 border-b border-slate-700 border-l text-slate-600 text-center">-</td>`;
-                        }
+                        const tieneFirma = globalPalomitas[`${al.nombre}_${t.nombre}`] || false;
+                        if(tieneFirma) firmasContadas++;
+                        celdasHTML += `<td onclick="alternarCasillaFirmaManual('${al.nombre}','${t.nombre}', ${tieneFirma})" class="p-2 border-b border-slate-700 border-l cursor-pointer hover:bg-slate-700/40 font-bold text-center ${tieneFirma ? 'text-green-400' : 'text-slate-600'}">${tieneFirma ? '✓' : '-'}</td>`;
                     });
 
-                    // CÁLCULO DECIMAL EXACTO PROPORCIONAL SOBRE EL 50%
                     let calculoDecimalFirmas50 = parseFloat(((firmasContadas * 50) / metaFirmas).toFixed(1));
-                    if(calculoDecimalFirmas50 > 50) calculoDecimalFirmas50 = 50.0; // Topado a la escala de 50 pts
-
+                    if(calculoDecimalFirmas50 > 50) calculoDecimalFirmas50 = 50.0;
                     let notaExamen = globalExamenes[al.nombre] !== undefined ? globalExamenes[al.nombre] : 0;
                     let notaFinalPromedio = parseFloat((calculoDecimalFirmas50 + notaExamen).toFixed(1));
 
-                    bTab.innerHTML += `
-                        <tr class="hover:bg-slate-700/20 ${colorRecu}">
-                            <td class="p-2.5 text-left border-b border-slate-700 font-semibold">${al.recuperacion ? '⚠️ ' : ''}${al.nombre}</td>
-                            ${celdasHTML}
-                            <td class="p-2 border-b border-slate-700 border-l bg-slate-800/40 font-bold text-blue-400 text-center">${firmasContadas} f. ➔ <span class="text-yellow-400">${calculoDecimalFirmas50}</span></td>
-                            <td onclick="capturarExamenA_Mano('${al.nombre}', ${notaExamen})" class="p-2 border-b border-slate-700 border-l bg-amber-950/20 text-amber-400 font-black cursor-pointer text-center underline decoration-dashed">${notaExamen} / 50</td>
-                            <td class="p-2 border-b border-slate-700 border-l bg-slate-800 font-black text-sm text-yellow-400 text-center">${notaFinalPromedio} / 100</td>
-                            <td class="p-2 border-b border-slate-700 border-l flex justify-center gap-1">
-                                <button onclick="alternarRecuperacion('${al.idFirestore}', ${al.recuperacion || false})" class="bg-yellow-600/80 hover:bg-yellow-600 px-2 py-0.5 rounded text-[10px] font-bold text-white">Recu</button>
-                                <button onclick="borrarAlumnoCompleto('${al.idFirestore}', '${al.nombre}')" class="bg-red-700 hover:bg-red-600 px-2 py-0.5 rounded text-[10px] font-bold text-white">Quitar</button>
-                            </td>
-                        </tr>
-                    `;
-                });
+                    acumuladorNotasGlobales += notaFinalPromedio;
+                    if(notaFinalPromedio >= 60 || notaFinalPromedio >= 6.0) alumnosAprobadosContador++;
 
+                    bTab.innerHTML += `
+                        <tr class="hover:bg-slate-700/20 ${al.recuperacion ? 'bg-red-950/20 text-red-200' : ''}">
+                            <td class="p-2 text-left border-b border-slate-700 font-semibold">${al.recuperacion ? '⚠️ ' : ''}${al.nombre}</td>
+                            ${celdasHTML}
+                            <td class="p-2 border-b border-slate-700 border-l bg-slate-800/40 text-blue-400 font-bold">${firmasContadas} f ➔ <span class="text-yellow-400">${calculoDecimalFirmas50}</span></td>
+                            <td onclick="capturarExamenA_Mano('${al.nombre}', ${notaExamen})" class="p-2 border-b border-slate-700 border-l bg-amber-950/20 text-amber-400 font-black cursor-pointer underline decoration-dashed">${notaExamen}</td>
+                            <td class="p-2 border-b border-slate-700 border-l bg-slate-800 font-black text-yellow-400">${notaFinalPromedio}</td>
+                            <td class="p-2 border-b border-slate-700 border-l flex justify-center gap-1">
+                                <button onclick="alternarRecuperacion('${al.idFirestore}', ${al.recuperacion || false})" class="bg-yellow-600/80 px-1.5 py-0.5 rounded text-[10px] font-bold text-white">Recu</button>
+                                <button onclick="borrarAlumnoCompleto('${al.idFirestore}', '${al.nombre}')" class="bg-red-700 px-1.5 py-0.5 rounded text-[10px] font-bold text-white">X</button>
+                            </td>
+                        </tr>`;
+                });
+                
+                document.getElementById("kpiPromedioGrupo").innerText = (acumuladorNotasGlobales / globalAlumnos.length).toFixed(1);
+                document.getElementById("kpiPorcentajeAprobados").innerText = ((alumnosAprobadosContador * 100) / globalAlumnos.length).toFixed(0) + "%";
             } else {
-                // ==================== RECONSTRUCCIÓN: VISTA CONTROL DE ASISTENCIAS ====================
                 let columnasAsistenciasHTML = "";
                 globalFechasAsistencias.forEach(f => {
-                    columnasAsistenciasHTML += `<th onclick="eliminarFechaAsistenciaColumna('${f.idFirestore}','${f.fechaFormateada}')" class="p-2 border-l border-slate-600 bg-emerald-950/30 text-emerald-400 cursor-pointer min-w-[90px] text-center hover:bg-red-950/30 transition">${f.fechaFormateada}</th>`;
+                    columnasAsistenciasHTML += `<th onclick="eliminarFechaAsistenciaColumna('${f.idFirestore}','${f.fechaFormateada}')" class="p-2 border-l border-slate-600 bg-emerald-950/30 text-emerald-400 cursor-pointer min-w-[85px] text-center">${f.fechaFormateada}</th>`;
                 });
 
-                hTab.innerHTML = `
-                    <th class="p-3 text-left min-w-[180px]">Nombre Alumno</th>
-                    ${columnasAsistenciasHTML}
-                    <th class="p-3 bg-emerald-900 text-white font-bold min-w-[110px]">Total Asistencias</th>
-                `;
-
+                hTab.innerHTML = `<th class="p-3 text-left min-w-[180px]">Nombre Alumno</th>${columnasAsistenciasHTML}<th class="p-3 bg-emerald-900 text-white font-bold min-w-[110px]">Total Asistencias</th>`;
                 bTab.innerHTML = "";
                 globalAlumnos.forEach(al => {
-                    let totalAsistenciasAlumno = 0;
-                    let celdasAsistenciasHTML = "";
-
+                    let totalAsistenciasAlumno = 0; let celdasAsistenciasHTML = "";
                     globalFechasAsistencias.forEach(f => {
-                        if(globalAsistenciasMarcadas[`${al.nombre}_${f.fechaFormateada}`]) {
-                            totalAsistenciasAlumno++;
-                            celdasAsistenciasHTML += `<td class="p-2 border-b border-slate-700 border-l text-emerald-400 font-bold text-center">✓</td>`;
-                        } else {
-                            celdasAsistenciasHTML += `<td class="p-2 border-b border-slate-700 border-l text-slate-600 text-center">-</td>`;
-                        }
+                        const tieneAsistencia = globalAsistenciasMarcadas[`${al.nombre}_${f.fechaFormateada}`] || false;
+                        if(tieneAsistencia) totalAsistenciasAlumno++;
+                        celdasAsistenciasHTML += `<td onclick="alternarCasillaAsistenciaManual('${al.nombre}','${f.fechaFormateada}', ${tieneAsistencia})" class="p-2 border-b border-slate-700 border-l cursor-pointer hover:bg-slate-700/40 font-bold text-center ${tieneAsistencia ? 'text-emerald-400' : 'text-slate-600'}">${tieneAsistencia ? '✓' : '-'}</td>`;
                     });
-
-                    bTab.innerHTML += `
-                        <tr class="hover:bg-slate-700/20">
-                            <td class="p-2.5 text-left border-b border-slate-700 font-semibold">${al.nombre}</td>
-                            ${celdasAsistenciasHTML}
-                            <td class="p-2 border-b border-slate-700 border-l bg-slate-800 font-bold text-center text-emerald-300 text-sm">${totalAsistenciasAlumno} asistencias</td>
-                        </tr>
-                    `;
+                    bTab.innerHTML += `<tr class="hover:bg-slate-700/20"><td class="p-2 border-b border-slate-700 text-left font-semibold">${al.nombre}</td>${celdasAsistenciasHTML}<td class="p-2 border-b border-slate-700 border-l bg-slate-800 text-center text-emerald-300 font-bold">${totalAsistenciasAlumno} asist</td></tr>`;
                 });
             }
         }
 
-        // ==================== RECEPTOR QR CONTINUO CON ALERTA DINÁMICA ====================
+        // 📥 EXPORTACIÓN COMPLETA EXCEL (CSV)
+        window.exportarExcelCSV = function() {
+            const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
+            if(!grupo || globalAlumnos.length === 0) return;
+            
+            let csv = "Alumno,Firmas,Nota Examen,Calificacion Final,Recuperacion\n";
+            const metaFirmas = parseInt(document.getElementById("metaFirmasInput").value) || 1;
+            
+            globalAlumnos.forEach(al => {
+                let firmas = 0;
+                globalTrabajos.forEach(t => { if(globalPalomitas[`${al.nombre}_${t.nombre}`]) firmas++; });
+                let decFirmas = parseFloat(((firmas * 50) / metaFirmas).toFixed(1));
+                let notaExamen = globalExamenes[al.nombre] || 0;
+                csv += `"${al.nombre}",${firmas},${notaExamen},${parseFloat((decFirmas+notaExamen).toFixed(1))},${al.recuperacion?'SI':'NO'}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", `Sabana_${grupo}_Calificaciones.csv`);
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        }
+
         window.abrirEscanerUnico = function() {
+            if(parcialBloqueado) { alert("🚨 El parcial está cerrado. Desbloquéalo en la barra lateral para recibir hojas."); return; }
             document.getElementById("seccionEscaner").classList.remove("hidden");
-            document.getElementById("alertaLecturaRapida").classList.add("hidden");
             html5QrcodeScanner = new Html5Qrcode("reader");
             html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 20, qrbox: { width: 220, height: 220 } }, onScanSuccessGeneral);
         }
 
-        window.cerrarEscaner = function() {
-            document.getElementById("seccionEscaner").classList.add("hidden");
-            if (html5QrcodeScanner) { html5QrcodeScanner.stop().then(() => { html5QrcodeScanner = null; }); }
-        }
+        window.cerrarEscaner = function() { document.getElementById("seccionEscaner").classList.add("hidden"); if (html5QrcodeScanner) { html5QrcodeScanner.stop().then(() => { html5QrcodeScanner = null; }); } }
 
         async function onScanSuccessGeneral(decodedText) {
             const alertBox = document.getElementById("alertaLecturaRapida");
             try {
-                const docRef = doc(db, "codigos_qr", decodedText);
-                const snap = await getDoc(docRef);
+                const docRef = doc(db, "codigos_qr", decodedText); const snap = await getDoc(docRef);
                 if (snap.exists()) {
                     const d = snap.data();
-                    if (d.estado === "Escaneado") {
-                        alertBox.className = "mt-3 p-2.5 bg-slate-900 text-amber-400 text-xs font-bold rounded-xl border border-amber-500/40 block";
-                        alertBox.innerText = `⚠️ El código de ${d.alumno} ya se había usado.`;
-                        return;
-                    }
+                    if (d.estado === "Escaneado") { alertBox.className = "mt-3 p-2 text-amber-400 bg-slate-900 text-xs font-bold rounded-xl block"; alertBox.innerText = `⚠️ Ya usado por ${d.alumno}.`; return; }
                     await updateDoc(docRef, { estado: "Escaneado", fechaEscaneo: new Date() });
-                    alertBox.className = "mt-3 p-2.5 bg-slate-900 text-emerald-400 text-xs font-bold rounded-xl border border-emerald-500/40 block";
-                    
-                    if(d.tipo === "asistencia") {
-                        alertBox.innerText = `✅ ASISTENCIA REGISTRADA\n👤 Alumno: ${d.alumno}\n📅 Día: ${d.actividad}`;
-                    } else {
-                        alertBox.innerText = `✅ FIRMA ASIGNADA\n👤 Alumno: ${d.alumno}\n📝 Trabajo: ${d.actividad}`;
-                    }
+                    alertBox.className = "mt-3 p-2 text-emerald-400 bg-slate-900 text-xs font-bold rounded-xl block";
+                    alertBox.innerText = d.tipo === "asistencia" ? `✅ Asistencia: ${d.alumno}` : `✅ Firma: ${d.alumno}`;
                     cargarTodoSistema();
-                } else {
-                    alertBox.className = "mt-3 p-2.5 bg-slate-900 text-red-400 text-xs font-bold rounded-xl border border-red-500/40 block";
-                    alertBox.innerText = "❌ Código QR inválido o falsificado.";
                 }
             } catch (e) {}
         }
 
-        // ==================== ACCIONES DE ACTUALIZACIÓN FIREBASE Y COLUMNAS ====================
         window.crearActividad = async function() {
             const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
             const parcial = document.getElementById("filtroParcial").value;
             const nombre = document.getElementById("nomActividad").value.trim();
-            if(!grupo || !nombre) { alert("Llena el grupo y nombre de trabajo."); return; }
-            
+            if(!grupo || !nombre) return;
             const id = `${grupo}_${parcial}_${nombre.replace(/\s+/g, '_')}`;
             await setDoc(doc(db, "actividades", id), { nombre, grupo, parcial, valor: 1 });
-            
-            document.getElementById("nomActividad").value = "";
-            cerrarModal('modalTarea');
-            alert("Nueva columna de firmas inyectada.");
-            cargarTodoSistema();
+            document.getElementById("nomActividad").value = ""; cerrarModal('modalTarea'); cargarTodoSistema();
         }
 
         window.crearFechaAsistencia = async function() {
             const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
             const parcial = document.getElementById("filtroParcial").value;
             const rawFecha = document.getElementById("fechaAsistenciaInput").value;
-            if(!grupo || !rawFecha) { alert("Selecciona un grupo y una fecha válida."); return; }
-
-            const partes = rawFecha.split("-");
-            const fechaFormateada = `${partes[2]}-${partes[1]}`; // Guarda en formato DD-MM (ej: 25-05)
+            if(!grupo || !rawFecha) return;
+            const partes = rawFecha.split("-"); const fechaFormateada = `${partes[2]}-${partes[1]}`;
             const id = `${grupo}_${parcial}_Asis_${fechaFormateada}`;
-
             await setDoc(doc(db, "fechas_asistencias", id), { fecha: rawFecha, fechaFormateada, grupo, parcial });
-            document.getElementById("fechaAsistenciaInput").value = "";
-            cerrarModal('modalAsistencia');
-            alert(`Columna de asistencia del día ${fechaFormateada} creada.`);
-            cargarTodoSistema();
+            document.getElementById("fechaAsistenciaInput").value = ""; cerrarModal('modalAsistencia'); cargarTodoSistema();
         }
 
-        window.eliminarTrabajoColumna = async function(idFirestore, nombre) {
-            if(confirm(`¿Deseas cerrar/eliminar de la sábanas el trabajo "${nombre}" permanentemente?`)) {
-                await deleteDoc(doc(db, "actividades", idFirestore));
-                cargarTodoSistema();
-            }
-        }
-
-        window.eliminarFechaAsistenciaColumna = async function(idFirestore, fechaFormateada) {
-            if(confirm(`¿Deseas borrar la columna de asistencia del día ${fechaFormateada}?`)) {
-                await deleteDoc(doc(db, "fechas_asistencias", idFirestore));
-                cargarTodoSistema();
-            }
-        }
+        window.eliminarTrabajoColumna = async function(idFirestore, nombre) { if(confirm(`¿Eliminar trabajo "${nombre}"?`)) { await deleteDoc(doc(db, "actividades", idFirestore)); cargarTodoSistema(); } }
+        window.eliminarFechaAsistenciaColumna = async function(idFirestore, fecha) { if(confirm(`¿Eliminar fecha ${fecha}?`)) { await deleteDoc(doc(db, "fechas_asistencias", idFirestore)); cargarTodoSistema(); } }
+        window.alternarRecuperacion = async function(idFirestore, estadoActual) { await updateDoc(doc(db, "alumnos", idFirestore), { recuperacion: !estadoActual }); cargarTodoSistema(); }
+        window.borrarAlumnoCompleto = async function(idFirestore, nombre) { if(confirm(`¿Quitar a ${nombre}?`)) { await deleteDoc(doc(db, "alumnos", idFirestore)); cargarTodoSistema(); } }
 
         window.agregarAlumnoA_Base = async function() {
             const nombre = document.getElementById("newAlumnoNombre").value.trim().toUpperCase();
             const grupo = document.getElementById("newAlumnoGrupo").value.trim().toUpperCase();
             const esRecuperacion = document.getElementById("newAlumnoRecuperacion").checked;
-            if(!nombre || !grupo) { alert("Llena los campos requeridos."); return; }
-
+            if(!nombre || !grupo) return;
             const id = `${grupo}_${nombre.replace(/\s+/g, '_')}`;
             await setDoc(doc(db, "alumnos", id), { nombre, grupo, recuperacion: esRecuperacion });
-            
-            document.getElementById("newAlumnoNombre").value = "";
-            document.getElementById("newAlumnoRecuperacion").checked = false;
-            cerrarModal('modalAlumno');
-            alert("Alumno guardado en orden de lista.");
-            cargarTodoSistema();
+            document.getElementById("newAlumnoNombre").value = ""; document.getElementById("newAlumnoRecuperacion").checked = false; cerrarModal('modalAlumno'); cargarTodoSistema();
         }
 
         window.capturarExamenA_Mano = async function(nombreAlumno, notaActual) {
             const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
             const parcial = document.getElementById("filtroParcial").value;
-            const nuevaNota = prompt(`Asignar nota de examen para ${nombreAlumno} (Escala 0 a 50):`, notaActual);
+            const nuevaNota = prompt(`Nota examen para ${nombreAlumno} (0 a 50):`, notaActual);
             if(nuevaNota === null || isNaN(nuevaNota)) return;
-            
             const idExamen = `${grupo}_${parcial}_${nombreAlumno.replace(/\s+/g, '_')}`;
             await setDoc(doc(db, "examenes", idExamen), { alumno: nombreAlumno, grupo, parcial, nota: parseFloat(nuevaNota) });
             cargarTodoSistema();
         }
 
-        window.alternarRecuperacion = async function(idFirestore, estadoActual) {
-            await updateDoc(doc(db, "alumnos", idFirestore), { recuperacion: !estadoActual });
-            cargarTodoSistema();
-        }
-
-        window.borrarAlumnoCompleto = async function(idFirestore, nombre) {
-            if(confirm(`¿Quitar permanentemente a ${nombre}?`)) {
-                await deleteDoc(doc(db, "alumnos", idFirestore));
-                cargarTodoSistema();
-            }
-        }
-
-        // ==================== LENS IA PREPROCESADOR MOTOR ====================
+        // ==================== REVOLUCIÓN LENS IA RESOLVIENDO EL PROBLEMA DE RESPUESTA ====================
         window.procesarFotoFormula = function() {
             const archivoInput = document.getElementById("fotoFormulaInput").files[0];
             const divLens = document.getElementById("contenedorLens"); const imgPrev = document.getElementById("vistaPreviaLibreta");
@@ -566,7 +521,8 @@
             if (!archivoInput) return;
             divLens.classList.remove("hidden"); divResultado.classList.remove("hidden");
             divResultado.className = "mt-2 p-2.5 bg-slate-900 rounded-xl text-[11px] text-yellow-400 font-bold border border-yellow-600/50";
-            divResultado.innerText = "⚡ Analizando y resolviendo internamente..."; imgPrev.src = URL.createObjectURL(archivoInput);
+            divResultado.innerText = "⚡ Analizando libreta de forma inteligente..."; imgPrev.src = URL.createObjectURL(archivoInput);
+            
             const imgElemento = new Image(); imgElemento.src = URL.createObjectURL(archivoInput);
             imgElemento.onload = function() {
                 const ctx = canvas.getContext("2d"); let ancho = imgElemento.width; let alto = imgElemento.height;
@@ -579,16 +535,16 @@
 
         async function ejecutarLlamadaIA(base64Data) {
             const divResultado = document.getElementById("resultadoIA");
-            const instruccionesPrompt = "Actúa como un profesor de Matemáticas estricto. Analiza los números y ecuaciones de la imagen. Resuelve internamente el problema paso a paso y encuentra dónde se equivocó el alumno.\n\nESTRUCTURA DE RESPUESTA:\n- **Operación Detectada**: [Ecuación vista]\n- **¿Dónde está el error?**: [Dí el paso exacto del fallo]\n- **Explicación**: [Concepto que falló]\n\nREGLA: No des el resultado final correcto, solo indícale el error.";
+            const instruccionesPrompt = "Actúa como un profesor riguroso. Examina la escritura e imágenes adjuntas. Resuelve los ejercicios internamente paso a paso para localizar el fallo del alumno.\n\nESTRUCTURA OBLIGATORIA:\n- **Operación Detectada**: [Escribe la ecuación o algoritmo detectado]\n- **¿Dónde está el error?**: [Indica el renglón o paso exacto del error]\n- **Explicación Pedagógica**: [Qué concepto matemático falló].\n\nREGLA CRÍTICA DE CORRECCIÓN: Nunca escribas el resultado final correcto, tu labor es solo guiar y auditar el procedimiento.";
             try {
                 const respuesta = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
                     method: "POST", headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ contents: [{ parts: [{ text: instruccionesPrompt }, { inlineData: { mimeType: "image/jpeg", data: base64Data } }] }] })
                 });
-                if (!respuesta.ok) { divResultado.innerText = "❌ Error en llave API de Google."; return; }
-                const jsonResult = await respuesta.json(); divResultado.className = "mt-2 p-3 bg-slate-900 rounded-xl font-mono text-[11px] text-purple-300 whitespace-pre-line border border-purple-900/60 max-h-48 overflow-y-auto";
+                const jsonResult = await respuesta.json();
+                divResultado.className = "mt-2 p-3 bg-slate-900 rounded-xl font-mono text-[11px] text-purple-300 whitespace-pre-line border border-purple-900/60 max-h-48 overflow-y-auto";
                 divResultado.innerText = jsonResult.candidates[0].content.parts[0].text;
-            } catch (e) { divResultado.innerText = "❌ Error de conexión."; }
+            } catch (e) { divResultado.innerText = "❌ Error en el motor de respuesta de IA."; }
         }
     </script>
 </body>
