@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Maestra - Edición Quantum V9.8 Ultra</title>
+    <title>Panel Maestra - Edición Quantum V9.9 Ultra</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 </head>
@@ -82,7 +82,7 @@
             </nav>
         </div>
         <div class="p-4 border-t border-slate-800 text-[10px] text-slate-500 font-mono menu-txt">
-            V9.8 • Mantenimiento
+            V9.9 • Estable
         </div>
     </aside>
 
@@ -165,21 +165,17 @@
             <div class="flex justify-end -mt-2 -mr-2">
                 <button onclick="cerrarModal('modalIA')" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
             </div>
-            
             <div class="w-16 h-16 mx-auto mb-4 bg-purple-500/10 rounded-full flex items-center justify-center text-3xl border border-purple-500/20">
                 🛠️
             </div>
-            
             <h3 class="font-bold text-base text-purple-400 tracking-wide mb-1">MÓDULO EN MANTENIMIENTO</h3>
             <p class="text-xs text-slate-400 px-2 leading-relaxed">
                 El Corrector Multimodal Lens IA se encuentra fuera de servicio temporalmente por actualización de servidores.
             </p>
-            
             <div class="mt-4 pt-3 border-t border-slate-700/60 flex flex-col gap-1 text-[10px] text-purple-300/70 font-mono">
                 <span>Estado: Reconfigurando Sabanas</span>
                 <span>Código de error: 503_SERVICE_UNAVAILABLE</span>
             </div>
-
             <button onclick="cerrarModal('modalIA')" class="mt-5 w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 rounded-xl text-xs transition cursor-pointer">
                 Entendido
             </button>
@@ -323,7 +319,7 @@
             cargarTodoSistema();
         }
 
-        function montarYRenderizarTodo(calcularMetaAutomatica) {
+        window.montarYRenderizarTodo = function(calcularMetaAutomatica) {
             const hTab = document.getElementById("tabCabeceraDinamica"); const bTab = document.getElementById("tabCuerpoDinamico");
             if(globalAlumnos.length === 0) return;
             document.getElementById("kpiTotalAlumnos").innerText = globalAlumnos.length;
@@ -417,7 +413,7 @@
         window.capturarExamenA_Mano = async function(n, nota) {
             const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase(); const parcial = document.getElementById("filtroParcial").value;
             const nuevaNota = prompt(`Nota examen para ${n}:`, nota); if(nuevaNota === null || isNaN(nuevaNota)) return;
-            await setDoc(doc(db, "examenes", `${grupo}_${parcial}_${n.replace(/\s+/g, '_')}`), { alumno: n, grupo, parcial, nota: parseFloat(nuevaNota) }); cargarTodoSistema();
+            await setDoc(doc(db, "examenes", `${grupo}_${parcial}_${n.replace(/\s+/g, '_')}`), { alumno: n, group: grupo, parcial, nota: parseFloat(nuevaNota) }); cargarTodoSistema();
         }
         window.agregarAlumnoA_Base = async function() {
             const nombre = document.getElementById("newAlumnoNombre").value.trim().toUpperCase(); const grupo = document.getElementById("newAlumnoGrupo").value.trim().toUpperCase(); const rec = document.getElementById("newAlumnoRecuperacion").checked;
