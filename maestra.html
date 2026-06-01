@@ -130,6 +130,18 @@
             <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-sm text-blue-400">📝 Publicar Trabajo</h3><button onclick="cerrarModal('modalTarea')" class="text-slate-400 hover:text-white font-bold">✕</button></div>
             <div class="space-y-3 text-xs">
                 <div><label class="block text-slate-400 mb-1">Nombre Corto:</label><input id="nomActividad" type="text" placeholder="Ej: Tarea 1" class="w-full p-2.5 bg-slate-700 rounded-xl text-white"></div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Fecha de Publicación:</label>
+                    <input id="fechaPubInput" type="date" onchange="actualizarFechaLimiteMismoDia()" class="w-full p-2.5 bg-slate-700 rounded-xl text-slate-200">
+                </div>
+                <div class="flex items-center gap-2 bg-slate-900/40 p-2 rounded-xl border border-slate-700/60">
+                    <input id="chkMismoDia" type="checkbox" onchange="toggleMismoDia()" class="w-4 h-4 text-blue-600 bg-slate-700 border-slate-600 rounded">
+                    <label for="chkMismoDia" class="text-slate-300 font-medium cursor-pointer select-none">⚡ ¿Es para entregar hoy mismo?</label>
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Fecha Límite de Entrega:</label>
+                    <input id="fechaTareaInput" type="date" class="w-full p-2.5 bg-slate-700 rounded-xl text-slate-200">
+                </div>
                 <button onclick="crearActividad()" class="w-full bg-blue-600 hover:bg-blue-500 p-2.5 rounded-xl font-bold transition">Inyectar Columna</button>
             </div>
         </div>
@@ -226,6 +238,26 @@
         window.abrirModal = function(id) { document.getElementById(id).classList.remove("hidden"); }
         window.cerrarModal = function(id) { document.getElementById(id).classList.add("hidden"); }
 
+        window.toggleMismoDia = function() {
+            const chk = document.getElementById("chkMismoDia");
+            const fLim = document.getElementById("fechaTareaInput");
+            if(chk.checked) {
+                fLim.disabled = true;
+                fLim.classList.add("opacity-40");
+                actualizarFechaLimiteMismoDia();
+            } else {
+                fLim.disabled = false;
+                fLim.classList.remove("opacity-40");
+            }
+        }
+
+        window.actualizarFechaLimiteMismoDia = function() {
+            const chk = document.getElementById("chkMismoDia");
+            if(chk.checked) {
+                document.getElementById("fechaTareaInput").value = document.getElementById("fechaPubInput").value;
+            }
+        }
+
         window.toggleBloqueoParcial = function() {
             parcialBloqueado = !parcialBloqueado;
             const btn = document.getElementById("btnLockParcial");
@@ -298,7 +330,7 @@
             const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
             const idDoc = `${grupo}_Manual_${nombreAlumno.replace(/\s+/g,'_')}_${nombreTrabajo.replace(/\s+/g,'_')}`;
             if(estadoActual) await setDoc(doc(db, "codigos_qr", idDoc), { alumno: nombreAlumno, actividad: nombreTrabajo, grupo, estado: "Cancelado", tipo: "trabajo" });
-            else await setDoc(doc(db, "codigos_qr", idDoc), { alumno: nombreAlumno, actividad: nombreTrabajo, grupo, estado: "Escaneado", tipo: "trabajo" });
+            else await setDoc(doc(db, "codigos_qr", idDoc), { alumno: nombreAlumno, actividad: nombreTrabajo, group: grupo, estado: "Escaneado", tipo: "trabajo" });
             cargarTodoSistema();
         }
 
@@ -330,7 +362,16 @@
 
             if (vistaActual === "calificaciones") {
                 let columnasTareasHTML = "";
-                globalTrabajos.forEach(t => { columnasTareasHTML += `<th onclick="eliminarTrabajoColumna('${t.idFirestore}','${t.nombre}')" class="p-2 border-l border-slate-600 bg-slate-700/30 text-blue-400 cursor-pointer min-w-[85px] text-center">${t.nombre}</th>`; });
+                globalTrabajos.forEach(t => { 
+                    const tituloColumna = `
+                        <div class="leading-tight py-1">
+                            <span class="font-bold text-blue-400 block">${t.nombre}</span>
+                            <span class="text-[9px] text-slate-400 block font-normal">P: ${t.fPubFormateada || '-'}</span>
+                            <span class="text-[9px] text-red-400 block font-semibold">L: ${t.fLimFormateada || '-'}</span>
+                        </div>
+                    `;
+                    columnasTareasHTML += `<th onclick="eliminarTrabajoColumna('${t.idFirestore}','${t.nombre}')" class="p-1 border-l border-slate-600 bg-slate-700/30 cursor-pointer min-w-[95px] text-center">${tituloColumna}</th>`; 
+                });
                 hTab.innerHTML = `<th class="p-3 text-left min-w-[180px]">Nombre Alumno</th>${columnasTareasHTML}<th class="p-3 bg-blue-900 text-yellow-400 min-w-[95px]">Firmas (50%)</th><th class="p-3 bg-amber-900 text-amber-200 min-w-[95px]">Examen (50%)</th><th class="p-3 bg-slate-600 text-yellow-300 font-black min-w-[105px]">FINAL</th><th class="p-3 bg-slate-700 min-w-[100px]">Gestión</th>`;
                 bTab.innerHTML = "";
                 globalAlumnos.forEach(al => {
@@ -387,6 +428,20 @@
                         alertBox.className = "mt-3 p-2 text-amber-400 bg-slate-900 text-xs font-bold rounded-xl block"; 
                         alertBox.innerText = `⚠️ Ya usado por ${d.alumno}.`; return; 
                     }
+
+                    // 🛠️ VALIDACIÓN TIPO CLASSROOM (CONTROL DE FECHA LÍMITE)
+                    if (d.tipo !== "asistencia") {
+                        const tMatch = globalTrabajos.find(t => t.nombre === d.actividad);
+                        if (tMatch && tMatch.fechaLimite) {
+                            const hoyStr = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+                            if (hoyStr > tMatch.fechaLimite) {
+                                alertBox.className = "mt-3 p-2 text-red-400 bg-slate-900 text-xs font-bold rounded-xl block border border-red-500/50";
+                                alertBox.innerText = `🚨 Plazo vencido para ${d.actividad}.`;
+                                return;
+                            }
+                        }
+                    }
+
                     await updateDoc(docRef, { estado: "Escaneado", fechaEscaneo: new Date() });
                     alertBox.className = "mt-3 p-2 text-emerald-400 bg-slate-900 text-xs font-bold rounded-xl block"; alertBox.innerText = `✅ Validado: ${d.alumno}`; cargarTodoSistema();
                 }
@@ -394,9 +449,38 @@
         }
 
         window.crearActividad = async function() {
-            const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase(); const parcial = document.getElementById("filtroParcial").value; const nombre = document.getElementById("nomActividad").value.trim();
-            if(!grupo || !nombre) return; await setDoc(doc(db, "actividades", `${grupo}_${parcial}_${nombre.replace(/\s+/g, '_')}`), { nombre, group: grupo, parcial, valor: 1 });
-            document.getElementById("nomActividad").value = ""; cerrarModal('modalTarea'); cargarTodoSistema();
+            const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase(); 
+            const parcial = document.getElementById("filtroParcial").value; 
+            const nombre = document.getElementById("nomActividad").value.trim();
+            const rawFechaPub = document.getElementById("fechaPubInput").value;
+            const rawFechaLim = document.getElementById("fechaTareaInput").value;
+            
+            if(!grupo || !nombre || !rawFechaPub || !rawFechaLim) return; 
+            
+            const pPub = rawFechaPub.split("-");
+            const pLim = rawFechaLim.split("-");
+            const fPubForm = `${pPub[2]}-${pPub[1]}`;
+            const fLimForm = `${pLim[2]}-${pLim[1]}`;
+            
+            await setDoc(doc(db, "actividades", `${grupo}_${parcial}_${nombre.replace(/\s+/g, '_')}`), { 
+                nombre, 
+                grupo, 
+                parcial, 
+                valor: 1,
+                fechaPublicacion: rawFechaPub,
+                fPubFormateada: fPubForm,
+                fechaLimite: rawFechaLim,
+                fLimFormateada: fLimForm
+            });
+            
+            document.getElementById("nomActividad").value = ""; 
+            document.getElementById("fechaPubInput").value = ""; 
+            document.getElementById("fechaTareaInput").value = ""; 
+            document.getElementById("chkMismoDia").checked = false;
+            document.getElementById("fechaTareaInput").disabled = false;
+            document.getElementById("fechaTareaInput").classList.remove("opacity-40");
+            cerrarModal('modalTarea'); 
+            cargarTodoSistema();
         }
 
         window.crearFechaAsistencia = async function() {
@@ -413,7 +497,7 @@
         window.capturarExamenA_Mano = async function(n, nota) {
             const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase(); const parcial = document.getElementById("filtroParcial").value;
             const nuevaNota = prompt(`Nota examen para ${n}:`, nota); if(nuevaNota === null || isNaN(nuevaNota)) return;
-            await setDoc(doc(db, "examenes", `${grupo}_${parcial}_${n.replace(/\s+/g, '_')}`), { alumno: n, group: grupo, parcial, nota: parseFloat(nuevaNota) }); cargarTodoSistema();
+            await setDoc(doc(db, "examenes", `${grupo}_${parcial}_${n.replace(/\s+/g, '_')}`), { alumno: n, grupo, parcial, nota: parseFloat(nuevaNota) }); cargarTodoSistema();
         }
         window.agregarAlumnoA_Base = async function() {
             const nombre = document.getElementById("newAlumnoNombre").value.trim().toUpperCase(); const grupo = document.getElementById("newAlumnoGrupo").value.trim().toUpperCase(); const rec = document.getElementById("newAlumnoRecuperacion").checked;
