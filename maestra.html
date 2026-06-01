@@ -3,17 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Maestra - Edición Quantum V9.6 Ultra</title>
+    <title>Panel Maestra - Edición Quantum V9.8 Ultra</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
-    <style>
-        @keyframes laser {
-            0% { top: 0%; }
-            50% { top: 100%; }
-            100% { top: 0%; }
-        }
-        .anim-laser { animation: laser 2s linear infinite; }
-    </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans flex overflow-hidden">
 
@@ -90,7 +82,7 @@
             </nav>
         </div>
         <div class="p-4 border-t border-slate-800 text-[10px] text-slate-500 font-mono menu-txt">
-            V9.6 • Ultra IA
+            V9.8 • Mantenimiento
         </div>
     </aside>
 
@@ -169,46 +161,28 @@
     </div>
 
     <div id="modalIA" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-800 border border-slate-700 w-full max-w-md rounded-2xl p-5 shadow-2xl flex flex-col max-h-[90vh]">
-            <div class="flex justify-between items-center mb-3">
-                <h3 class="font-bold text-sm text-purple-400 flex items-center gap-1">🤖 Corrector Multimodal Lens IA</h3>
-                <button onclick="cerrarModal('modalIA')" class="text-slate-400 hover:text-white font-bold">✕</button>
+        <div class="bg-slate-800 border border-purple-500/40 w-full max-w-sm rounded-2xl p-6 shadow-2xl text-center">
+            <div class="flex justify-end -mt-2 -mr-2">
+                <button onclick="cerrarModal('modalIA')" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
             </div>
             
-            <div class="space-y-4 text-xs overflow-y-auto flex-1 pr-1">
-                <div>
-                    <label class="block text-[10px] text-slate-400 uppercase font-bold mb-1.5">Método de Entrada:</label>
-                    <select id="selectorMetodoIA" onchange="cambiarMetodoEntradaIA()" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-purple-300 font-bold focus:outline-none">
-                        <option value="camara">📸 Opción 1: Tomar foto en el momento</option>
-                        <option value="galeria">📁 Opción 2: Escoger foto de la galería</option>
-                        <option value="texto">✍️ Opción 3: Escribir el problema a mano</option>
-                    </select>
-                </div>
-
-                <div id="zonaCapturaImagen" class="space-y-2">
-                    <input id="inputCamaraEnVivo" type="file" accept="image/*" capture="environment" class="hidden" onchange="procesarMetodoImagen(this)">
-                    <input id="inputGaleriaArchivo" type="file" accept="image/*" class="hidden" onchange="procesarMetodoImagen(this)">
-                    
-                    <button id="btnAccionDisparador" onclick="dispararEntradaSeleccionada()" class="w-full bg-purple-700 hover:bg-purple-600 text-white p-3 rounded-xl block text-center font-bold tracking-wide transition shadow-md cursor-pointer">
-                        📸 ABRIR CÁMARA TRASERA EN VIVO
-                    </button>
-                </div>
-
-                <div id="zonaCapturaTexto" class="hidden space-y-2">
-                    <label class="block text-[10px] text-slate-400">Escribe la operación o problema matemático:</label>
-                    <textarea id="textoProblemaManual" rows="3" placeholder="Ej: 3x + 5 = 20. El alumno resolvió que x = 4..." class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 font-mono"></textarea>
-                    <button onclick="procesarMetodoTexto()" class="w-full bg-purple-600 hover:bg-purple-500 text-white p-2.5 rounded-xl font-bold transition cursor-pointer">
-                        Enviar Texto a la IA ➔
-                    </button>
-                </div>
-
-                <div id="contenedorLens" class="hidden relative w-full h-40 bg-slate-950 rounded-xl overflow-hidden border border-purple-500">
-                    <img id="vistaPreviaLibreta" class="w-full h-full object-cover opacity-60" src="" alt="Escaneo">
-                    <div class="absolute left-0 right-0 h-0.5 bg-purple-400 shadow-[0_0_10px_#c084fc] anim-laser"></div>
-                </div>
-                
-                <div id="resultadoIA" class="hidden p-3 bg-slate-900 rounded-xl font-mono text-[11px] text-purple-300 whitespace-pre-line border border-purple-900/60 max-h-48 overflow-y-auto"></div>
+            <div class="w-16 h-16 mx-auto mb-4 bg-purple-500/10 rounded-full flex items-center justify-center text-3xl border border-purple-500/20">
+                🛠️
             </div>
+            
+            <h3 class="font-bold text-base text-purple-400 tracking-wide mb-1">MÓDULO EN MANTENIMIENTO</h3>
+            <p class="text-xs text-slate-400 px-2 leading-relaxed">
+                El Corrector Multimodal Lens IA se encuentra fuera de servicio temporalmente por actualización de servidores.
+            </p>
+            
+            <div class="mt-4 pt-3 border-t border-slate-700/60 flex flex-col gap-1 text-[10px] text-purple-300/70 font-mono">
+                <span>Estado: Reconfigurando Sabanas</span>
+                <span>Código de error: 503_SERVICE_UNAVAILABLE</span>
+            </div>
+
+            <button onclick="cerrarModal('modalIA')" class="mt-5 w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 rounded-xl text-xs transition cursor-pointer">
+                Entendido
+            </button>
         </div>
     </div>
 
@@ -220,9 +194,6 @@
             <button onclick="cerrarEscaner()" class="mt-4 w-full bg-red-600 text-white py-2 rounded-xl text-xs font-bold">Apagar Cámara</button>
         </div>
     </div>
-
-    <canvas id="canvasPreprocessors" class="hidden"></canvas>
-    <canvas id="canvasPreprocesador" class="hidden"></canvas>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -303,7 +274,7 @@
             globalFechasAsistencias.sort((a,b) => a.fecha.localeCompare(b.fecha));
 
             if(desuscripcionGlobal) desuscripcionGlobal();
-            const qQR = query(collection(db, "codigos_qr"), where("estado", "==", "Escaneado"), where("grupo", "==", grupo));
+            const qQR = query(collection(db, "codigos_qr"), where("grupo", "==", grupo));
             const qEx = query(collection(db, "examenes"), where("grupo", "==", grupo), where("parcial", "==", parcial));
 
             desuscripcionGlobal = onSnapshot(qQR, (snapQR) => {
@@ -311,8 +282,15 @@
                     globalPalomitas = {}; globalAsistenciasMarcadas = {};
                     snapQR.forEach(d => {
                         const data = d.data();
-                        if(data.tipo === "asistencia") globalAsistenciasMarcadas[`${data.alumno}_${data.actividad}`] = true;
-                        else globalPalomitas[`${data.alumno}_${data.actividad}`] = true;
+                        if(data.estado === "Escaneado") {
+                            if(data.tipo === "asistencia") {
+                                globalAsistenciasMarcadas[`${data.alumno}_${data.actividad}`] = "✓";
+                            } else {
+                                globalPalomitas[`${data.alumno}_${data.actividad}`] = true;
+                            }
+                        } else if(data.estado === "Retardo" && data.tipo === "asistencia") {
+                            globalAsistenciasMarcadas[`${data.alumno}_${data.actividad}`] = "R";
+                        }
                     });
                     globalExamenes = {}; snapEx.forEach(d => { globalExamenes[d.data().alumno] = d.data().nota; });
                     montarYRenderizarTodo(true);
@@ -328,11 +306,20 @@
             cargarTodoSistema();
         }
 
-        window.alternarCasillaAsistenciaManual = async function(nombreAlumno, fechaFormateada, estadoActual) {
+        window.alternarCasillaAsistenciaManual = async function(nombreAlumno, fechaFormateada) {
             const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
             const idDoc = `${grupo}_AsisManual_${nombreAlumno.replace(/\s+/g,'_')}_${fechaFormateada}`;
-            if(estadoActual) await setDoc(doc(db, "codigos_qr", idDoc), { alumno: nombreAlumno, actividad: fechaFormateada, group, estado: "Cancelado", tipo: "asistencia" });
-            else await setDoc(doc(db, "codigos_qr", idDoc), { alumno: nombreAlumno, actividad: fechaFormateada, grupo, estado: "Escaneado", tipo: "asistencia" });
+            const seleccion = prompt(`Marcar asistencia para ${nombreAlumno} en la fecha ${fechaFormateada}:\n\nEscribe:\n[ 1 ] para Asistencia (✓)\n[ 2 ] para Retardo (R)\n[ 3 ] para Falta (-)`);
+            
+            if(seleccion === "1") {
+                await setDoc(doc(db, "codigos_qr", idDoc), { alumno: nombreAlumno, actividad: fechaFormateada, grupo, estado: "Escaneado", tipo: "asistencia" });
+            } else if(seleccion === "2") {
+                await setDoc(doc(db, "codigos_qr", idDoc), { alumno: nombreAlumno, actividad: fechaFormateada, grupo, estado: "Retardo", tipo: "asistencia" });
+            } else if(seleccion === "3") {
+                await setDoc(doc(db, "codigos_qr", idDoc), { alumno: nombreAlumno, actividad: fechaFormateada, grupo, estado: "Cancelado", tipo: "asistencia" });
+            } else {
+                return;
+            }
             cargarTodoSistema();
         }
 
@@ -373,8 +360,14 @@
                 globalAlumnos.forEach(al => {
                     let totalAsistenciasAlumno = 0; let celdasAsistenciasHTML = "";
                     globalFechasAsistencias.forEach(f => {
-                        const tieneAsistencia = globalAsistenciasMarcadas[`${al.nombre}_${f.fechaFormateada}`] || false; if(tieneAsistencia) totalAsistenciasAlumno++;
-                        celdasAsistenciasHTML += `<td onclick="alternarCasillaAsistenciaManual('${al.nombre}','${f.fechaFormateada}', ${tieneAsistencia})" class="p-2 border-b border-slate-700 border-l cursor-pointer hover:bg-slate-700/40 font-bold text-center ${tieneAsistencia ? 'text-emerald-400' : 'text-slate-600'}">${tieneAsistencia ? '✓' : '-'}</td>`;
+                        const estadoAsistencia = globalAsistenciasMarcadas[`${al.nombre}_${f.fechaFormateada}`] || "-";
+                        let colorTexto = "text-slate-600";
+                        if(estadoAsistencia === "✓") {
+                            totalAsistenciasAlumno += 1; colorTexto = "text-green-400";
+                        } else if(estadoAsistencia === "R") {
+                            totalAsistenciasAlumno += 0.5; colorTexto = "text-yellow-400 font-extrabold";
+                        }
+                        celdasAsistenciasHTML += `<td onclick="alternarCasillaAsistenciaManual('${al.nombre}','${f.fechaFormateada}')" class="p-2 border-b border-slate-700 border-l cursor-pointer hover:bg-slate-700/40 font-bold text-center ${colorTexto}">${estadoAsistencia}</td>`;
                     });
                     bTab.innerHTML += `<tr class="hover:bg-slate-700/20"><td class="p-2 border-b border-slate-700 text-left font-semibold">${al.nombre}</td>${celdasAsistenciasHTML}<td class="p-2 border-b border-slate-700 border-l text-emerald-300 font-bold">${totalAsistenciasAlumno} asist</td></tr>`;
                 });
@@ -393,7 +386,11 @@
             try {
                 const docRef = doc(db, "codigos_qr", decodedText); const snap = await getDoc(docRef);
                 if (snap.exists()) {
-                    const d = snap.data(); if (d.estado === "Escaneado") { alertBox.className = "mt-3 p-2 text-amber-400 bg-slate-900 text-xs font-bold rounded-xl block"; alertBox.innerText = `⚠️ Ya usado por ${d.alumno}.`; return; }
+                    const d = snap.data(); 
+                    if (d.estado === "Escaneado" || d.estado === "Retardo") { 
+                        alertBox.className = "mt-3 p-2 text-amber-400 bg-slate-900 text-xs font-bold rounded-xl block"; 
+                        alertBox.innerText = `⚠️ Ya usado por ${d.alumno}.`; return; 
+                    }
                     await updateDoc(docRef, { estado: "Escaneado", fechaEscaneo: new Date() });
                     alertBox.className = "mt-3 p-2 text-emerald-400 bg-slate-900 text-xs font-bold rounded-xl block"; alertBox.innerText = `✅ Validado: ${d.alumno}`; cargarTodoSistema();
                 }
@@ -402,7 +399,7 @@
 
         window.crearActividad = async function() {
             const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase(); const parcial = document.getElementById("filtroParcial").value; const nombre = document.getElementById("nomActividad").value.trim();
-            if(!grupo || !nombre) return; await setDoc(doc(db, "actividades", `${grupo}_${parcial}_${nombre.replace(/\s+/g, '_')}`), { nombre, grupo, parcial, valor: 1 });
+            if(!grupo || !nombre) return; await setDoc(doc(db, "actividades", `${grupo}_${parcial}_${nombre.replace(/\s+/g, '_')}`), { nombre, group: grupo, parcial, valor: 1 });
             document.getElementById("nomActividad").value = ""; cerrarModal('modalTarea'); cargarTodoSistema();
         }
 
@@ -437,125 +434,6 @@
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob);
             link.setAttribute("download", `Sabana_${grupo}.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link);
-        }
-
-        // ==================== 🤖 INTERFAZ Y PROCESAMIENTO MULTIMODAL LENS IA (3 EN 1) ====================
-        
-        // Manejador del cambio de la lista desplegable del modal morado
-        window.cambiarMetodoEntradaIA = function() {
-            const metodo = document.getElementById("selectorMetodoIA").value;
-            const zonaImg = document.getElementById("zonaCapturaImagen");
-            const zonaTxt = document.getElementById("zonaCapturaTexto");
-            const btnDisparar = document.getElementById("btnAccionDisparador");
-            
-            // Reiniciar estados visuales anteriores
-            document.getElementById("contenedorLens").classList.add("hidden");
-            document.getElementById("resultadoIA").classList.add("hidden");
-
-            if (metodo === "texto") {
-                zonaImg.classList.add("hidden");
-                zonaTxt.classList.remove("hidden");
-            } else {
-                zonaTxt.classList.add("hidden");
-                zonaImg.classList.remove("hidden");
-                btnDisparar.innerText = metodo === "camara" ? "📸 ABRIR CÁMARA TRASERA EN VIVO" : "📁 EXAMINAR ARCHIVOS / GALERÍA";
-            }
-        }
-
-        // Simula el clic al input invisible correspondiente
-        window.dispararEntradaSeleccionada = function() {
-            const metodo = document.getElementById("selectorMetodoIA").value;
-            if (metodo === "camara") {
-                document.getElementById("inputCamaraEnVivo").click();
-            } else if (metodo === "galeria") {
-                document.getElementById("inputGaleriaArchivo").click();
-            }
-        }
-
-        // Procesa la imagen cargada por Cámara o Galería, comprime y despacha
-        window.procesarMetodoImagen = function(elementoInput) {
-            // 📝 ESPACIO VACÍO: PEGA TU NUEVA API KEY ENTRE LAS COMILLAS
-            const apiKey = "AQ.Ab8RN6LkJXtuJEMLSveWrsIpna4rgbg4YPTJKKPD-0JzULEHbA";
-
-            const archivo = elementoInput.files[0];
-            const divLens = document.getElementById("contenedorLens"); 
-            const imgPrev = document.getElementById("vistaPreviaLibreta");
-            const divResultado = document.getElementById("resultadoIA"); 
-            const canvas = document.getElementById("canvasPreprocesador");
-            
-            if (!archivo) return;
-            
-            divLens.classList.remove("hidden"); 
-            divResultado.classList.remove("hidden");
-            divResultado.className = "mt-2 p-2.5 bg-slate-900 rounded-xl text-[11px] text-purple-400 font-bold border border-purple-600/50 animate-pulse";
-            divResultado.innerText = "⚡ Extrayendo imagen y consultando a Gemini Pro..."; 
-            
-            const urlSegura = URL.createObjectURL(archivo);
-            imgPrev.src = urlSegura;
-            
-            const imgAux = new Image(); 
-            imgAux.onload = function() {
-                const ctx = canvas.getContext("2d"); 
-                let w = imgAux.width; let h = imgAux.height;
-                if (w > 800) { h *= 800 / w; w = 800; }
-                canvas.width = w; canvas.height = h; 
-                ctx.drawImage(imgAux, 0, 0, w, h);
-                
-                const base64Str = canvas.toDataURL("image/jpeg", 0.7).split(',')[1];
-                URL.revokeObjectURL(urlSegura);
-                
-                ejecutarLlamadaIA(base64Str, apiKey, true);
-            };
-            imgAux.src = urlSegura;
-        }
-
-        // Procesa el problema si la maestra decidió redactarlo textualmente
-        window.procesarMetodoTexto = function() {
-            // 📝 ESPACIO VACÍO: PEGA TU NUEVA API KEY ENTRE LAS COMILLAS
-            const apiKey = "AQUÍ_VA_TU_NUEVA_API_KEY";
-            
-            const textoProblema = document.getElementById("textoProblemaManual").value.trim();
-            const divResultado = document.getElementById("resultadoIA");
-            
-            if (!textoProblema) { alert("⚠️ Escribe la operación antes de enviarla."); return; }
-            
-            divResultado.classList.remove("hidden");
-            divResultado.className = "mt-2 p-2.5 bg-slate-900 rounded-xl text-[11px] text-purple-400 font-bold border border-purple-600/50 animate-pulse";
-            divResultado.innerText = "⚡ Analizando el problema redactado...";
-            
-            ejecutarLlamadaIA(textoProblema, apiKey, false);
-        }
-
-        // Conector global unificado a la API de Google Gemini 1.5 Flash
-        async function ejecutarLlamadaIA(payload, apiKey, esImagen) {
-            const divResultado = document.getElementById("resultadoIA");
-            const promptFijo = "Actúa como un profesor de matemáticas estricto. Examina el ejercicio provisto. Resuélvelo internamente paso a paso para contrastar el proceso.\n\nESTRUCTURA DE RESPUESTA OBLIGATORIA:\n1. **Operación Detectada**: [Escribe el problema identificado]\n2. **¿En qué estás mal?**: [Identifica el renglón, número o signo preciso de la falla]\n3. **¿Por qué estás mal?**: [Explica la regla matemática rota].\n\nREGLA DE ORO: Tienes prohibido revelar o escribir el resultado numérico definitivo o la respuesta final.";
-            
-            let cuerpoPeticion = {};
-            if (esImagen) {
-                cuerpoPeticion = { contents: [{ parts: [{ text: promptFijo }, { inlineData: { mimeType: "image/jpeg", data: payload } }] }] };
-            } else {
-                cuerpoPeticion = { contents: [{ parts: [{ text: `${promptFijo}\n\nAquí tienes el ejercicio del alumno:\n${payload}` }] }] };
-            }
-            
-            try {
-                const apiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-                    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(cuerpoPeticion)
-                });
-                
-                const datos = await apiRes.json();
-                if(!apiRes.ok || !datos.candidates) {
-                    divResultado.className = "mt-2 p-3 bg-red-950/40 rounded-xl font-mono text-[11px] text-red-400 border border-red-900/60";
-                    divResultado.innerText = "❌ Error: La API Key ingresada no es válida o está bloqueada por restricciones de Google Cloud.";
-                    return;
-                }
-                
-                divResultado.className = "mt-2 p-3 bg-slate-900 rounded-xl font-mono text-[11px] text-purple-300 whitespace-pre-line border border-purple-900/60 max-h-48 overflow-y-auto";
-                divResultado.innerText = datos.candidates[0].content.parts[0].text;
-            } catch(e) {
-                divResultado.className = "mt-2 p-3 bg-red-950/40 rounded-xl font-mono text-[11px] text-red-400 border border-red-900/60";
-                divResultado.innerText = "❌ Error crítico: Imposible establecer comunicación con Google AI.";
-            }
         }
     </script>
 </body>
