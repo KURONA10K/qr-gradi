@@ -505,30 +505,39 @@
             await setDoc(doc(db, "examenes", idExamen), { alumno: nombreAlumno, grupo, parcial, nota: parseFloat(nuevaNota) });
             cargarTodoSistema();
         }
-
-        // ==================== 🤖 MOTOR DE IA NATIVO CON TU CLAVE INTEGRADA ====================
+// ==================== 🤖 MOTOR DE IA NATIVO CON TU CLAVE INTEGRADA ====================
         window.procesarFotoFormula = function() {
-            // 📝 LINEA DE EDICIÓN: Aquí está inyectada la clave fija que copiaste de Google
-            const apiKey = "AIzaSyCeCnBTgwLU98w8hxrt-ac2Mb_4ZINYcGc";
+            // 📝 TU CLAVE NUEVA TOTALMENTE FIJA
+            const apiKey = "AQ.Ab8RN6JiXucTpvvCcYlnG_OiFzWhorKn0DWIyy7i46-3ftIR_A";
 
             const archivoInput = document.getElementById("fotoFormulaInput").files[0];
-            const divLens = document.getElementById("contenedorLens"); const imgPrev = document.getElementById("vistaPreviaLibreta");
-            const divResultado = document.getElementById("resultadoIA"); const canvas = document.getElementById("canvasPreprocesador");
+            const divLens = document.getElementById("contenedorLens"); 
+            const imgPrev = document.getElementById("vistaPreviaLibreta");
+            const divResultado = document.getElementById("resultadoIA"); 
+            const canvas = document.getElementById("canvasPreprocesador");
             if (!archivoInput) return;
             
-            divLens.classList.remove("hidden"); divResultado.classList.remove("hidden");
+            divLens.classList.remove("hidden"); 
+            divResultado.classList.remove("hidden");
             divResultado.className = "mt-2 p-2.5 bg-slate-900 rounded-xl text-[11px] text-yellow-400 font-bold border border-yellow-600/50 animate-pulse";
-            divResultado.innerText = "⚡ Leyendo imagen/cámara y procesando con IA..."; imgPrev.src = URL.createObjectURL(archivoInput);
+            divResultado.innerText = "⚡ Leyendo imagen/cámara y procesando con IA..."; 
+            imgPrev.src = URL.createObjectURL(archivoInput);
             
-            const imgElemento = new Image(); imgElemento.src = URL.createObjectURL(archivoInput);
+            const imgElemento = new Image(); 
+            imgElemento.src = URL.createObjectURL(archivoInput);
             imgElemento.onload = function() {
-                const ctx = canvas.getContext("2d"); let ancho = imgElemento.width; let alto = imgElemento.height;
+                const ctx = canvas.getContext("2d"); 
+                let ancho = imgElemento.width; 
+                let alto = imgElemento.height;
                 if (ancho > 1024) { alto *= 1024 / ancho; ancho = 1024; }
-                canvas.width = ancho; canvas.height = alto; ctx.drawImage(imgElemento, 0, 0, ancho, alto);
+                canvas.width = ancho; 
+                canvas.height = alto; 
+                ctx.drawImage(imgElemento, 0, 0, ancho, alto);
                 const base64Comprimido = canvas.toDataURL("image/jpeg", 0.75).split(',')[1];
                 ejecutarLlamadaIA(base64Comprimido, apiKey);
             };
         }
+     
 
         async function ejecutarLlamadaIA(base64Data, apiKey) {
             const divResultado = document.getElementById("resultadoIA");
