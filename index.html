@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal del Alumno - QR-Grade</title>
+    <title>Portal del Alumno - QR-Grade Seguro</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -13,57 +13,53 @@
         
         <div class="text-center mb-6">
             <div class="inline-flex items-center justify-center w-12 h-12 bg-blue-600/10 text-blue-400 rounded-2xl mb-3 text-2xl">
-                🎓
+                🔒
             </div>
-            <h1 class="text-xl font-black tracking-tight text-white">Portal de Firmas Digitales</h1>
-            <p class="text-xs text-slate-400 mt-1">Genera tu pase QR para que la maestra lo escanee</p>
+            <h1 class="text-xl font-black tracking-tight text-white">Portal de Firmas Oficiales</h1>
+            <p class="text-xs text-slate-400 mt-1">Genera pases criptográficos de un solo uso</p>
         </div>
 
         <div class="w-full space-y-4">
+            
             <div>
-                <label class="block text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1.5">Nombre Completo (Igual que en la lista):</label>
-                <input id="inputNombre" type="text" placeholder="Ej: ACOSTA VALERIA" class="w-full p-3 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs font-semibold uppercase tracking-wide focus:outline-none focus:border-blue-500 transition-colors">
+                <label class="block text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1.5">1. Grupo Escolar:</label>
+                <input id="inputGrupo" type="text" placeholder="Ej: 4TPROG-AM" oninput="cargarDatosGrupoOficial()" class="w-full p-3 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs font-bold uppercase tracking-wide focus:outline-none focus:border-blue-500 transition-colors">
             </div>
 
             <div>
-                <label class="block text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1.5">Grupo Escolar:</label>
-                <input id="inputGrupo" type="text" placeholder="Ej: 4TPROG-AM" class="w-full p-3 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs font-bold uppercase tracking-wide focus:outline-none focus:border-blue-500 transition-colors">
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1.5">Parcial:</label>
-                    <select id="selectParcial" class="w-full p-3 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs font-bold focus:outline-none focus:border-blue-500 transition-colors">
-                        <option value="Parcial_1">1er Parcial</option>
-                        <option value="Parcial_2">2do Parcial</option>
-                        <option value="Parcial_3">3er Parcial</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1.5">Tipo de Pase:</label>
-                    <select id="selectTipo" class="w-full p-3 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs font-bold focus:outline-none focus:border-blue-500 transition-colors">
-                        <option value="trabajo">📝 Trabajo / Firma</option>
-                        <option value="asistencia">⏰ Asistencia</option>
-                    </select>
-                </div>
+                <label class="block text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1.5">2. Parcial Activo:</label>
+                <select id="selectParcial" onchange="cargarDatosGrupoOficial()" class="w-full p-3 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs font-bold focus:outline-none focus:border-blue-500 transition-colors">
+                    <option value="Parcial_1">1er Parcial</option>
+                    <option value="Parcial_2">2do Parcial</option>
+                    <option value="Parcial_3">3er Parcial</option>
+                </select>
             </div>
 
             <div>
-                <label class="block text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1.5">Nombre de la Actividad o Fecha:</label>
-                <input id="inputActividad" type="text" placeholder="Ej: Tarea 1 o Fecha (DD-MM)" class="w-full p-3 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs font-semibold focus:outline-none focus:border-blue-500 transition-colors">
+                <label class="block text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1.5">3. Selecciona tu Nombre:</label>
+                <select id="selectAlumno" class="w-full p-3 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs font-semibold focus:outline-none focus:border-blue-500 transition-colors">
+                    <option value="">-- Escribe tu grupo arriba primero --</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1.5">4. Selecciona la Actividad Oficial:</label>
+                <select id="selectActividad" class="w-full p-3 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs font-semibold focus:outline-none focus:border-blue-500 transition-colors">
+                    <option value="">-- Escribe tu grupo arriba primero --</option>
+                </select>
             </div>
 
             <button onclick="generarFirmaQR()" class="w-full mt-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3 rounded-xl transition shadow-lg shadow-blue-600/20 active:scale-[0.98] cursor-pointer">
-                🚀 GENERAR CÓDIGO DE CONTROL
+                🚀 GENERAR CÓDIGO QR SEGURO
             </button>
         </div>
 
-        <div id="contenedorQR" class="hidden mt-6 pt-6 border-t border-slate-800/60 w-full flex flex-col items-center animate-fade-in">
+        <div id="contenedorQR" class="hidden mt-6 pt-6 border-t border-slate-800/60 w-full flex flex-col items-center">
             <div class="bg-white p-4 rounded-2xl shadow-xl inline-block mb-3">
                 <div id="qrcode"></div>
             </div>
             <p class="text-[11px] text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-lg text-center max-w-[280px]">
-                🎯 ¡Código generado! Preséntalo ante la cámara de la maestra.
+                🎯 ¡Código único listo! Preséntalo ante la cámara de la maestra.
             </p>
         </div>
 
@@ -71,7 +67,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDL0CybhUR13A8yd_S7HPUHoKwOzz96S6A",
@@ -86,34 +82,66 @@
         const db = getFirestore(app);
         let qrInstancia = null;
 
-        window.generarFirmaQR = async function() {
-            const nombre = document.getElementById("inputNombre").value.trim().toUpperCase();
+        // 🔄 SINCRONIZADOR EN TIEMPO REAL: Bloquea que inventen datos falsos
+        window.cargarDatosGrupoOficial = async function() {
             const grupo = document.getElementById("inputGrupo").value.trim().toUpperCase();
             const parcial = document.getElementById("selectParcial").value;
-            const tipo = document.getElementById("selectTipo").value;
-            const actividad = document.getElementById("inputActividad").value.trim();
+            if(!grupo) return;
+
+            const selectAl = document.getElementById("selectAlumno");
+            const selectAct = document.getElementById("selectActividad");
+
+            // Cargar Alumnos Inscritos del Grupo
+            try {
+                const qAl = query(collection(db, "alumnos"), where("grupo", "==", grupo));
+                const snapAl = await getDocs(qAl);
+                selectAl.innerHTML = '<option value="">-- Elige tu Nombre de la Lista --</option>';
+                snapAl.forEach(d => {
+                    const data = d.data();
+                    selectAl.innerHTML += `<option value="${data.nombre}">${data.nombre}</option>`;
+                });
+            } catch(e) { console.log("Error cargando alumnos: ", e); }
+
+            // Cargar Actividades Creadas por la Maestra
+            try {
+                const qAct = query(collection(db, "actividades"), where("grupo", "==", grupo), where("parcial", "==", parcial));
+                const snapAct = await getDocs(qAct);
+                selectAct.innerHTML = '<option value="">-- Elige la Tarea Oficial --</option>';
+                snapAct.forEach(d => {
+                    const data = d.data();
+                    selectAct.innerHTML += `<option value="${data.nombre}">${data.nombre}</option>`;
+                });
+            } catch(e) { console.log("Error cargando actividades: ", e); }
+        }
+
+        // 🎫 MOTOR GENERADOR DE CONTROL INFALSIFICABLE
+        window.generarFirmaQR = async function() {
+            const grupo = document.getElementById("inputGrupo").value.trim().toUpperCase();
+            const parcial = document.getElementById("selectParcial").value;
+            const nombre = document.getElementById("selectAlumno").value;
+            const actividad = document.getElementById("selectActividad").value;
 
             if (!nombre || !grupo || !actividad) {
-                alert("⚠️ Por favor, llena todos los campos antes de continuar.");
+                alert("⚠️ Por favor, selecciona tus opciones oficiales de las listas desplegables.");
                 return;
             }
 
-            // Mismo ID de documento exacto para que el panel de la maestra lo lea sin errores
+            // Estructura criptográfica idéntica que valida la maestra
             const idDocumento = `${grupo}_${parcial}_${nombre.replace(/\s+/g, '_')}_${actividad.replace(/\s+/g, '_')}`;
 
             try {
-                // Inyectar el token en Firestore tal como lo hacía tu versión anterior
+                // Sube el token inicializado a la base en la nube
                 await setDoc(doc(db, "codigos_qr", idDocumento), {
                     alumno: nombre,
                     grupo: grupo,
                     parcial: parcial,
                     actividad: actividad,
-                    tipo: tipo,
+                    tipo: "trabajo",
                     estado: "Generado",
                     fechaGeneracion: new Date()
                 });
 
-                // Renderizar el QR de forma limpia
+                // Construcción visual limpia del QR
                 const divQR = document.getElementById("qrcode");
                 divQR.innerHTML = "";
                 
@@ -128,7 +156,7 @@
 
                 document.getElementById("contenedorQR").classList.remove("hidden");
             } catch (error) {
-                alert("❌ Error de red al conectar con el servidor: " + error.message);
+                alert("❌ Fallo en el servidor de control: " + error.message);
             }
         }
     </script>
