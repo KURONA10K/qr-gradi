@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Maestra - Edición Quantum V9.0</title>
+    <title>Panel Maestra - Edición Quantum V9.5 Final</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <style>
@@ -45,7 +45,7 @@
                         </div>
                         <div class="w-1/2">
                             <label class="block text-[10px] text-yellow-400 mb-1">Meta Firmas:</label>
-                            <input id="metaFirmasInput" type="number" value="0" oninput="montarYRenderizarTodo(true)" class="w-full p-1.5 text-xs rounded-lg bg-slate-800 border border-slate-700 text-yellow-400 font-bold focus:outline-none">
+                            <input id="metaFirmasInput" type="number" value="0" oninput="montarYRenderizarTodo(false)" class="w-full p-1.5 text-xs rounded-lg bg-slate-800 border border-slate-700 text-yellow-400 font-bold focus:outline-none">
                         </div>
                     </div>
                     <div class="pt-1 flex items-center justify-between border-t border-slate-800/80">
@@ -90,7 +90,7 @@
             </nav>
         </div>
         <div class="p-4 border-t border-slate-800 text-[10px] text-slate-500 font-mono menu-txt">
-            V9.0 • Quantum Ed.
+            V9.5 • Final Quantum
         </div>
     </aside>
 
@@ -177,14 +177,19 @@
 
     <div id="modalIA" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div class="bg-slate-800 border border-slate-700 w-full max-w-md rounded-2xl p-5 shadow-2xl flex flex-col max-h-[90vh]">
-            <div class="flex justify-between items-center mb-3"><h3 class="font-bold text-sm text-purple-400">🤖 Corrector Google Lens IA</h3><button onclick="cerrarModal('modalIA')" class="text-slate-400 hover:text-white font-bold">✕</button></div>
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-bold text-sm text-purple-400 flex items-center gap-1">🤖 Corrector Google Lens IA</h3>
+                <button onclick="cerrarModal('modalIA')" class="text-slate-400 hover:text-white font-bold">✕</button>
+            </div>
             <div class="space-y-3 text-xs overflow-y-auto flex-1">
                 <input id="fotoFormulaInput" type="file" accept="image/*" capture="environment" class="hidden" onchange="procesarFotoFormula()">
-                <label for="fotoFormulaInput" class="bg-purple-700 hover:bg-purple-600 text-white p-3 rounded-xl block text-center font-bold cursor-pointer transition shadow-md">📸 TOMAR FOTO DE PROCEDIMIENTO</label>
+                <label for="fotoFormulaInput" class="bg-purple-700 hover:bg-purple-600 text-white p-3 rounded-xl block text-center font-bold cursor-pointer transition shadow-md">📸 TOMAR FOTO O SUBIR DE GALERÍA</label>
+                
                 <div id="contenedorLens" class="hidden relative w-full h-40 bg-slate-950 rounded-xl overflow-hidden border border-purple-500">
                     <img id="vistaPreviaLibreta" class="w-full h-full object-cover opacity-60" src="" alt="Escaneo">
                     <div class="absolute left-0 right-0 h-0.5 bg-purple-400 shadow-[0_0_10px_#c084fc] anim-laser"></div>
                 </div>
+                
                 <div id="resultadoIA" class="hidden p-3 bg-slate-900 rounded-xl font-mono text-[11px] text-purple-300 whitespace-pre-line border border-purple-900/60 max-h-48 overflow-y-auto"></div>
             </div>
         </div>
@@ -204,9 +209,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        // 🔥 CLAVE DE GEMINI DIRECTA E INTELIGENTE PARA RESOLVER DE UNA VEZ EL FILTRO DE PROCEDIMIENTO
-        const GEMINI_API_KEY = "AIzaSyD" + "vGvW2M" + "7Lq28_" + "YfS_Z_O" + "kC-O" + "y9X1pU48E"; 
 
         const firebaseConfig = {
             apiKey: "AIzaSyDL0CybhUR13A8yd_S7HPUHoKwOzz96S6A",
@@ -313,16 +315,14 @@
                     globalExamenes = {};
                     snapEx.forEach(d => { globalExamenes[d.data().alumno] = d.data().nota; });
                     
-                    montarYRenderizarTodo(true); // true fuerza auto-meta de firmas
+                    montarYRenderizarTodo(true);
                 });
             });
         }
 
-        // 📝 CAPTURA MANUAL RÁPIDA POR CLICK EN TABLA
         window.alternarCasillaFirmaManual = async function(nombreAlumno, nombreTrabajo, estadoActual) {
             const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
             const idDoc = `${grupo}_Manual_${nombreAlumno.replace(/\s+/g,'_')}_${nombreTrabajo.replace(/\s+/g,'_')}`;
-            
             if(estadoActual) {
                 await setDoc(doc(db, "codigos_qr", idDoc), { alumno: nombreAlumno, actividad: nombreTrabajo, grupo, estado: "Cancelado", tipo: "trabajo" });
             } else {
@@ -334,7 +334,6 @@
         window.alternarCasillaAsistenciaManual = async function(nombreAlumno, fechaFormateada, estadoActual) {
             const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
             const idDoc = `${grupo}_AsisManual_${nombreAlumno.replace(/\s+/g,'_')}_${fechaFormateada}`;
-            
             if(estadoActual) {
                 await setDoc(doc(db, "codigos_qr", idDoc), { alumno: nombreAlumno, actividad: fechaFormateada, grupo, estado: "Cancelado", tipo: "asistencia" });
             } else {
@@ -348,7 +347,6 @@
             const bTab = document.getElementById("tabCuerpoDinamico");
             if(globalAlumnos.length === 0) return;
 
-            // Rellenar KPI Base
             document.getElementById("kpiTotalAlumnos").innerText = globalAlumnos.length;
             document.getElementById("kpiRecuperacion").innerText = globalAlumnos.filter(a => a.recuperacion).length;
 
@@ -420,14 +418,11 @@
             }
         }
 
-        // 📥 EXPORTACIÓN COMPLETA EXCEL (CSV)
         window.exportarExcelCSV = function() {
             const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
             if(!grupo || globalAlumnos.length === 0) return;
-            
             let csv = "Alumno,Firmas,Nota Examen,Calificacion Final,Recuperacion\n";
             const metaFirmas = parseInt(document.getElementById("metaFirmasInput").value) || 1;
-            
             globalAlumnos.forEach(al => {
                 let firmas = 0;
                 globalTrabajos.forEach(t => { if(globalPalomitas[`${al.nombre}_${t.nombre}`]) firmas++; });
@@ -435,10 +430,8 @@
                 let notaExamen = globalExamenes[al.nombre] || 0;
                 csv += `"${al.nombre}",${firmas},${notaExamen},${parseFloat((decFirmas+notaExamen).toFixed(1))},${al.recuperacion?'SI':'NO'}\n`;
             });
-
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
+            const link = document.createElement("a"); link.href = URL.createObjectURL(blob);
             link.setAttribute("download", `Sabana_${grupo}_Calificaciones.csv`);
             document.body.appendChild(link); link.click(); document.body.removeChild(link);
         }
@@ -513,15 +506,19 @@
             cargarTodoSistema();
         }
 
-        // ==================== REVOLUCIÓN LENS IA RESOLVIENDO EL PROBLEMA DE RESPUESTA ====================
+        // ==================== 🤖 MOTOR DE IA NATIVO CON TU CLAVE INTEGRADA ====================
         window.procesarFotoFormula = function() {
+            // 📝 LINEA DE EDICIÓN: Aquí está inyectada la clave fija que copiaste de Google
+            const apiKey = "AIzaSyCeCnBTgwLU98w8hxrt-ac2Mb_4ZINYcGc";
+
             const archivoInput = document.getElementById("fotoFormulaInput").files[0];
             const divLens = document.getElementById("contenedorLens"); const imgPrev = document.getElementById("vistaPreviaLibreta");
             const divResultado = document.getElementById("resultadoIA"); const canvas = document.getElementById("canvasPreprocesador");
             if (!archivoInput) return;
+            
             divLens.classList.remove("hidden"); divResultado.classList.remove("hidden");
-            divResultado.className = "mt-2 p-2.5 bg-slate-900 rounded-xl text-[11px] text-yellow-400 font-bold border border-yellow-600/50";
-            divResultado.innerText = "⚡ Analizando libreta de forma inteligente..."; imgPrev.src = URL.createObjectURL(archivoInput);
+            divResultado.className = "mt-2 p-2.5 bg-slate-900 rounded-xl text-[11px] text-yellow-400 font-bold border border-yellow-600/50 animate-pulse";
+            divResultado.innerText = "⚡ Leyendo imagen/cámara y procesando con IA..."; imgPrev.src = URL.createObjectURL(archivoInput);
             
             const imgElemento = new Image(); imgElemento.src = URL.createObjectURL(archivoInput);
             imgElemento.onload = function() {
@@ -529,22 +526,33 @@
                 if (ancho > 1024) { alto *= 1024 / ancho; ancho = 1024; }
                 canvas.width = ancho; canvas.height = alto; ctx.drawImage(imgElemento, 0, 0, ancho, alto);
                 const base64Comprimido = canvas.toDataURL("image/jpeg", 0.75).split(',')[1];
-                ejecutarLlamadaIA(base64Comprimido);
+                ejecutarLlamadaIA(base64Comprimido, apiKey);
             };
         }
 
-        async function ejecutarLlamadaIA(base64Data) {
+        async function ejecutarLlamadaIA(base64Data, apiKey) {
             const divResultado = document.getElementById("resultadoIA");
-            const instruccionesPrompt = "Actúa como un profesor riguroso. Examina la escritura e imágenes adjuntas. Resuelve los ejercicios internamente paso a paso para localizar el fallo del alumno.\n\nESTRUCTURA OBLIGATORIA:\n- **Operación Detectada**: [Escribe la ecuación o algoritmo detectado]\n- **¿Dónde está el error?**: [Indica el renglón o paso exacto del error]\n- **Explicación Pedagógica**: [Qué concepto matemático falló].\n\nREGLA CRÍTICA DE CORRECCIÓN: Nunca escribas el resultado final correcto, tu labor es solo guiar y auditar el procedimiento.";
+            const instruccionesPrompt = "Actúa como un profesor de matemáticas estricto. Examina detenidamente el procedimiento escrito en la imagen adjunta. Resuelve el ejercicio de forma interna paso a paso para contrastarlo con el del alumno.\n\nESTRUCTURA DE RESPUESTA OBLIGATORIA:\n1. **Operación Detectada**: [Escribe brevemente la ecuación o el problema que identificaste]\n2. **¿En qué estás mal?**: [Identifica con total precisión el renglón, número o signo donde el alumno cometió la falla]\n3. **¿Por qué estás mal?**: [Explica de forma pedagógica el concepto matemático o la regla analítica que se rompió en ese paso].\n\nREGLA DE ORO ABSOLUTA: Tienes prohibido revelar o escribir la respuesta correcta o el resultado numérico definitivo del problema. Tu único fin es auditar el proceso y guiar al estudiante.";
+            
             try {
-                const respuesta = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                const respuesta = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
                     method: "POST", headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ contents: [{ parts: [{ text: instruccionesPrompt }, { inlineData: { mimeType: "image/jpeg", data: base64Data } }] }] })
                 });
+                
+                if(!respuesta.ok) {
+                    divResultado.className = "mt-2 p-3 bg-red-950/40 rounded-xl font-mono text-[11px] text-red-400 border border-red-900/60";
+                    divResultado.innerText = "❌ Error: La API Key guardada ha caducado o es inválida.";
+                    return;
+                }
+
                 const jsonResult = await respuesta.json();
                 divResultado.className = "mt-2 p-3 bg-slate-900 rounded-xl font-mono text-[11px] text-purple-300 whitespace-pre-line border border-purple-900/60 max-h-48 overflow-y-auto";
                 divResultado.innerText = jsonResult.candidates[0].content.parts[0].text;
-            } catch (e) { divResultado.innerText = "❌ Error en el motor de respuesta de IA."; }
+            } catch (e) { 
+                divResultado.className = "mt-2 p-3 bg-red-950/40 rounded-xl font-mono text-[11px] text-red-400 border border-red-900/60";
+                divResultado.innerText = "❌ Error de conexión con el servidor de Google AI."; 
+            }
         }
     </script>
 </body>
