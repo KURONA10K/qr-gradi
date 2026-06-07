@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Alumnos - QR y Tareas</title>
+    <title>Miss Karol Revision - Portal de Alumnos</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -11,7 +11,7 @@
 
     <div class="w-full max-w-xl space-y-4">
         
-        <!-- 📱 SISTEMA PARA GENERAR EL QR -->
+        <!-- 📱 GENERADOR DE CÓDIGO QR -->
         <div class="bg-slate-950/60 p-5 rounded-2xl border border-slate-800 shadow-2xl">
             <div class="text-center mb-4">
                 <span class="text-2xl">✨</span>
@@ -54,7 +54,7 @@
                 </button>
             </div>
 
-            <!-- Contenedor del QR (Se muestra al presionar el botón) -->
+            <!-- Contenedor del QR -->
             <div id="zonaQR" class="hidden mt-5 pt-4 border-t border-slate-800 text-center flex flex-col items-center justify-center">
                 <div class="bg-white p-3 rounded-xl inline-block shadow-lg">
                     <div id="qrcode"></div>
@@ -63,7 +63,7 @@
             </div>
         </div>
 
-        <!-- 📊 LA TABLA DE CONTROL (Se llena automáticamente) -->
+        <!-- 📊 TABLA DE CONTROL DE ENTREGAS -->
         <div id="contenedorTabla" class="bg-slate-950/40 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden hidden flex flex-col">
             <div class="p-3 bg-slate-900 border-b border-slate-800 text-center flex justify-between items-center px-4">
                 <span class="text-xs font-bold text-slate-300">📋 Estatus de tus Entregas</span>
@@ -80,7 +80,7 @@
                         </tr>
                     </thead>
                     <tbody id="cuerpoTablaAlumno" class="divide-y divide-slate-800/60 bg-slate-900/20">
-                        <!-- Se llena automáticamente con las tareas del alumno -->
+                        <!-- Se llena automáticamente -->
                     </tbody>
                 </table>
             </div>
@@ -88,7 +88,7 @@
 
     </div>
 
-    <!-- SCRIPT DE CONEXIÓN CON TU BASE DE DATOS -->
+    <!-- CONEXIÓN CON FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -109,7 +109,6 @@
         let registroFirmasGlobal = {};
         let qrInstancia = null;
 
-        // Carga los alumnos y actividades cuando escriben el grupo
         window.cargarDatosGrupo = async function() {
             const grupo = document.getElementById("selectGrupo").value.trim().toUpperCase();
             if(grupo.length < 4) return;
@@ -133,10 +132,7 @@
                 const snapAct = await getDocs(qAct);
                 listaActividadesGlobal = [];
                 snapAct.forEach(d => {
-                    let data = d.data();
-                    // Forzar a que el parcial sea un string limpio para evitar fallas
-                    if (data.parcial) data.parcial = String(data.parcial).replace("Parcial ", "").trim();
-                    listaActividadesGlobal.push(data);
+                    listaActividadesGlobal.push(d.data());
                 });
 
                 // Firmas
@@ -148,8 +144,6 @@
                     registroFirmasGlobal[`${data.alumno}_${data.actividad}`] = true;
                 });
 
-                // Auto-detectar cuál parcial tiene más tareas para seleccionarlo por defecto
-                detectarParcialActivo();
                 filtrarPorParcial();
 
             } catch (e) {
@@ -157,27 +151,18 @@
             }
         }
 
-        // Detecta inteligentemente en qué parcial hay tareas creadas actualmente
-        function detectarParcialActivo() {
-            const conteos = { "1": 0, "2": 0, "3": 0 };
-            listaActividadesGlobal.forEach(act => {
-                if (conteos[act.parcial] !== undefined) conteos[act.parcial]++;
-            });
-            
-            let parcialMaximo = "1";
-            if (conteos["2"] > conteos["1"]) parcialMaximo = "2";
-            if (conteos["3"] > conteos["2"] && conteos["3"] > conteos["1"]) parcialMaximo = "3";
-            
-            document.getElementById("selectParcial").value = parcialMaximo;
-        }
-
-        // Filtra el menú desplegable de actividades por parcial
+        // NUEVO FILTRO INTELIGENTE CORREGIDO
         window.filtrarPorParcial = function() {
-            const parcial = document.getElementById("selectParcial").value;
+            const parcialSeleccionado = document.getElementById("selectParcial").value; // "1", "2" o "3"
             const selectAct = document.getElementById("selectActividad");
             selectAct.innerHTML = '<option value="">-- Selecciona la actividad --</option>';
 
-            const filtradas = listaActividadesGlobal.filter(act => act.parcial === parcial);
+            // Valida tanto si guardaste "3" como "Parcial 3" en Firebase
+            const filtradas = listaActividadesGlobal.filter(act => {
+                const actParcialStr = String(act.parcial).toLowerCase();
+                return actParcialStr === parcialSeleccionado || actParcialStr.includes(`parcial ${parcialSeleccionado}`);
+            });
+
             filtradas.forEach(act => {
                 selectAct.innerHTML += `<option value="${act.nombre}">${act.nombre}</option>`;
             });
@@ -185,10 +170,9 @@
             actualizarTablaAlumno();
         }
 
-        // RENDERIZA LA TABLA DE ABAJO (Estilo Maestra)
         window.actualizarTablaAlumno = function() {
             const alumno = document.getElementById("selectAlumno").value;
-            const parcial = document.getElementById("selectParcial").value;
+            const parcialSeleccionado = document.getElementById("selectParcial").value;
             const contenedorTabla = document.getElementById("contenedorTabla");
             const cuerpoTabla = document.getElementById("cuerpoTablaAlumno");
 
@@ -198,7 +182,13 @@
             }
 
             cuerpoTabla.innerHTML = "";
-            const actividadesFiltradas = listaActividadesGlobal.filter(act => act.parcial === parcial);
+            
+            // Misma validación inteligente para armar las filas de la tabla de abajo
+            const actividadesFiltradas = listaActividadesGlobal.filter(act => {
+                const actParcialStr = String(act.parcial).toLowerCase();
+                return actParcialStr === parcialSeleccionado || actParcialStr.includes(`parcial ${parcialSeleccionado}`);
+            });
+
             let firmasContadas = 0;
 
             actividadesFiltradas.forEach(act => {
@@ -225,7 +215,6 @@
             contenedorTabla.classList.remove("hidden");
         }
 
-        // GENERAR QR DE ALUMNO
         window.generarCodigoQRAlumno = function() {
             const grupo = document.getElementById("selectGrupo").value.trim().toUpperCase();
             const alumno = document.getElementById("selectAlumno").value;
