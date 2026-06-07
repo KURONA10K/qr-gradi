@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen font-sans p-4 flex flex-col items-center justify-center">
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans p-4 flex flex-col items-center justify-start gap-4">
 
     <div class="w-full max-w-md space-y-4">
         
@@ -26,13 +26,20 @@
 
                 <div>
                     <label class="block text-slate-400 mb-1 font-semibold tracking-wide">Selecciona tu Nombre:</label>
-                    <select id="selectAlumno" class="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-medium focus:outline-none focus:border-pink-500">
+                    <select id="selectAlumno" onchange="manejarCambioAlumno()" class="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-medium focus:outline-none focus:border-pink-500">
                         <option value="">-- Escribe tu grupo primero --</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="block text-slate-400 mb-1 font-semibold tracking-wide">Selecciona la Actividad / Tarea:</label>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-slate-400 font-semibold tracking-wide">Selecciona la Actividad / Tarea:</label>
+                        <select id="filtroParcialAlumno" onchange="cargarDatosGrupo()" class="bg-slate-900 text-pink-400 font-bold text-[11px] px-2 py-0.5 rounded border border-slate-700 focus:outline-none">
+                            <option value="Parcial_1">1er Parcial</option>
+                            <option value="Parcial_2">2do Parcial</option>
+                            <option value="Parcial_3">3er Parcial</option>
+                        </select>
+                    </div>
                     <select id="selectActividad" class="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-medium focus:outline-none focus:border-pink-500">
                         <option value="">-- Selecciona la actividad --</option>
                     </select>
@@ -61,6 +68,42 @@
             </button>
         </div>
 
+        <div id="seccionReporteAlumno" class="hidden bg-slate-950/60 p-5 rounded-2xl border border-slate-800 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <h2 class="text-xs font-black text-blue-400 uppercase tracking-wider">📋 Tu Historial de Firmas</h2>
+                <span id="badgeRecuAlumno" class="hidden text-[10px] px-2 py-0.5 rounded font-black bg-red-600/20 text-red-400 border border-red-500/30 animate-pulse">⚠️ RECUPERACIÓN</span>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                    <span class="block text-[9px] text-slate-500 uppercase font-bold">Firmas</span>
+                    <span id="kpiFirmasAlumno" class="text-sm font-black text-white">0 / 0</span>
+                </div>
+                <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                    <span class="block text-[9px] text-amber-500 uppercase font-bold">Examen</span>
+                    <span id="kpiExamenAlumno" class="text-sm font-black text-amber-400">0</span>
+                </div>
+                <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                    <span class="block text-[9px] text-emerald-500 uppercase font-bold">Calificación</span>
+                    <span id="kpiNotaAlumno" class="text-sm font-black text-yellow-400">0.0</span>
+                </div>
+            </div>
+
+            <div class="overflow-hidden rounded-xl border border-slate-800 text-[11px]">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-800 text-slate-400 font-bold uppercase text-[9px]">
+                        <tr>
+                            <th class="p-2.5">Actividad</th>
+                            <th class="p-2.5 text-center">Límite</th>
+                            <th class="p-2.5 text-center">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaAvanceCuerpo" class="divide-y divide-slate-800/50 bg-slate-900/10">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 
     <script type="module">
@@ -81,9 +124,14 @@
 
         let qrInstancia = null;
         let temporizadorGrupo = null;
-        let desuscribirEscuchaQR = null; // Guardará el oyente de Firebase
+        let desuscribirEscuchaQR = null;
+        let desuscribirReporteRealtime = null;
 
-        // Temporizador para esperar a que terminen de escribir el grupo entero
+        let arregloAlumnos = [];
+        let arregloActividades = [];
+        let mapaFirmasValidas = {};
+        let mapaExamenesNota = {};
+
         window.manejarEntradaGrupo = function() {
             clearTimeout(temporizadorGrupo);
             temporizadorGrupo = setTimeout(() => {
@@ -91,46 +139,142 @@
             }, 600);
         }
 
-        // Descarga directa de alumnos y actividades del grupo escrito
         window.cargarDatosGrupo = async function() {
             const grupo = document.getElementById("selectGrupo").value.trim().toUpperCase();
-            if(grupo.length < 4) return;
+            const parcial = document.getElementById("filtroParcialAlumno").value;
+            if(grupo.length < 4) {
+                ocultarReporteCompleto();
+                return;
+            }
 
             try {
-                // 1. Cargar Alumnos del grupo
+                // 1. Cargar Alumnos
                 const qAl = query(collection(db, "alumnos"), where("grupo", "==", grupo));
                 const snapAl = await getDocs(qAl);
                 const selectAl = document.getElementById("selectAlumno");
+                const alumnoSeleccionadoPrevio = selectAl.value;
+                
                 selectAl.innerHTML = '<option value="">-- Selecciona tu Nombre --</option>';
                 
-                let alumnos = [];
-                snapAl.forEach(d => alumnos.push(d.data()));
-                alumnos.sort((a,b) => a.nombre.localeCompare(b.nombre));
-                alumnos.forEach(al => {
-                    selectAl.innerHTML += `<option value="${al.nombre}">${al.nombre}</option>`;
+                arregloAlumnos = [];
+                snapAl.forEach(d => arregloAlumnos.push({ id: d.id, ...d.data() }));
+                arregloAlumnos.sort((a,b) => a.nombre.localeCompare(b.nombre));
+                
+                arregloAlumnos.forEach(al => {
+                    selectAl.innerHTML += `<option value="${al.nombre}">${al.nombre} ${al.recuperacion ? '(⚠️)' : ''}</option>`;
                 });
 
-                // 2. Cargar TODAS las Actividades del grupo (Sin filtros de parciales que estorben)
-                const qAct = query(collection(db, "actividades"), where("grupo", "==", grupo));
+                if(alumnoSeleccionadoPrevio) {
+                    selectAl.value = alumnoSeleccionadoPrevio;
+                }
+
+                // 2. Cargar Actividades filtradas por el parcial activo
+                const qAct = query(collection(db, "actividades"), where("grupo", "==", grupo), where("parcial", "==", parcial));
                 const snapAct = await getDocs(qAct);
                 const selectAct = document.getElementById("selectActividad");
                 selectAct.innerHTML = '<option value="">-- Selecciona la actividad --</option>';
 
-                let actividades = [];
-                snapAct.forEach(d => actividades.push(d.data()));
-                // Ordenar actividades alfabéticamente
-                actividades.sort((a,b) => a.nombre.localeCompare(b.nombre));
+                arregloActividades = [];
+                snapAct.forEach(d => { arregloActividades.push(d.data()); });
+                arregloActividades.sort((a,b) => a.nombre.localeCompare(b.nombre));
                 
-                actividades.forEach(act => {
+                arregloActividades.forEach(act => {
                     selectAct.innerHTML += `<option value="${act.nombre}">${act.nombre}</option>`;
                 });
+
+                // Si ya había seleccionado su nombre, refrescamos los cálculos de su reporte
+                if(selectAl.value) {
+                    manejarCambioAlumno();
+                }
 
             } catch (e) {
                 console.error("Error al conectar con Firebase: ", e);
             }
         }
 
-        // Función para generar el código QR y quedarse escuchando si se escanea
+        // LÓGICA AL SELECCIONAR EL NOMBRE DEL ALUMNO
+        window.manejarCambioAlumno = function() {
+            const grupo = document.getElementById("selectGrupo").value.trim().toUpperCase();
+            const alumno = document.getElementById("selectAlumno").value;
+            const parcial = document.getElementById("filtroParcialAlumno").value;
+
+            if(!alumno) {
+                ocultarReporteCompleto();
+                return;
+            }
+
+            // Validar etiqueta de recuperación
+            const infoAl = arregloAlumnos.find(a => a.nombre === alumno);
+            const badge = document.getElementById("badgeRecuAlumno");
+            if(infoAl && infoAl.recuperacion) {
+                badge.classList.remove("hidden");
+            } else {
+                badge.classList.add("hidden");
+            }
+
+            // Matar oyente en tiempo real previo para evitar fugas de memoria
+            if(desuscribirReporteRealtime) desuscribirReporteRealtime();
+
+            // Consultas vivas en tiempo real
+            const qQR = query(collection(db, "codigos_qr"), where("grupo", "==", grupo), where("estado", "==", "Escaneado"), where("tipo", "==", "trabajo"));
+            const qEx = query(collection(db, "examenes"), where("grupo", "==", grupo), where("parcial", "==", parcial));
+
+            desuscribirReporteRealtime = onSnapshot(qQR, (snapQR) => {
+                onSnapshot(qEx, (snapEx) => {
+                    mapaFirmasValidas = {};
+                    snapQR.forEach(d => { mapaFirmasValidas[`${d.data().alumno}_${d.data().actividad}`] = true; });
+
+                    mapaExamenesNota = {};
+                    snapEx.forEach(d => { mapaExamenesNota[d.data().alumno] = d.data().nota; });
+
+                    renderizarTablaAvanceAlumno();
+                });
+            });
+        }
+
+        // DIBUJAR LOS AVANCES VIVOS DEL ALUMNO
+        function renderizarTablaAvanceAlumno() {
+            const alumno = document.getElementById("selectAlumno").value;
+            const tablaCuerpo = document.getElementById("tablaAvanceCuerpo");
+            
+            tablaCuerpo.innerHTML = "";
+            let firmasContadas = 0;
+
+            if(arregloActividades.length === 0) {
+                tablaCuerpo.innerHTML = '<tr><td colspan="3" class="p-4 text-center italic text-slate-500">No hay tareas publicadas en este parcial.</td></tr>';
+            } else {
+                arregloActividades.forEach(act => {
+                    const tieneFirma = mapaFirmasValidas[`${alumno}_${act.nombre}`] || false;
+                    if(tieneFirma) firmasContadas++;
+
+                    tablaCuerpo.innerHTML += `
+                        <tr class="${tieneFirma ? 'bg-emerald-950/10' : 'bg-transparent'}">
+                            <td class="p-2.5 font-medium text-slate-200">${act.nombre}</td>
+                            <td class="p-2.5 text-center font-mono text-pink-400">${act.fLimFormateada || act.fechaLimite || '-'}</td>
+                            <td class="p-2.5 text-center font-bold ${tieneFirma ? 'text-green-400' : 'text-slate-600'}">
+                                ${tieneFirma ? '✓ Firmado' : 'Pendiente'}
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+
+            // Cálculos matemáticos basados en el valor del 50%
+            const meta = arregloActividades.length || 1;
+            let totalPuntosFirmas = parseFloat(((firmasContadas * 50) / meta).toFixed(1));
+            if(totalPuntosFirmas > 50) totalPuntosFirmas = 50.0;
+
+            let notaExamen = mapaExamenesNota[alumno] !== undefined ? mapaExamenesNota[alumno] : 0;
+            let calificacionFinal = parseFloat((totalPuntosFirmas + notaExamen).toFixed(1));
+
+            // Actualizar los KPIs visuales
+            document.getElementById("kpiFirmasAlumno").innerText = `${firmasContadas} / ${arregloActividades.length}`;
+            document.getElementById("kpiExamenAlumno").innerText = `${notaExamen} pts`;
+            document.getElementById("kpiNotaAlumno").innerText = calificacionFinal;
+
+            document.getElementById("seccionReporteAlumno").classList.remove("hidden");
+        }
+
         window.generarCodigoQRAlumno = function() {
             const grupo = document.getElementById("selectGrupo").value.trim().toUpperCase();
             const alumno = document.getElementById("selectAlumno").value;
@@ -143,11 +287,9 @@
                 return;
             }
 
-            // Limpiar QR anterior y detener cualquier oyente previo activo
             contenedorQR.innerHTML = "";
             if (desuscribirEscuchaQR) desuscribirEscuchaQR();
 
-            // Formato idéntico de lectura de la Maestra
             const datosQR = `Firma:${alumno}:${actividad}:${grupo}`;
 
             qrInstancia = new QRCode(contenedorQR, {
@@ -162,7 +304,6 @@
             document.getElementById("txtInfoQR").innerText = actividad;
             zonaQR.classList.remove("hidden");
 
-            // 🎯 ESCUCHA EN TIEMPO REAL: Detecta cuando cambies el estado a "Escaneado" desde tu app
             const qEscucha = query(
                 collection(db, "codigos_qr"), 
                 where("grupo", "==", grupo), 
@@ -173,11 +314,10 @@
 
             desuscribirEscuchaQR = onSnapshot(qEscucha, (snapshot) => {
                 if (!snapshot.empty) {
-                    // Si encuentra un documento que coincide y ya fue escaneado, activa el éxito
                     document.getElementById("panelPrincipal").classList.add("hidden");
+                    document.getElementById("seccionReporteAlumno").classList.add("hidden"); // Ocultar reporte temporalmente en el éxito
                     document.getElementById("mensajeExito").classList.remove("hidden");
                     
-                    // Matamos el oyente para ahorrar datos de red
                     if (desuscribirEscuchaQR) {
                         desuscribirEscuchaQR();
                         desuscribirEscuchaQR = null;
@@ -186,12 +326,16 @@
             });
         }
 
-        // Permite regresar a la pantalla para que el alumno pida otra firma
         window.regresarAlGenerador = function() {
             document.getElementById("mensajeExito").classList.add("hidden");
             document.getElementById("zonaQR").classList.add("hidden");
-            document.getElementById("selectActividad").value = ""; // Limpiar actividad anterior
+            document.getElementById("selectActividad").value = ""; 
             document.getElementById("panelPrincipal").classList.remove("hidden");
+            document.getElementById("seccionReporteAlumno").classList.remove("hidden"); // Regresa la tabla de firmas visible
+        }
+
+        function ocultarReporteCompleto() {
+            document.getElementById("seccionReporteAlumno").classList.add("hidden");
         }
     </script>
 </body>
