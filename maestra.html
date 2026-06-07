@@ -199,7 +199,7 @@
         let vistaActual = "calificaciones", parcialBloqueado = false;
         let escaneandoEnProgreso = false;
 
-        // Establecer fecha de hoy por defecto en los modales al abrir
+        // Establecer fecha de hoy por defecto
         const hoy = new Date().toISOString().split('T')[0];
         document.getElementById("fechaPubInput").value = hoy;
         document.getElementById("fechaTareaInput").value = hoy;
@@ -315,7 +315,7 @@
             });
         }
 
-        // PROCESADOR DEL QR RECEPTOR CON FIRESTORE UNIFICADO (FIJA TIPO TRABAJO)
+        // PROCESADOR DEL QR CON CONFIRMACIÓN PREVIA PARA LA MAESTRA
         async function procesarLecturaQR(textoCodigo) {
             if (escaneandoEnProgreso) return;
             escaneandoEnProgreso = true;
@@ -327,31 +327,38 @@
                     const actividad = partes[2];
                     const grupo = partes[3];
 
-                    const idDoc = `${grupo}_${alumno.replace(/\s+/g,'_')}_${actividad.replace(/\s+/g,'_')}`;
-                    reproducirBeep();
+                    // VENTANA DE CONFIRMACIÓN OBLIGATORIA
+                    const confirmar = confirm(`¿Confirmar firma para?\n\n👤 Alumno: ${alumno}\n📝 Trabajo: ${actividad}\n👥 Grupo: ${grupo}`);
+                    
+                    if (confirmar) {
+                        const idDoc = `${grupo}_${alumno.replace(/\s+/g,'_')}_${actividad.replace(/\s+/g,'_')}`;
+                        reproducirBeep();
 
-                    const alerta = document.getElementById("alertaLecturaRapida");
-                    alerta.innerText = `✓ REGISTRADO: ${alumno} -> ${actividad}`;
-                    alerta.classList.remove("hidden");
+                        const alerta = document.getElementById("alertaLecturaRapida");
+                        alerta.innerText = `✓ REGISTRADO: ${alumno} -> ${actividad}`;
+                        alerta.classList.remove("hidden");
 
-                    // Inyección obligatoria de tipo: "trabajo" para que el renderizador lo detecte
-                    await setDoc(doc(db, "codigos_qr", idDoc), {
-                        alumno: alumno,
-                        actividad: actividad,
-                        grupo: grupo,
-                        estado: "Escaneado",
-                        tipo: "trabajo",
-                        fechaEscaneo: new Date().toISOString()
-                    });
+                        await setDoc(doc(db, "codigos_qr", idDoc), {
+                            alumno: alumno,
+                            actividad: actividad,
+                            grupo: grupo,
+                            estado: "Escaneado",
+                            tipo: "trabajo",
+                            fechaEscaneo: new Date().toISOString()
+                        });
 
-                    setTimeout(() => { alerta.classList.add("hidden"); }, 2500);
+                        setTimeout(() => { alerta.classList.add("hidden"); }, 2500);
+                    } else {
+                        console.log("Escaneo cancelado por la maestra.");
+                    }
                 } else {
                     alert("Código QR no válido para este sistema de firmas.");
                 }
             } catch (e) {
-                console.error("Error al inyectar firma del QR: ", e);
+                console.error("Error al procesar el QR: ", e);
             } finally {
-                setTimeout(() => { escaneandoEnProgreso = false; }, 1200);
+                // Pequeño retraso para dar tiempo antes del siguiente escaneo
+                setTimeout(() => { escaneandoEnProgreso = false; }, 1000);
             }
         }
 
@@ -364,7 +371,7 @@
                 { facingMode: "environment" },
                 { fps: 10, qrbox: { width: 250, height: 250 } },
                 (decodedText) => { procesarLecturaQR(decodedText); },
-                (err) => { /* Silenciar logs de búsqueda */ }
+                (err) => { /* Silenciar logs continuos */ }
             ).catch(err => console.error("Error cámara: ", err));
         }
 
