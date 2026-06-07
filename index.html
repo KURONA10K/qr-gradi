@@ -23,7 +23,7 @@
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block text-slate-400 mb-1 font-semibold">Grupo:</label>
-                        <input id="selectGrupo" type="text" placeholder="Ej: 4TPROG-AM" oninput="cargarDatosGrupo()" class="w-full p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-bold uppercase tracking-wide focus:outline-none focus:border-pink-500">
+                        <input id="selectGrupo" type="text" placeholder="Ej: 4TPROG-AM" oninput="manejarEntradaGrupo()" class="w-full p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-bold uppercase tracking-wide focus:outline-none focus:border-pink-500">
                     </div>
                     <div>
                         <label class="block text-slate-400 mb-1 font-semibold">Parcial:</label>
@@ -108,13 +108,22 @@
         let listaActividadesGlobal = [];
         let registroFirmasGlobal = {};
         let qrInstancia = null;
+        let temporizadorGrupo = null;
+
+        // Evita que busque en la BD en cada letra que escribe el usuario
+        window.manejarEntradaGrupo = function() {
+            clearTimeout(temporizadorGrupo);
+            temporizadorGrupo = setTimeout(() => {
+                cargarDatosGrupo();
+            }, 500); // Espera medio segundo sin presionar teclas para arrancar la búsqueda
+        }
 
         window.cargarDatosGrupo = async function() {
             const grupo = document.getElementById("selectGrupo").value.trim().toUpperCase();
             if(grupo.length < 4) return;
 
             try {
-                // Alumnos
+                // 1. Obtener Alumnos
                 const qAl = query(collection(db, "alumnos"), where("grupo", "==", grupo));
                 const snapAl = await getDocs(qAl);
                 const selectAl = document.getElementById("selectAlumno");
@@ -127,7 +136,7 @@
                     selectAl.innerHTML += `<option value="${al.nombre}">${al.nombre}</option>`;
                 });
 
-                // Actividades
+                // 2. Obtener Actividades sin filtros restrictivos
                 const qAct = query(collection(db, "actividades"), where("grupo", "==", grupo));
                 const snapAct = await getDocs(qAct);
                 listaActividadesGlobal = [];
@@ -135,7 +144,7 @@
                     listaActividadesGlobal.push(d.data());
                 });
 
-                // Firmas
+                // 3. Obtener Firmas del grupo
                 const qQR = query(collection(db, "codigos_qr"), where("grupo", "==", grupo), where("estado", "==", "Escaneado"));
                 const snapQR = await getDocs(qQR);
                 registroFirmasGlobal = {};
@@ -144,23 +153,24 @@
                     registroFirmasGlobal[`${data.alumno}_${data.actividad}`] = true;
                 });
 
+                // Forzar renderizado
                 filtrarPorParcial();
 
             } catch (e) {
-                console.error(e);
+                console.error("Error cargando base de datos: ", e);
             }
         }
 
-        // NUEVO FILTRO INTELIGENTE CORREGIDO
         window.filtrarPorParcial = function() {
-            const parcialSeleccionado = document.getElementById("selectParcial").value; // "1", "2" o "3"
+            const parcialSeleccionado = document.getElementById("selectParcial").value; 
             const selectAct = document.getElementById("selectActividad");
             selectAct.innerHTML = '<option value="">-- Selecciona la actividad --</option>';
 
-            // Valida tanto si guardaste "3" como "Parcial 3" en Firebase
+            // Compara de forma limpia si coincide con el número ("3") o con la cadena ("parcial 3")
             const filtradas = listaActividadesGlobal.filter(act => {
-                const actParcialStr = String(act.parcial).toLowerCase();
-                return actParcialStr === parcialSeleccionado || actParcialStr.includes(`parcial ${parcialSeleccionado}`);
+                if(!act.parcial) return false;
+                const actParcialStr = String(act.parcial).toLowerCase().trim();
+                return actParcialStr === parcialSeleccionado || actParcialStr.includes(`parcial ${parcialSeleccionado}`) || actParcialStr.includes(parcialSeleccionado);
             });
 
             filtradas.forEach(act => {
@@ -183,10 +193,10 @@
 
             cuerpoTabla.innerHTML = "";
             
-            // Misma validación inteligente para armar las filas de la tabla de abajo
             const actividadesFiltradas = listaActividadesGlobal.filter(act => {
-                const actParcialStr = String(act.parcial).toLowerCase();
-                return actParcialStr === parcialSeleccionado || actParcialStr.includes(`parcial ${parcialSeleccionado}`);
+                if(!act.parcial) return false;
+                const actParcialStr = String(act.parcial).toLowerCase().trim();
+                return actParcialStr === parcialSeleccionado || actParcialStr.includes(`parcial ${parcialSeleccionado}`) || actParcialStr.includes(parcialSeleccionado);
             });
 
             let firmasContadas = 0;
