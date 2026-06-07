@@ -170,7 +170,8 @@
 
     <div id="seccionEscaner" class="hidden fixed inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 z-50">
         <div class="bg-slate-800 w-full max-w-sm rounded-2xl p-4 text-center border border-slate-700">
-            <h3 class="text-sm font-bold text-white mb-2">📷 Receptor QR Activo</h3>
+            <h3 class="text-sm font-bold text-white mb-1">📷 Receptor QR Activo</h3>
+            <p class="text-[10px] text-slate-400 mb-3">El sistema firmará directamente al detectar el código</p>
             <div id="reader" class="w-full overflow-hidden rounded-xl bg-slate-900 border border-slate-700"></div>
             <div id="alertaLecturaRapida" class="mt-3 p-2.5 bg-emerald-950/80 text-emerald-400 text-xs font-bold rounded-xl border border-emerald-500/40 hidden animate-pulse"></div>
             <button onclick="cerrarEscaner()" class="mt-4 w-full bg-red-600 hover:bg-red-500 text-white py-2 rounded-xl text-xs font-bold cursor-pointer transition">Apagar Cámara</button>
@@ -198,8 +199,9 @@
         let globalPalomitas = {}, globalExamenes = {}, globalAsistenciasMarcadas = {};
         let vistaActual = "calificaciones", parcialBloqueado = false;
         let escaneandoEnProgreso = false;
+        let ultimoCodigoLeido = ""; 
+        let temporizadorResetCodigo = null;
 
-        // Establecer fecha de hoy por defecto
         const hoy = new Date().toISOString().split('T')[0];
         document.getElementById("fechaPubInput").value = hoy;
         document.getElementById("fechaTareaInput").value = hoy;
@@ -315,10 +317,17 @@
             });
         }
 
-        // PROCESADOR DEL QR CON CONFIRMACIÓN PREVIA PARA LA MAESTRA
+        // ESCANEO DIRECTO SIN MODALES DE CONFIRMACIÓN
         async function procesarLecturaQR(textoCodigo) {
-            if (escaneandoEnProgreso) return;
+            // Si el código es exactamente igual al recién leído, se ignora temporalmente para evitar registrar 2 veces lo mismo
+            if (textoCodigo === ultimoCodigoLeido || escaneandoEnProgreso) return;
+            
             escaneandoEnProgreso = true;
+            ultimoCodigoLeido = textoCodigo;
+
+            // Limpiar el candado del código duplicado tras 3 segundos para permitir volver a escanearlo si es necesario
+            clearTimeout(temporizadorResetCodigo);
+            temporizadorResetCodigo = setTimeout(() => { ultimoCodigoLeido = ""; }, 3000);
 
             try {
                 const partes = textoCodigo.split(":");
@@ -327,38 +336,32 @@
                     const actividad = partes[2];
                     const grupo = partes[3];
 
-                    // VENTANA DE CONFIRMACIÓN OBLIGATORIA
-                    const confirmar = confirm(`¿Confirmar firma para?\n\n👤 Alumno: ${alumno}\n📝 Trabajo: ${actividad}\n👥 Grupo: ${grupo}`);
-                    
-                    if (confirmar) {
-                        const idDoc = `${grupo}_${alumno.replace(/\s+/g,'_')}_${actividad.replace(/\s+/g,'_')}`;
-                        reproducirBeep();
+                    const idDoc = `${grupo}_${alumno.replace(/\s+/g,'_')}_${actividad.replace(/\s+/g,'_')}`;
+                    reproducirBeep();
 
-                        const alerta = document.getElementById("alertaLecturaRapida");
-                        alerta.innerText = `✓ REGISTRADO: ${alumno} -> ${actividad}`;
-                        alerta.classList.remove("hidden");
+                    // Alerta visual rápida en pantalla
+                    const alerta = document.getElementById("alertaLecturaRapida");
+                    alerta.innerText = `⚡ REGISTRADO: ${alumno} -> ${actividad}`;
+                    alerta.classList.remove("hidden");
 
-                        await setDoc(doc(db, "codigos_qr", idDoc), {
-                            alumno: alumno,
-                            actividad: actividad,
-                            grupo: grupo,
-                            estado: "Escaneado",
-                            tipo: "trabajo",
-                            fechaEscaneo: new Date().toISOString()
-                        });
+                    await setDoc(doc(db, "codigos_qr", idDoc), {
+                        alumno: alumno,
+                        actividad: actividad,
+                        grupo: grupo,
+                        estado: "Escaneado",
+                        tipo: "trabajo",
+                        fechaEscaneo: new Date().toISOString()
+                    });
 
-                        setTimeout(() => { alerta.classList.add("hidden"); }, 2500);
-                    } else {
-                        console.log("Escaneo cancelado por la maestra.");
-                    }
+                    setTimeout(() => { alerta.classList.add("hidden"); }, 2000);
                 } else {
-                    alert("Código QR no válido para este sistema de firmas.");
+                    console.log("Código QR detectado pero no pertenece al formato del sistema.");
                 }
             } catch (e) {
                 console.error("Error al procesar el QR: ", e);
             } finally {
-                // Pequeño retraso para dar tiempo antes del siguiente escaneo
-                setTimeout(() => { escaneandoEnProgreso = false; }, 1000);
+                // Pequeño delay de 400ms entre lecturas físicas para mantener el flujo ultra rápido
+                setTimeout(() => { escaneandoEnProgreso = false; }, 400);
             }
         }
 
@@ -369,9 +372,9 @@
             }
             html5QrcodeScanner.start(
                 { facingMode: "environment" },
-                { fps: 10, qrbox: { width: 250, height: 250 } },
+                { fps: 20, qrbox: { width: 260, height: 260 } }, // Subidos los FPS a 20 para lectura inmediata
                 (decodedText) => { procesarLecturaQR(decodedText); },
-                (err) => { /* Silenciar logs continuos */ }
+                (err) => { /* Silenciar errores continuos de enfoque */ }
             ).catch(err => console.error("Error cámara: ", err));
         }
 
@@ -379,10 +382,126 @@
             if(html5QrcodeScanner) {
                 html5QrcodeScanner.stop().then(() => {
                     document.getElementById("seccionEscaner").classList.add("hidden");
+                    ultimoCodigoLeido = "";
                 }).catch(err => console.error(err));
             } else {
                 document.getElementById("seccionEscaner").classList.add("hidden");
             }
+        }
+
+        // INTERFAZ DE RENDERIZADO DE TABLAS COMPLETA
+        window.montarYRenderizarTodo = function(esSnapshot) {
+            const cabecera = document.getElementById("tabCabeceraDinamica");
+            const cuerpo = document.getElementById("tabCuerpoDinamico");
+            const metaFirmas = parseInt(document.getElementById("metaFirmasInput").value) || 0;
+
+            if (globalAlumnos.length === 0) {
+                cuerpo.innerHTML = `<tr><td class="p-8 text-slate-500 italic">No hay alumnos inscritos en este grupo o no has digitado el grupo...</td></tr>`;
+                return;
+            }
+
+            let numAprobados = 0;
+            let sumaCalificacionesTotales = 0;
+
+            if (vistaActual === "calificaciones") {
+                // CABECERA CALIFICACIONES
+                let htmlCab = `<th class="p-3 text-left min-w-[200px] bg-slate-950 font-bold sticky left-0 z-20">Nombre del Alumno</th>`;
+                globalTrabajos.forEach(t => {
+                    htmlCab += `<th onclick="gestionarTrabajoColumna('${t.idFirestore}','${t.nombre}','${t.fechaLimite}')" class="p-3 cursor-pointer hover:bg-slate-600 transition min-w-[90px] border-l border-slate-600/40 text-[10px] font-black uppercase tracking-wider text-blue-300">
+                        ${t.nombre}<br><span class="text-[9px] font-normal text-slate-400 font-mono">${t.fLimFormateada || ''}</span>
+                    </th>`;
+                });
+                htmlCab += `<th class="p-3 bg-slate-900 font-black text-amber-400 border-l border-slate-600/40 min-w-[70px]">Examen</th>`;
+                htmlCab += `<th class="p-3 bg-slate-950 font-black text-yellow-400 border-l border-slate-700 min-w-[70px]">NOTA</th>`;
+                cabecera.innerHTML = htmlCab;
+
+                // CUERPO CALIFICACIONES
+                let htmlCuerpo = "";
+                globalAlumnos.forEach(al => {
+                    let firmasDeEsteAlumno = 0;
+                    let celdasTrabajos = "";
+
+                    globalTrabajos.forEach(t => {
+                        const llave = `${al.nombre}_${t.nombre}`;
+                        const firmado = globalPalomitas[llave] || false;
+                        if(firmado) firmasDeEsteAlumno++;
+
+                        celdasTrabajos += `<td onclick="alternarCasillaFirmaManual('${al.nombre}','${t.nombre}', ${firmado})" class="p-2.5 border-l border-slate-700/50 cursor-pointer hover:bg-slate-700/40 font-mono text-center transition select-none">
+                            ${firmado ? '<span class="text-green-400 font-bold text-sm">✓</span>' : '<span class="text-slate-600">-</span>'}
+                        </td>`;
+                    });
+
+                    const divisorMeta = globalTrabajos.length || 1;
+                    let puntosFirmas = parseFloat(((firmasDeEsteAlumno * 50) / divisorMeta).toFixed(1));
+                    if(puntosFirmas > 50) puntosFirmas = 50.0;
+
+                    const notaExamen = globalExamenes[al.nombre] !== undefined ? globalExamenes[al.nombre] : 0;
+                    let notaFinal = parseFloat((puntosFirmas + notaExamen).toFixed(1));
+                    if(notaFinal > 100) notaFinal = 100;
+
+                    sumaCalificacionesTotales += notaFinal;
+                    if(notaFinal >= 60) numAprobados++;
+
+                    const baseFilaEstilo = al.recuperacion ? 'bg-red-500/5 border-l-4 border-l-red-500 font-semibold' : 'hover:bg-slate-800/40';
+
+                    htmlCuerpo += `<tr class="${baseFilaEstilo} transition">
+                        <td class="p-2.5 text-left font-medium text-slate-200 sticky left-0 bg-slate-850 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.3)] flex items-center justify-between gap-1">
+                            <span class="truncate pr-1">${al.nombre}</span>
+                            ${al.recuperacion ? '<span class="text-[9px] px-1 bg-red-600/20 text-red-400 border border-red-500/20 rounded font-black shrink-0">REC</span>' : ''}
+                        </td>
+                        ${celdasTrabajos}
+                        <td onclick="capturarExamenA_Mano('${al.nombre}', ${notaExamen})" class="p-2.5 bg-slate-900/40 font-mono font-bold border-l border-slate-700/50 text-amber-400 cursor-pointer hover:bg-slate-700/60 transition">${notaExamen}</td>
+                        <td class="p-2.5 bg-slate-950/40 font-mono font-black border-l border-slate-700 text-sm ${notaFinal >= 60 ? 'text-green-400' : 'text-red-400'}">${notaFinal.toFixed(1)}</td>
+                    </tr>`;
+                });
+                cuerpo.innerHTML = htmlCuerpo;
+
+            } else {
+                // CABECERA ASISTENCIAS
+                let htmlCab = `<th class="p-3 text-left min-w-[200px] bg-slate-950 font-bold sticky left-0 z-20">Nombre del Alumno</th>`;
+                globalFechasAsistencias.forEach(f => {
+                    htmlCab += `<th class="p-3 min-w-[85px] border-l border-slate-600/40 text-[10px] font-black uppercase text-emerald-400 bg-slate-950">${f.fechaFormateada}</th>`;
+                });
+                cabecera.innerHTML = htmlCab;
+
+                // CUERPO ASISTENCIAS
+                let htmlCuerpo = "";
+                globalAlumnos.forEach(al => {
+                    let celdasAsis = "";
+                    globalFechasAsistencias.forEach(f => {
+                        const llave = `${al.nombre}_${f.fechaFormateada}`;
+                        const marca = globalAsistenciasMarcadas[llave] || "-";
+
+                        let colorTexto = "text-slate-600";
+                        if(marca === "✓") colorTexto = "text-emerald-400 font-bold text-sm";
+                        if(marca === "R") colorTexto = "text-yellow-400 font-bold text-xs";
+
+                        celdasAsis += `<td onclick="alternarCasillaAsistenciaManual('${al.nombre}','${f.fechaFormateada}')" class="p-2.5 border-l border-slate-700/50 cursor-pointer hover:bg-slate-700/40 font-mono text-center transition select-none ${colorTexto}">
+                            ${marca}
+                        </td>`;
+                    });
+
+                    const baseFilaEstilo = al.recuperacion ? 'bg-red-500/5 border-l-4 border-l-red-500' : 'hover:bg-slate-800/40';
+
+                    htmlCuerpo += `<tr class="${baseFilaEstilo} transition">
+                        <td class="p-2.5 text-left font-medium text-slate-200 sticky left-0 bg-slate-850 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
+                            ${al.nombre}
+                        </td>
+                        ${celdasAsis}
+                    </tr>`;
+                });
+                cuerpo.innerHTML = htmlCuerpo;
+            }
+
+            // ACTUALIZAR KPIS SUPERIORES
+            document.getElementById("kpiTotalAlumnos").innerText = globalAlumnos.length;
+            document.getElementById("kpiRecuperacion").innerText = globalAlumnos.filter(a => a.recuperacion).length;
+            
+            const pctAprob = globalAlumnos.length > 0 ? Math.round((numAprobados / globalAlumnos.length) * 100) : 0;
+            document.getElementById("kpiPorcentajeAprobados").innerText = `${pctAprob}%`;
+
+            const promGpo = globalAlumnos.length > 0 ? (sumaCalificacionesTotales / globalAlumnos.length).toFixed(1) : "0.0";
+            document.getElementById("kpiPromedioGrupo").innerText = promGpo;
         }
 
         window.gestionarTrabajoColumna = async function(idFirestore, nombreTrabajo, fechaActual) {
@@ -393,10 +512,7 @@
                     const partes = nuevaFecha.split("-");
                     if (partes.length === 3) {
                         const fLimForm = `${partes[2]}-${partes[1]}`;
-                        await updateDoc(doc(db, "actividades", idFirestore), {
-                            fechaLimite: nuevaFecha,
-                            fLimFormateada: fLimForm
-                        });
+                        await updateDoc(doc(db, "actividades", idFirestore), { fechaLimite: nuevaFecha, fLimFormateada: fLimForm });
                         alert("¡Fecha modificada!");
                         cargarTodoSistema();
                     } else { alert("Formato inválido."); }
@@ -494,163 +610,45 @@
             if(!nombre || !grupo) return;
             const idDoc = `${grupo}_Al_${nombre.replace(/\s+/g,'_')}`;
             await setDoc(doc(db, "alumnos", idDoc), { nombre, grupo, recuperacion: recu });
-            
             cerrarModal("modalAlumno");
             document.getElementById("newAlumnoNombre").value = "";
             cargarTodoSistema();
         }
 
-        window.alternarRecuperacion = async function(idFirestore, estadoActual) {
-            await updateDoc(doc(db, "alumnos", idFirestore), { recuperacion: !estadoActual });
-            cargarTodoSistema();
-        }
-
-        window.borrarAlumnoCompleto = async function(idFirestore, nombre) {
-            if(confirm(`¿Eliminar permanentemente a ${nombre} de la lista?`)) {
-                await deleteDoc(doc(db, "alumnos", idFirestore));
-                cargarTodoSistema();
-            }
-        }
-
-        window.montarYRenderizarTodo = function(calcularMetaAutomatica) {
-            const hTab = document.getElementById("tabCabeceraDinamica"); 
-            const bTab = document.getElementById("tabCuerpoDinamico");
-            if(globalAlumnos.length === 0) return;
-
-            document.getElementById("kpiTotalAlumnos").innerText = globalAlumnos.length;
-            document.getElementById("kpiRecuperacion").innerText = globalAlumnos.filter(a => a.recuperacion).length;
-            
-            if(calcularMetaAutomatica) document.getElementById("metaFirmasInput").value = globalTrabajos.length;
-            const metaFirmas = parseInt(document.getElementById("metaFirmasInput").value) || 1;
-            
-            let acumuladorNotasGlobales = 0, alumnosAprobadosContador = 0;
-
-            if (vistaActual === "calificaciones") {
-                let columnasTareasHTML = "";
-                globalTrabajos.forEach(t => { 
-                    const tituloColumna = `
-                        <div class="leading-tight py-1">
-                            <span class="font-bold text-blue-400 block">${t.nombre}</span>
-                            <span class="text-[9px] text-slate-400 block font-normal">P: ${t.fPubFormateada || '-'}</span>
-                            <span class="text-[9px] text-pink-400 block font-semibold">L: ${t.fLimFormateada || '-'}</span>
-                        </div>
-                    `;
-                    columnasTareasHTML += `<th onclick="gestionarTrabajoColumna('${t.idFirestore}','${t.nombre}','${t.fechaLimite || ''}')" class="p-1 border-l border-slate-600 bg-slate-700/30 cursor-pointer min-w-[95px] text-center hover:bg-slate-700/60">${tituloColumna}</th>`; 
-                });
-                hTab.innerHTML = `<th class="p-3 text-left min-w-[180px]">Nombre Alumno</th>${columnasTareasHTML}<th class="p-3 bg-blue-900 text-yellow-400 min-w-[95px]">Firmas (50%)</th><th class="p-3 bg-amber-900 text-amber-200 min-w-[95px]">Examen (50%)</th><th class="p-3 bg-slate-600 text-yellow-300 font-black min-w-[105px]">FINAL</th><th class="p-3 bg-slate-700 min-w-[100px]">Gestión</th>`;
-                bTab.innerHTML = "";
-                
-                globalAlumnos.forEach(al => {
-                    let firmasContadas = 0; let celdasHTML = "";
-                    globalTrabajos.forEach(t => {
-                        const tieneFirma = globalPalomitas[`${al.nombre}_${t.nombre}`] || false; if(tieneFirma) firmasContadas++;
-                        celdasHTML += `<td onclick="alternarCasillaFirmaManual('${al.nombre}','${t.nombre}', ${tieneFirma})" class="p-2 border-b border-slate-700 border-l cursor-pointer hover:bg-slate-700/40 font-bold text-center ${tieneFirma ? 'text-green-400' : 'text-slate-600'}">${tieneFirma ? '✓' : '-'}</td>`;
-                    });
-                    
-                    let calculoDecimalFirmas50 = parseFloat(((firmasContadas * 50) / metaFirmas).toFixed(1));
-                    if(calculoDecimalFirmas50 > 50) calculoDecimalFirmas50 = 50.0;
-                    let notaExamen = globalExamenes[al.nombre] !== undefined ? globalExamenes[al.nombre] : 0;
-                    let notaFinalPromedio = parseFloat((calculoDecimalFirmas50 + notaExamen).toFixed(1));
-                    
-                    acumuladorNotasGlobales += notaFinalPromedio; 
-                    if(notaFinalPromedio >= 6.0 || notaFinalPromedio >= 60) alumnosAprobadosContador++;
-
-                    bTab.innerHTML += `
-                        <tr class="hover:bg-slate-700/20 ${al.recuperacion ? 'bg-red-950/20 text-red-200' : ''}">
-                            <td class="p-2 text-left border-b border-slate-700 font-semibold">${al.recuperacion ? '⚠️ ' : ''}${al.nombre}</td>
-                            ${celdasHTML}
-                            <td class="p-2 border-b border-slate-700 border-l text-blue-400 font-bold">${firmasContadas} f ➔ <span class="text-yellow-400">${calculoDecimalFirmas50}</span></td>
-                            <td onclick="capturarExamenA_Mano('${al.nombre}', ${notaExamen})" class="p-2 border-b border-slate-700 border-l text-amber-400 font-black cursor-pointer underline decoration-dashed">${notaExamen}</td>
-                            <td class="p-2 border-b border-slate-700 border-l font-black text-yellow-400">${notaFinalPromedio}</td>
-                            <td class="p-2 border-b border-slate-700 border-l flex justify-center gap-1">
-                                <button onclick="alternarRecuperacion('${al.idFirestore}', ${al.recuperacion || false})" class="bg-yellow-600/80 px-1.5 py-0.5 rounded text-[10px] font-bold text-white cursor-pointer">Recu</button>
-                                <button onclick="borrarAlumnoCompleto('${al.idFirestore}', '${al.nombre}')" class="bg-red-700 px-1.5 py-0.5 rounded text-[10px] font-bold text-white cursor-pointer">X</button>
-                            </td>
-                        </tr>`;
-                });
-                document.getElementById("kpiPromedioGrupo").innerText = (acumuladorNotasGlobales / globalAlumnos.length).toFixed(1);
-                document.getElementById("kpiPorcentajeAprobados").innerText = ((alumnosAprobadosContador * 100) / globalAlumnos.length).toFixed(0) + "%";
-            
-            } else {
-                // RENDER VISTA ASISTENCIAS
-                let columnasAsistenciasHTML = "";
-                globalFechasAsistencias.forEach(f => { 
-                    columnasAsistenciasHTML += `<th onclick="eliminarFechaAsistenciaColumna('${f.idFirestore}','${f.fechaFormateada}')" class="p-2 border-l border-slate-600 bg-emerald-950/30 text-emerald-400 cursor-pointer min-w-[85px] text-center hover:bg-slate-700/60">${f.fechaFormateada}</th>`; 
-                });
-                
-                hTab.innerHTML = `<th class="p-3 text-left min-w-[180px]">Nombre Alumno</th>${columnasAsistenciasHTML}<th class="p-3 bg-emerald-900 text-white font-bold min-w-[110px]">Total Asistencias</th>`; 
-                bTab.innerHTML = "";
-                
-                globalAlumnos.forEach(al => {
-                    let totalAsistenciasAlumno = 0; let celdasAsistenciasHTML = "";
-                    globalFechasAsistencias.forEach(f => {
-                        const estadoAsistencia = globalAsistenciasMarcadas[`${al.nombre}_${f.fechaFormateada}`] || "-";
-                        let colorTexto = "text-slate-600";
-                        if(estadoAsistencia === "✓") {
-                            totalAsistenciasAlumno += 1; colorTexto = "text-green-400";
-                        } else if(estadoAsistencia === "R") {
-                            totalAsistenciasAlumno += 0.5; colorTexto = "text-yellow-400 font-extrabold";
-                        }
-                        celdasAsistenciasHTML += `<td onclick="alternarCasillaAsistenciaManual('${al.nombre}','${f.fechaFormateada}')" class="p-2 border-b border-slate-700 border-l cursor-pointer hover:bg-slate-700/40 font-bold text-center ${colorTexto}">${estadoAsistencia}</td>`;
-                    });
-
-                    bTab.innerHTML += `
-                        <tr class="hover:bg-slate-700/20 ${al.recuperacion ? 'bg-red-950/20 text-red-200' : ''}">
-                            <td class="p-2 text-left border-b border-slate-700 font-semibold">${al.recuperacion ? '⚠️ ' : ''}${al.nombre}</td>
-                            ${celdasAsistenciasHTML}
-                            <td class="p-2 border-b border-slate-700 border-l font-bold text-emerald-400 bg-emerald-950/10">${totalAsistenciasAlumno} asist</td>
-                        </tr>`;
-                });
-            }
-        }
-
-        window.eliminarFechaAsistenciaColumna = async function(idFirestore, fechaForm) {
-            if(confirm(`¿Deseas eliminar la columna de asistencia del "${fechaForm}"?`)) {
-                await deleteDoc(doc(db, "fechas_asistencias", idFirestore));
-                cargarTodoSistema();
-            }
-        }
-
         window.exportarExcelCSV = function() {
             const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
-            if(!grupo || globalAlumnos.length === 0) return;
+            if(!grupo || globalAlumnos.length === 0) { alert("No hay datos para exportar."); return; }
             
-            let csvContent = "\uFEFF"; // BOM para acentos correctos en Excel
-            
+            let csvContent = "\uFEFF"; 
             if(vistaActual === "calificaciones") {
-                csvContent += "Nombre Alumno,";
+                csvContent += "Nombre del Alumno,";
                 globalTrabajos.forEach(t => { csvContent += `"${t.nombre}",`; });
-                csvContent += "Firmas Totales,Examen (50%),Nota Final\n";
+                csvContent += "Examen,Calificacion Final\n";
 
                 globalAlumnos.forEach(al => {
                     csvContent += `"${al.nombre}",`;
                     let firmas = 0;
                     globalTrabajos.forEach(t => {
-                        const tiene = globalPalomitas[`${al.nombre}_${t.nombre}`] || false;
-                        if(tiene) firmas++;
-                        csvContent += tiene ? "1," : "0,";
+                        const f = globalPalomitas[`${al.nombre}_${t.nombre}`] || false;
+                        if(f) firmas++;
+                        csvContent += f ? "1," : "0,";
                     });
-                    const meta = parseInt(document.getElementById("metaFirmasInput").value) || 1;
-                    let firmas50 = parseFloat(((firmas * 50) / meta).toFixed(1));
-                    if(firmas50 > 50) firmas50 = 50.0;
-                    let notaEx = globalExamenes[al.nombre] || 0;
-                    csvContent += `${firmas},${notaEx},${(firmas50 + notaEx).toFixed(1)}\n`;
+                    const divisor = globalTrabajos.length || 1;
+                    let pts = parseFloat(((firmas * 50) / divisor).toFixed(1));
+                    if(pts > 50) pts = 50;
+                    const ex = globalExamenes[al.nombre] || 0;
+                    csvContent += `${ex},${(pts + ex).toFixed(1)}\n`;
                 });
             } else {
-                csvContent += "Nombre Alumno,";
+                csvContent += "Nombre del Alumno,";
                 globalFechasAsistencias.forEach(f => { csvContent += `"${f.fechaFormateada}",`; });
-                csvContent += "Total Asistencias\n";
-
+                csvContent += "\n";
                 globalAlumnos.forEach(al => {
                     csvContent += `"${al.nombre}",`;
-                    let totalA = 0;
                     globalFechasAsistencias.forEach(f => {
-                        const est = globalAsistenciasMarcadas[`${al.nombre}_${f.fechaFormateada}`] || "-";
-                        if(est === "✓") totalA += 1;
-                        if(est === "R") totalA += 0.5;
-                        csvContent += `"${est}",`;
+                        csvContent += `"${globalAsistenciasMarcadas[`${al.nombre}_${f.fechaFormateada}`] || '-'}",`;
                     });
-                    csvContent += `${totalA}\n`;
+                    csvContent += "\n";
                 });
             }
 
