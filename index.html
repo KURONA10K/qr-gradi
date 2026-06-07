@@ -3,71 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal del Alumno - QR-Grade Seguro</title>
+    <title>Portal Alumnos - QR y Tareas</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen font-sans flex items-center justify-center p-4">
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans p-4 flex flex-col items-center">
 
-    <div class="w-full max-w-md bg-slate-950/60 border border-slate-800 rounded-3xl p-6 shadow-2xl backdrop-blur-md flex flex-col items-center">
+    <div class="w-full max-w-xl space-y-4">
         
-        <div class="text-center mb-6">
-            <div class="inline-flex items-center justify-center w-12 h-12 bg-blue-600/10 text-blue-400 rounded-2xl mb-3 text-2xl">
-                🔒
+        <!-- 📱 TU SISTEMA ORIGINAL PARA GENERAR EL QR -->
+        <div class="bg-slate-950/60 p-5 rounded-2xl border border-slate-800 shadow-2xl">
+            <div class="text-center mb-4">
+                <span class="text-2xl">✨</span>
+                <h1 class="text-lg font-bold text-pink-400 mt-1">Generador de Código QR</h1>
+                <p class="text-[11px] text-slate-400">Selecciona tus datos para generar el QR de revisión</p>
             </div>
-            <h1 class="text-xl font-black tracking-tight text-white">Portal de Firmas Oficiales</h1>
-            <p class="text-xs text-slate-400 mt-1">Genera pases criptográficos de un solo uso</p>
+
+            <div class="space-y-3 text-xs">
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-slate-400 mb-1 font-semibold">Grupo:</label>
+                        <input id="selectGrupo" type="text" placeholder="Ej: 4TPROG-AM" oninput="cargarDatosGrupo()" class="w-full p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-bold uppercase tracking-wide focus:outline-none focus:border-pink-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1 font-semibold">Parcial:</label>
+                        <select id="selectParcial" onchange="filtrarPorParcial()" class="w-full p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-bold focus:outline-none focus:border-pink-500">
+                            <option value="Parcial 1">Parcial 1</option>
+                            <option value="Parcial 2">Parcial 2</option>
+                            <option value="Parcial 3">Parcial 3</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-slate-400 mb-1 font-semibold">Alumno:</label>
+                    <select id="selectAlumno" onchange="actualizarTablaAlumno()" class="w-full p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-pink-500">
+                        <option value="">-- Escribe tu grupo primero --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-slate-400 mb-1 font-semibold">Actividad / Tarea:</label>
+                    <select id="selectActividad" class="w-full p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-pink-500">
+                        <option value="">-- Selecciona la actividad --</option>
+                    </select>
+                </div>
+
+                <button onclick="generarCodigoQRAlumno()" class="w-full mt-2 bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-750 text-white py-2.5 rounded-xl font-bold tracking-wide transition cursor-pointer text-center block">
+                    ⚡ Generar Código QR
+                </button>
+            </div>
+
+            <!-- Contenedor del QR (Se muestra al presionar el botón) -->
+            <div id="zonaQR" class="hidden mt-5 pt-4 border-t border-slate-800 text-center flex flex-col items-center justify-center">
+                <div class="bg-white p-3 rounded-xl inline-block shadow-lg">
+                    <div id="qrcode"></div>
+                </div>
+                <span id="txtInfoQR" class="text-xs font-mono font-bold text-yellow-400 mt-2 block"></span>
+            </div>
         </div>
 
-        <div class="w-full space-y-4">
+        <!-- 📊 LA TABLA DE CONTROL (Esto es lo nuevo que querías agregar abajo) -->
+        <div id="contenedorTabla" class="bg-slate-950/40 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden hidden flex flex-col">
+            <div class="p-3 bg-slate-900 border-b border-slate-800 text-center flex justify-between items-center px-4">
+                <span class="text-xs font-bold text-slate-300">📋 Estatus de tus Entregas</span>
+                <span class="text-xs font-mono text-pink-400 font-bold">Firmas: <span id="resFirmasContadas">0</span>/<span id="resMetaTotal">0</span></span>
+            </div>
             
-            <div>
-                <label class="block text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1.5">1. Grupo Escolar:</label>
-                <input id="inputGrupo" type="text" placeholder="Ej: 4TPROG-AM" oninput="cargarDatosGrupoOficial()" class="w-full p-3 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs font-bold uppercase tracking-wide focus:outline-none focus:border-blue-500 transition-colors">
+            <div class="overflow-x-auto">
+                <table class="w-full text-center text-xs">
+                    <thead>
+                        <tr class="bg-slate-800/60 text-slate-300 font-bold border-b border-slate-700">
+                            <th class="p-2.5 text-left">Actividad / Tarea</th>
+                            <th class="p-2.5">Fecha Límite</th>
+                            <th class="p-2.5">Estatus</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTablaAlumno" class="divide-y divide-slate-800/60 bg-slate-900/20">
+                        <!-- Se llena automáticamente con las tareas del alumno -->
+                    </tbody>
+                </table>
             </div>
-
-            <div>
-                <label class="block text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1.5">2. Parcial Activo:</label>
-                <select id="selectParcial" onchange="cargarDatosGrupoOficial()" class="w-full p-3 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs font-bold focus:outline-none focus:border-blue-500 transition-colors">
-                    <option value="Parcial_1">1er Parcial</option>
-                    <option value="Parcial_2">2do Parcial</option>
-                    <option value="Parcial_3">3er Parcial</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1.5">3. Selecciona tu Nombre:</label>
-                <select id="selectAlumno" class="w-full p-3 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs font-semibold focus:outline-none focus:border-blue-500 transition-colors">
-                    <option value="">-- Escribe tu grupo arriba primero --</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1.5">4. Selecciona la Actividad Oficial:</label>
-                <select id="selectActividad" class="w-full p-3 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs font-semibold focus:outline-none focus:border-blue-500 transition-colors">
-                    <option value="">-- Escribe tu grupo arriba primero --</option>
-                </select>
-            </div>
-
-            <button onclick="generarFirmaQR()" class="w-full mt-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3 rounded-xl transition shadow-lg shadow-blue-600/20 active:scale-[0.98] cursor-pointer">
-                🚀 GENERAR CÓDIGO QR SEGURO
-            </button>
-        </div>
-
-        <div id="contenedorQR" class="hidden mt-6 pt-6 border-t border-slate-800/60 w-full flex flex-col items-center">
-            <div class="bg-white p-4 rounded-2xl shadow-xl inline-block mb-3">
-                <div id="qrcode"></div>
-            </div>
-            <p class="text-[11px] text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-lg text-center max-w-[280px]">
-                🎯 ¡Código único listo! Preséntalo ante la cámara de la maestra.
-            </p>
         </div>
 
     </div>
 
+    <!-- SCRIPT DE CONEXIÓN CON TU BASE DE DATOS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDL0CybhUR13A8yd_S7HPUHoKwOzz96S6A",
@@ -80,84 +104,135 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+
+        let listaActividadesGlobal = [];
+        let registroFirmasGlobal = {};
         let qrInstancia = null;
 
-        // 🔄 SINCRONIZADOR EN TIEMPO REAL: Bloquea que inventen datos falsos
-        window.cargarDatosGrupoOficial = async function() {
-            const grupo = document.getElementById("inputGrupo").value.trim().toUpperCase();
-            const parcial = document.getElementById("selectParcial").value;
-            if(!grupo) return;
+        // Carga los alumnos y actividades cuando escriben el grupo
+        window.cargarDatosGrupo = async function() {
+            const grupo = document.getElementById("selectGrupo").value.trim().toUpperCase();
+            if(grupo.length < 4) return;
 
-            const selectAl = document.getElementById("selectAlumno");
-            const selectAct = document.getElementById("selectActividad");
-
-            // Cargar Alumnos Inscritos del Grupo
             try {
+                // Alumnos
                 const qAl = query(collection(db, "alumnos"), where("grupo", "==", grupo));
                 const snapAl = await getDocs(qAl);
-                selectAl.innerHTML = '<option value="">-- Elige tu Nombre de la Lista --</option>';
-                snapAl.forEach(d => {
-                    const data = d.data();
-                    selectAl.innerHTML += `<option value="${data.nombre}">${data.nombre}</option>`;
+                const selectAl = document.getElementById("selectAlumno");
+                selectAl.innerHTML = '<option value="">-- Selecciona tu Nombre --</option>';
+                
+                let alumnos = [];
+                snapAl.forEach(d => alumnos.push(d.data()));
+                alumnos.sort((a,b) => a.nombre.localeCompare(b.nombre));
+                alumnos.forEach(al => {
+                    selectAl.innerHTML += `<option value="${al.nombre}">${al.nombre}</option>`;
                 });
-            } catch(e) { console.log("Error cargando alumnos: ", e); }
 
-            // Cargar Actividades Creadas por la Maestra
-            try {
-                const qAct = query(collection(db, "actividades"), where("grupo", "==", grupo), where("parcial", "==", parcial));
+                // Actividades
+                const qAct = query(collection(db, "actividades"), where("grupo", "==", grupo));
                 const snapAct = await getDocs(qAct);
-                selectAct.innerHTML = '<option value="">-- Elige la Tarea Oficial --</option>';
-                snapAct.forEach(d => {
+                listaActividadesGlobal = [];
+                snapAct.forEach(d => listaActividadesGlobal.push(d.data()));
+
+                // Firmas
+                const qQR = query(collection(db, "codigos_qr"), where("grupo", "==", grupo), where("estado", "==", "Escaneado"));
+                const snapQR = await getDocs(qQR);
+                registroFirmasGlobal = {};
+                snapQR.forEach(d => {
                     const data = d.data();
-                    selectAct.innerHTML += `<option value="${data.nombre}">${data.nombre}</option>`;
+                    registroFirmasGlobal[`${data.alumno}_${data.actividad}`] = true;
                 });
-            } catch(e) { console.log("Error cargando actividades: ", e); }
+
+                filtrarPorParcial();
+
+            } catch (e) {
+                console.error(e);
+            }
         }
 
-        // 🎫 MOTOR GENERADOR DE CONTROL INFALSIFICABLE
-        window.generarFirmaQR = async function() {
-            const grupo = document.getElementById("inputGrupo").value.trim().toUpperCase();
+        // Filtra el menú desplegable de actividades por parcial
+        window.filtrarPorParcial = function() {
             const parcial = document.getElementById("selectParcial").value;
-            const nombre = document.getElementById("selectAlumno").value;
-            const actividad = document.getElementById("selectActividad").value;
+            const selectAct = document.getElementById("selectActividad");
+            selectAct.innerHTML = '<option value="">-- Selecciona la actividad --</option>';
 
-            if (!nombre || !grupo || !actividad) {
-                alert("⚠️ Por favor, selecciona tus opciones oficiales de las listas desplegables.");
+            const filtradas = listaActividadesGlobal.filter(act => act.parcial === parcial);
+            filtradas.forEach(act => {
+                selectAct.innerHTML += `<option value="${act.nombre}">${act.nombre}</option>`;
+            });
+
+            actualizarTablaAlumno();
+        }
+
+        // RENDERIZA LA TABLA DE ABAJO (Estilo Maestra)
+        window.actualizarTablaAlumno = function() {
+            const alumno = document.getElementById("selectAlumno").value;
+            const parcial = document.getElementById("selectParcial").value;
+            const contenedorTabla = document.getElementById("contenedorTabla");
+            const cuerpoTabla = document.getElementById("cuerpoTablaAlumno");
+
+            if(!alumno) {
+                contenedorTabla.classList.add("hidden");
                 return;
             }
 
-            // Estructura criptográfica idéntica que valida la maestra
-            const idDocumento = `${grupo}_${parcial}_${nombre.replace(/\s+/g, '_')}_${actividad.replace(/\s+/g, '_')}`;
+            cuerpoTabla.innerHTML = "";
+            const actividadesFiltradas = listaActividadesGlobal.filter(act => act.parcial === parcial);
+            let firmasContadas = 0;
 
-            try {
-                // Sube el token inicializado a la base en la nube
-                await setDoc(doc(db, "codigos_qr", idDocumento), {
-                    alumno: nombre,
-                    grupo: grupo,
-                    parcial: parcial,
-                    actividad: actividad,
-                    tipo: "trabajo",
-                    estado: "Generado",
-                    fechaGeneracion: new Date()
-                });
+            actividadesFiltradas.forEach(act => {
+                const tieneFirma = registroFirmasGlobal[`${alumno}_${act.nombre}`] || false;
+                if(tieneFirma) firmasContadas++;
 
-                // Construcción visual limpia del QR
-                const divQR = document.getElementById("qrcode");
-                divQR.innerHTML = "";
-                
-                qrInstancia = new QRCode(divQR, {
-                    text: idDocumento,
-                    width: 180,
-                    height: 180,
-                    colorDark: "#020617",
-                    colorLight: "#ffffff",
-                    correctLevel: QRCode.CorrectLevel.H
-                });
+                cuerpoTabla.innerHTML += `
+                    <tr class="${tieneFirma ? 'bg-green-950/20 text-green-400' : 'bg-slate-900 text-slate-300'}">
+                        <td class="p-2.5 text-left font-semibold">${act.nombre}</td>
+                        <td class="p-2.5 text-slate-400 font-mono text-[11px]">${act.fLimFormateada || 'Sin límite'}</td>
+                        <td class="p-2.5 font-bold">
+                            ${tieneFirma ? '✓ Firmado' : '❌ Falta'}
+                        </td>
+                    </tr>
+                `;
+            });
 
-                document.getElementById("contenedorQR").classList.remove("hidden");
-            } catch (error) {
-                alert("❌ Fallo en el servidor de control: " + error.message);
+            if(actividadesFiltradas.length === 0) {
+                cuerpoTabla.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-500 italic">No hay tareas registradas en este parcial.</td></tr>`;
             }
+
+            document.getElementById("resFirmasContadas").innerText = firmasContadas;
+            document.getElementById("resMetaTotal").innerText = actividadesFiltradas.length;
+            contenedorTabla.classList.remove("hidden");
+        }
+
+        // TU SISTEMA DE GENERAR QR DE SIEMPRE (Activa al dar clic al botón)
+        window.generarCodigoQRAlumno = function() {
+            const grupo = document.getElementById("selectGrupo").value.trim().toUpperCase();
+            const alumno = document.getElementById("selectAlumno").value;
+            const actividad = document.getElementById("selectActividad").value;
+            const zonaQR = document.getElementById("zonaQR");
+            const contenedorQR = document.getElementById("qrcode");
+
+            if(!grupo || !alumno || !actividad) {
+                alert("Por favor completa todos los campos antes de generar.");
+                return;
+            }
+
+            contenedorQR.innerHTML = "";
+            
+            // Mantiene el formato que lee tu aplicación de maestra
+            const datosQR = `Firma:${alumno}:${actividad}:${grupo}`;
+
+            qrInstancia = new QRCode(contenedorQR, {
+                text: datosQR,
+                width: 160,
+                height: 160,
+                colorDark : "#0f172a",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+
+            document.getElementById("txtInfoQR").innerText = `QR Listo: ${actividad}`;
+            zonaQR.classList.remove("hidden");
         }
     </script>
 </body>
