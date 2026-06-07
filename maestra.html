@@ -3,24 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Maestra - Edición Quantum V9.9 Ultra</title>
+    <title>Miss Karol Revision - Panel</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans flex overflow-hidden">
 
+    <!-- 📊 BARRA LATERAL -->
     <aside id="sidebar" class="w-64 bg-slate-950 border-r border-slate-800 transition-all duration-300 flex flex-col justify-between shrink-0 h-screen z-40">
         <div>
             <div class="p-4 flex items-center gap-3 border-b border-slate-800">
                 <button onclick="toggleSidebar()" class="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition cursor-pointer">
                     ☰
                 </button>
-                <span id="sidebarTitle" class="font-bold text-sm tracking-wide text-blue-400 font-mono">QR-Grade Pro</span>
+                <span id="sidebarTitle" class="font-bold text-sm tracking-wide text-pink-400 font-mono">Miss Karol Revision</span>
             </div>
 
             <nav class="p-3 space-y-1">
                 <div class="p-2 text-[10px] uppercase font-bold text-slate-500 tracking-wider menu-txt">Controles Principales</div>
                 
+                <!-- Filtros Rápidos -->
                 <div class="p-2 bg-slate-900/60 rounded-xl border border-slate-800 mb-2 space-y-2 menu-txt">
                     <div>
                         <label class="block text-[10px] text-slate-400 mb-1">Grupo Activo:</label>
@@ -46,6 +48,7 @@
                     </div>
                 </div>
 
+                <!-- SELECTOR DE VISTAS -->
                 <button id="btnVistaCalificaciones" onclick="cambiarVistaTabla('calificaciones')" class="w-full flex items-center gap-3 p-2.5 bg-blue-600/20 text-blue-400 rounded-xl text-xs font-bold transition text-left cursor-pointer">
                     <span>📋</span> <span class="menu-txt">Tabla de Firmas y Califs</span>
                 </button>
@@ -72,26 +75,24 @@
                     <span>👤</span> <span class="menu-txt">Inscribir Alumno</span>
                 </button>
 
-                <button onclick="abrirModal('modalIA')" class="w-full flex items-center gap-3 p-2.5 hover:bg-purple-600/20 text-purple-400 hover:text-purple-300 rounded-xl text-xs font-bold transition text-left cursor-pointer">
-                    <span>🤖</span> <span class="menu-txt">Corrector Lens IA (3 en 1)</span>
-                </button>
-
                 <button onclick="exportarExcelCSV()" class="w-full flex items-center gap-3 p-2.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition text-left cursor-pointer">
                     <span>📥</span> <span class="menu-txt">Exportar Hoja Excel (.csv)</span>
                 </button>
             </nav>
         </div>
         <div class="p-4 border-t border-slate-800 text-[10px] text-slate-500 font-mono menu-txt">
-            V9.9 • Estable
+            Miss Karol Revision • V10.0
         </div>
     </aside>
 
+    <!-- 🖥️ ÁREA PRINCIPAL -->
     <main class="flex-1 h-screen overflow-y-auto p-4 sm:p-6 lg:p-8 flex flex-col">
         <div class="flex items-center gap-3 mb-4 lg:hidden">
             <button onclick="toggleSidebar()" class="p-2 bg-slate-800 rounded-lg text-white">☰</button>
-            <h1 id="topBarTitle" class="text-lg font-bold text-blue-400">Firmas y Calificaciones</h1>
+            <h1 id="topBarTitle" class="text-lg font-bold text-pink-400">Miss Karol Revision</h1>
         </div>
 
+        <!-- 📊 TARJETAS DE ESTADÍSTICAS INTELIGENTES (KPIs) -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
             <div class="bg-slate-950/40 p-3 rounded-xl border border-slate-800">
                 <span class="block text-[10px] text-slate-500 uppercase font-bold">Total Alumnos</span>
@@ -111,6 +112,7 @@
             </div>
         </div>
 
+        <!-- TABLA CENTRAL -->
         <div class="bg-slate-800 rounded-2xl border border-slate-700 shadow-xl overflow-hidden flex-1 flex flex-col">
             <div class="overflow-x-auto flex-1">
                 <table class="w-full text-center text-xs">
@@ -125,6 +127,7 @@
         </div>
     </main>
 
+    <!-- MODALES -->
     <div id="modalTarea" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div class="bg-slate-800 border border-slate-700 w-full max-w-sm rounded-2xl p-5 shadow-2xl">
             <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-sm text-blue-400">📝 Publicar Trabajo</h3><button onclick="cerrarModal('modalTarea')" class="text-slate-400 hover:text-white font-bold">✕</button></div>
@@ -172,28 +175,7 @@
         </div>
     </div>
 
-    <div id="modalIA" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-800 border border-purple-500/40 w-full max-w-sm rounded-2xl p-6 shadow-2xl text-center">
-            <div class="flex justify-end -mt-2 -mr-2">
-                <button onclick="cerrarModal('modalIA')" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
-            </div>
-            <div class="w-16 h-16 mx-auto mb-4 bg-purple-500/10 rounded-full flex items-center justify-center text-3xl border border-purple-500/20">
-                🛠️
-            </div>
-            <h3 class="font-bold text-base text-purple-400 tracking-wide mb-1">MÓDULO EN MANTENIMIENTO</h3>
-            <p class="text-xs text-slate-400 px-2 leading-relaxed">
-                El Corrector Multimodal Lens IA se encuentra fuera de servicio temporalmente por actualización de servidores.
-            </p>
-            <div class="mt-4 pt-3 border-t border-slate-700/60 flex flex-col gap-1 text-[10px] text-purple-300/70 font-mono">
-                <span>Estado: Reconfigurando Sabanas</span>
-                <span>Código de error: 503_SERVICE_UNAVAILABLE</span>
-            </div>
-            <button onclick="cerrarModal('modalIA')" class="mt-5 w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 rounded-xl text-xs transition cursor-pointer">
-                Entendido
-            </button>
-        </div>
-    </div>
-
+    <!-- MODAL: QR ESCÁNER -->
     <div id="seccionEscaner" class="hidden fixed inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 z-50">
         <div class="bg-slate-800 w-full max-w-sm rounded-2xl p-4 text-center border border-slate-700">
             <h3 class="text-sm font-bold text-white mb-1">📷 Receptor QR Activo</h3>
@@ -223,6 +205,20 @@
         let globalAlumnos = [], globalTrabajos = [], globalFechasAsistencias = [];
         let globalPalomitas = {}, globalExamenes = {}, globalAsistenciasMarcadas = {};
         let vistaActual = "calificaciones", parcialBloqueado = false;
+        let escaneandoEnProgreso = false;
+
+        // Generador de sonido sintetizado tipo Beep (Para no depender de archivos externos)
+        function reproducirBeep() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // Tono agudo
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                oscillator.connect(gainNode); gainNode.connect(audioCtx.destination);
+                oscillator.start(); oscillator.stop(audioCtx.currentTime + 0.15);
+            } catch(e) {}
+        }
 
         window.toggleSidebar = function() {
             const side = document.getElementById("sidebar");
@@ -242,20 +238,15 @@
             const chk = document.getElementById("chkMismoDia");
             const fLim = document.getElementById("fechaTareaInput");
             if(chk.checked) {
-                fLim.disabled = true;
-                fLim.classList.add("opacity-40");
-                actualizarFechaLimiteMismoDia();
+                fLim.disabled = true; fLim.classList.add("opacity-40"); actualizarFechaLimiteMismoDia();
             } else {
-                fLim.disabled = false;
-                fLim.classList.remove("opacity-40");
+                fLim.disabled = false; fLim.classList.remove("opacity-40");
             }
         }
 
         window.actualizarFechaLimiteMismoDia = function() {
             const chk = document.getElementById("chkMismoDia");
-            if(chk.checked) {
-                document.getElementById("fechaTareaInput").value = document.getElementById("fechaPubInput").value;
-            }
+            if(chk.checked) { document.getElementById("fechaTareaInput").value = document.getElementById("fechaPubInput").value; }
         }
 
         window.toggleBloqueoParcial = function() {
@@ -326,11 +317,45 @@
             });
         }
 
+        // MENU COMPLETO DE CONTROL DE TRABAJOS (ADMINISTRAR COLUMNA)
+        window.gestionarTrabajoColumna = async function(idFirestore, nombreTrabajo, fechaActual) {
+            const accion = prompt(`¿Qué deseas hacer con la actividad "${nombreTrabajo}"?\n\n[ 1 ] Cambiar / Editar Fecha Límite\n[ 2 ] Eliminar Trabajo por Completo\n\nEscribe el número de la acción:`);
+            if (accion === "1") {
+                const nuevaFecha = prompt(`Escribe la nueva fecha límite de entrega (Formato: AAAA-MM-DD):`, fechaActual);
+                if (nuevaFecha) {
+                    const partes = nuevaFecha.split("-");
+                    if (partes.length === 3) {
+                        const fLimForm = `${partes[2]}-${partes[1]}`;
+                        await updateDoc(doc(db, "actividades", idFirestore), {
+                            fechaLimite: nuevaFecha,
+                            fLimFormateada: fLimForm
+                        });
+                        alert("¡Fecha modificada correctamente!");
+                        cargarTodoSistema();
+                    } else { alert("Formato inválido. No se hicieron cambios."); }
+                }
+            } else if (accion === "2") {
+                if(confirm(`¿Estás completamente segura de eliminar "${nombreTrabajo}"?`)) {
+                    await deleteDoc(doc(db, "actividades", idFirestore));
+                    cargarTodoSistema();
+                }
+            }
+        }
+
+        // PALOMITAS MANUALES CON MENÚ DE OPCIONES
         window.alternarCasillaFirmaManual = async function(nombreAlumno, nombreTrabajo, estadoActual) {
             const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
             const idDoc = `${grupo}_Manual_${nombreAlumno.replace(/\s+/g,'_')}_${nombreTrabajo.replace(/\s+/g,'_')}`;
-            if(estadoActual) await setDoc(doc(db, "codigos_qr", idDoc), { alumno: nombreAlumno, actividad: nombreTrabajo, grupo, estado: "Cancelado", tipo: "trabajo" });
-            else await setDoc(doc(db, "codigos_qr", idDoc), { alumno: nombreAlumno, actividad: nombreTrabajo, group: grupo, estado: "Escaneado", tipo: "trabajo" });
+            
+            const seleccion = prompt(`Modificar firma para ${nombreAlumno} en: ${nombreTrabajo}\n\nEscribe:\n[ 1 ] Firmar Actividad (✓)\n[ 2 ] Quitar Firma / No Entregó (-)`);
+            
+            if(seleccion === "1") {
+                await setDoc(doc(db, "codigos_qr", idDoc), { alumno: nombreAlumno, actividad: nombreTrabajo, grupo, estado: "Escaneado", tipo: "trabajo" });
+            } else if(seleccion === "2") {
+                await setDoc(doc(db, "codigos_qr", idDoc), { alumno: nombreAlumno, actividad: nombreTrabajo, grupo, estado: "Cancelado", tipo: "trabajo" });
+            } else {
+                return;
+            }
             cargarTodoSistema();
         }
 
@@ -367,10 +392,10 @@
                         <div class="leading-tight py-1">
                             <span class="font-bold text-blue-400 block">${t.nombre}</span>
                             <span class="text-[9px] text-slate-400 block font-normal">P: ${t.fPubFormateada || '-'}</span>
-                            <span class="text-[9px] text-red-400 block font-semibold">L: ${t.fLimFormateada || '-'}</span>
+                            <span class="text-[9px] text-pink-400 block font-semibold">L: ${t.fLimFormateada || '-'}</span>
                         </div>
                     `;
-                    columnasTareasHTML += `<th onclick="eliminarTrabajoColumna('${t.idFirestore}','${t.nombre}')" class="p-1 border-l border-slate-600 bg-slate-700/30 cursor-pointer min-w-[95px] text-center">${tituloColumna}</th>`; 
+                    columnasTareasHTML += `<th onclick="gestionarTrabajoColumna('${t.idFirestore}','${t.nombre}','${t.fechaLimite || ''}')" class="p-1 border-l border-slate-600 bg-slate-700/30 cursor-pointer min-w-[95px] text-center title-col hover:bg-slate-700/60">${tituloColumna}</th>`; 
                 });
                 hTab.innerHTML = `<th class="p-3 text-left min-w-[180px]">Nombre Alumno</th>${columnasTareasHTML}<th class="p-3 bg-blue-900 text-yellow-400 min-w-[95px]">Firmas (50%)</th><th class="p-3 bg-amber-900 text-amber-200 min-w-[95px]">Examen (50%)</th><th class="p-3 bg-slate-600 text-yellow-300 font-black min-w-[105px]">FINAL</th><th class="p-3 bg-slate-700 min-w-[100px]">Gestión</th>`;
                 bTab.innerHTML = "";
@@ -392,7 +417,7 @@
                 document.getElementById("kpiPorcentajeAprobados").innerText = ((alumnosAprobadosContador * 100) / globalAlumnos.length).toFixed(0) + "%";
             } else {
                 let columnasAsistenciasHTML = "";
-                globalFechasAsistencias.forEach(f => { columnasAsistenciasHTML += `<th onclick="eliminarFechaAsistenciaColumna('${f.idFirestore}','${f.fechaFormateada}')" class="p-2 border-l border-slate-600 bg-emerald-950/30 text-emerald-400 cursor-pointer min-w-[85px] text-center">${f.fechaFormateada}</th>`; });
+                globalFechasAsistencias.forEach(f => { columnasAsistenciasHTML += `<th onclick="eliminarFechaAsistenciaColumna('${f.idFirestore}','${f.fechaFormateada}')" class="p-2 border-l border-slate-600 bg-emerald-950/30 text-emerald-400 cursor-pointer min-w-[85px] text-center hover:bg-slate-700/60">${f.fechaFormateada}</th>`; });
                 hTab.innerHTML = `<th class="p-3 text-left min-w-[180px]">Nombre Alumno</th>${columnasAsistenciasHTML}<th class="p-3 bg-emerald-900 text-white font-bold min-w-[110px]">Total Asistencias</th>`; bTab.innerHTML = "";
                 globalAlumnos.forEach(al => {
                     let totalAsistenciasAlumno = 0; let celdasAsistenciasHTML = "";
@@ -419,33 +444,54 @@
         window.cerrarEscaner = function() { document.getElementById("seccionEscaner").classList.add("hidden"); if (html5QrcodeScanner) { html5QrcodeScanner.stop().then(() => { html5QrcodeScanner = null; }); } }
 
         async function onScanSuccessGeneral(decodedText) {
+            if (escaneandoEnProgreso) return;
             const alertBox = document.getElementById("alertaLecturaRapida");
+            
             try {
+                escaneandoEnProgreso = true;
                 const docRef = doc(db, "codigos_qr", decodedText); const snap = await getDoc(docRef);
+                
                 if (snap.exists()) {
                     const d = snap.data(); 
                     if (d.estado === "Escaneado" || d.estado === "Retardo") { 
                         alertBox.className = "mt-3 p-2 text-amber-400 bg-slate-900 text-xs font-bold rounded-xl block"; 
-                        alertBox.innerText = `⚠️ Ya usado por ${d.alumno}.`; return; 
+                        alertBox.innerText = `⚠️ Ya usado por ${d.alumno}.`; 
+                        setTimeout(() => { escaneandoEnProgreso = false; }, 1500);
+                        return; 
                     }
 
-                    // 🛠️ VALIDACIÓN TIPO CLASSROOM (CONTROL DE FECHA LÍMITE)
+                    // VALIDACIÓN CLASSROOM (PLAZO VENCIDO)
                     if (d.tipo !== "asistencia") {
                         const tMatch = globalTrabajos.find(t => t.nombre === d.actividad);
                         if (tMatch && tMatch.fechaLimite) {
-                            const hoyStr = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+                            const hoyStr = new Date().toISOString().split('T')[0];
                             if (hoyStr > tMatch.fechaLimite) {
                                 alertBox.className = "mt-3 p-2 text-red-400 bg-slate-900 text-xs font-bold rounded-xl block border border-red-500/50";
                                 alertBox.innerText = `🚨 Plazo vencido para ${d.actividad}.`;
+                                setTimeout(() => { escaneandoEnProgreso = false; }, 1500);
                                 return;
                             }
                         }
                     }
 
-                    await updateDoc(docRef, { estado: "Escaneado", fechaEscaneo: new Date() });
-                    alertBox.className = "mt-3 p-2 text-emerald-400 bg-slate-900 text-xs font-bold rounded-xl block"; alertBox.innerText = `✅ Validado: ${d.alumno}`; cargarTodoSistema();
+                    // 🛠️ DOBLE CONFIRMACIÓN ANTES DE ESCANEAR DE GOLPE
+                    const confirmarRegistro = confirm(`¿Registrar a ${d.alumno} en la actividad/fecha "${d.actividad}"?`);
+                    
+                    if(confirmarRegistro) {
+                        reproducirBeep(); // 🛠️ SONIDO AL CONFIRMAR Y VALIDAR
+                        await updateDoc(docRef, { estado: "Escaneado", fechaEscaneo: new Date() });
+                        alertBox.className = "mt-3 p-2 text-emerald-400 bg-slate-900 text-xs font-bold rounded-xl block"; 
+                        alertBox.innerText = `✅ Validado: ${d.alumno}`; 
+                        cargarTodoSistema();
+                    } else {
+                        alertBox.className = "mt-3 p-2 text-slate-400 bg-slate-900 text-xs font-bold rounded-xl block"; 
+                        alertBox.innerText = `❌ Lectura descartada.`;
+                    }
                 }
             } catch (e) {}
+            
+            // Pausa de cortesía para reanudar la lectura sin saltos bruscos
+            setTimeout(() => { escaneandoEnProgreso = false; }, 1200);
         }
 
         window.crearActividad = async function() {
@@ -457,40 +503,28 @@
             
             if(!grupo || !nombre || !rawFechaPub || !rawFechaLim) return; 
             
-            const pPub = rawFechaPub.split("-");
-            const pLim = rawFechaLim.split("-");
-            const fPubForm = `${pPub[2]}-${pPub[1]}`;
-            const fLimForm = `${pLim[2]}-${pLim[1]}`;
+            const pPub = rawFechaPub.split("-"); const pLim = rawFechaLim.split("-");
+            const fPubForm = `${pPub[2]}-${pPub[1]}`; const fLimForm = `${pLim[2]}-${pLim[1]}`;
             
             await setDoc(doc(db, "actividades", `${grupo}_${parcial}_${nombre.replace(/\s+/g, '_')}`), { 
-                nombre, 
-                grupo, 
-                parcial, 
-                valor: 1,
-                fechaPublicacion: rawFechaPub,
-                fPubFormateada: fPubForm,
-                fechaLimite: rawFechaLim,
-                fLimFormateada: fLimForm
+                nombre, grupo, parcial, valor: 1,
+                fechaPublicacion: rawFechaPub, fPubFormateada: fPubForm,
+                fechaLimite: rawFechaLim, fLimFormateada: fLimForm
             });
             
-            document.getElementById("nomActividad").value = ""; 
-            document.getElementById("fechaPubInput").value = ""; 
-            document.getElementById("fechaTareaInput").value = ""; 
-            document.getElementById("chkMismoDia").checked = false;
-            document.getElementById("fechaTareaInput").disabled = false;
+            document.getElementById("nomActividad").value = ""; document.getElementById("fechaPubInput").value = ""; document.getElementById("fechaTareaInput").value = ""; 
+            document.getElementById("chkMismoDia").checked = false; document.getElementById("fechaTareaInput").disabled = false;
             document.getElementById("fechaTareaInput").classList.remove("opacity-40");
-            cerrarModal('modalTarea'); 
-            cargarTodoSistema();
+            cerrarModal('modalTarea'); cargarTodoSistema();
         }
 
         window.crearFechaAsistencia = async function() {
             const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase(); const parcial = document.getElementById("filtroParcial").value; const rawFecha = document.getElementById("fechaAsistenciaInput").value;
             if(!grupo || !rawFecha) return; const partes = rawFecha.split("-"); const fForm = `${partes[2]}-${partes[1]}`;
-            await setDoc(doc(db, "fechas_asistencias", `${grupo}_${parcial}_Asis_${fForm}`), { fecha: rawFecha, fechaFormateada: fForm, grupo, parcial });
+            await setDoc(doc(db, "fechas_asistencias", `${grupo}_${parcial}_Asis_${fForm}`), { fecha: rawFecha, fechaFormateada: fForm, group: grupo, parcial });
             document.getElementById("fechaAsistenciaInput").value = ""; cerrarModal('modalAsistencia'); cargarTodoSistema();
         }
 
-        window.eliminarTrabajoColumna = async function(id, n) { if(confirm(`¿Eliminar ${n}?`)) { await deleteDoc(doc(db, "actividades", id)); cargarTodoSistema(); } }
         window.eliminarFechaAsistenciaColumna = async function(id, f) { if(confirm(`¿Eliminar ${f}?`)) { await deleteDoc(doc(db, "fechas_asistencias", id)); cargarTodoSistema(); } }
         window.alternarRecuperacion = async function(id, e) { await updateDoc(doc(db, "alumnos", id), { recuperacion: !e }); cargarTodoSistema(); }
         window.borrarAlumnoCompleto = async function(id, n) { if(confirm(`¿Quitar a ${n}?`)) { await deleteDoc(doc(db, "alumnos", id)); cargarTodoSistema(); } }
