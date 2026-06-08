@@ -41,8 +41,8 @@
                         </div>
                     </div>
                     <div class="pt-1 flex items-center justify-between border-t border-slate-800/80">
-                        <span class="text-[10px] text-slate-400 font-medium">Estado Parcial:</span>
-                        <button id="btnLockParcial" onclick="toggleBloqueoParcial()" class="text-[10px] px-2 py-0.5 rounded font-bold bg-emerald-600/20 text-emerald-400 border border-emerald-500/30">🔓 Abierto</button>
+                        <span class="text-[10px] text-slate-400 font-medium">Estado Interfaz:</span>
+                        <button id="btnLockParcial" onclick="toggleBloqueoParcial()" class="text-[10px] px-2 py-0.5 rounded font-bold bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 cursor-pointer">🔓 Abierto</button>
                     </div>
                 </div>
 
@@ -60,15 +60,15 @@
                     <span>📷</span> <span class="menu-txt">Abrir Escáner QR Único</span>
                 </button>
 
-                <button onclick="abrirModal('modalTarea')" class="w-full flex items-center gap-3 p-2.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition text-left cursor-pointer">
+                <button onclick="abrirModalSiPermitido('modalTarea')" class="w-full flex items-center gap-3 p-2.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition text-left cursor-pointer">
                     <span>📝</span> <span class="menu-txt">Publicar Trabajo (Firma)</span>
                 </button>
 
-                <button onclick="abrirModal('modalAsistencia')" class="w-full flex items-center gap-3 p-2.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition text-left cursor-pointer">
+                <button onclick="abrirModalSiPermitido('modalAsistencia')" class="w-full flex items-center gap-3 p-2.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition text-left cursor-pointer">
                     <span>⏰</span> <span class="menu-txt">Habilitar Fecha Asistencia</span>
                 </button>
 
-                <button onclick="abrirModal('modalAlumno')" class="w-full flex items-center gap-3 p-2.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition text-left cursor-pointer">
+                <button onclick="abrirModalSiPermitido('modalAlumno')" class="w-full flex items-center gap-3 p-2.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition text-left cursor-pointer">
                     <span>👤</span> <span class="menu-txt">Inscribir Alumno</span>
                 </button>
 
@@ -78,7 +78,7 @@
             </nav>
         </div>
         <div class="p-4 border-t border-slate-800 text-[10px] text-slate-500 font-mono menu-txt">
-            Miss Karol Revision • V10.0
+            Miss Karol Revision • V10.2
         </div>
     </aside>
 
@@ -171,7 +171,7 @@
     <div id="seccionEscaner" class="hidden fixed inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 z-50">
         <div class="bg-slate-800 w-full max-w-sm rounded-2xl p-4 text-center border border-slate-700">
             <h3 class="text-sm font-bold text-white mb-1">📷 Receptor QR Activo</h3>
-            <p class="text-[10px] text-slate-400 mb-3">El sistema firmará directamente al detectar el código</p>
+            <p class="text-[10px] text-slate-400 mb-3">Escaneo rápido continuo sin confirmación</p>
             <div id="reader" class="w-full overflow-hidden rounded-xl bg-slate-900 border border-slate-700"></div>
             <div id="alertaLecturaRapida" class="mt-3 p-2.5 bg-emerald-950/80 text-emerald-400 text-xs font-bold rounded-xl border border-emerald-500/40 hidden animate-pulse"></div>
             <button onclick="cerrarEscaner()" class="mt-4 w-full bg-red-600 hover:bg-red-500 text-white py-2 rounded-xl text-xs font-bold cursor-pointer transition">Apagar Cámara</button>
@@ -197,7 +197,7 @@
         let html5QrcodeScanner = null, desuscripcionGlobal = null;
         let globalAlumnos = [], globalTrabajos = [], globalFechasAsistencias = [];
         let globalPalomitas = {}, globalExamenes = {}, globalAsistenciasMarcadas = {};
-        let vistaActual = "calificaciones", parcialBloqueado = false;
+        let vistaActual = "calificaciones", interfazBloqueada = false;
         let escaneandoEnProgreso = false;
         let ultimoCodigoLeido = ""; 
         let temporizadorResetCodigo = null;
@@ -230,7 +230,10 @@
             }
         }
 
-        window.abrirModal = function(id) { document.getElementById(id).classList.remove("hidden"); }
+        window.abrirModalSiPermitido = function(id) { 
+            if(interfazBloqueada) { alert("⛔ Acceso denegado: El seguro de la pantalla está activado."); return; }
+            document.getElementById(id).classList.remove("hidden"); 
+        }
         window.cerrarModal = function(id) { document.getElementById(id).classList.add("hidden"); }
 
         window.toggleMismoDia = function() {
@@ -248,10 +251,11 @@
             if(chk.checked) { document.getElementById("fechaTareaInput").value = document.getElementById("fechaPubInput").value; }
         }
 
+        // CONTROL EXCLUSIVO DEL SEGURO DE PANTALLA
         window.toggleBloqueoParcial = function() {
-            parcialBloqueado = !parcialBloqueado;
+            interfazBloqueada = !interfazBloqueada;
             const btn = document.getElementById("btnLockParcial");
-            if(parcialBloqueado) {
+            if(interfazBloqueada) {
                 btn.className = "text-[10px] px-2 py-0.5 rounded font-bold bg-red-600/20 text-red-400 border border-red-500/30 cursor-pointer"; btn.innerText = "🔒 Bloqueado";
             } else {
                 btn.className = "text-[10px] px-2 py-0.5 rounded font-bold bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 cursor-pointer"; btn.innerText = "🔓 Abierto";
@@ -287,6 +291,11 @@
             snapAct.forEach(d => globalTrabajos.push({ idFirestore: d.id, ...d.data() }));
             globalTrabajos.sort((a,b) => a.nombre.localeCompare(b.nombre));
 
+            const inputMeta = parseInt(document.getElementById("metaFirmasInput").value) || 0;
+            if (inputMeta === 0) {
+                document.getElementById("metaFirmasInput").value = globalTrabajos.length;
+            }
+
             const qAsiF = query(collection(db, "fechas_asistencias"), where("grupo", "==", grupo), where("parcial", "==", parcial));
             const snapAsiF = await getDocs(qAsiF); globalFechasAsistencias = [];
             snapAsiF.forEach(d => globalFechasAsistencias.push({ idFirestore: d.id, ...d.data() }));
@@ -317,15 +326,17 @@
             });
         }
 
-        // ESCANEO DIRECTO SIN MODALES DE CONFIRMACIÓN
         async function procesarLecturaQR(textoCodigo) {
-            // Si el código es exactamente igual al recién leído, se ignora temporalmente para evitar registrar 2 veces lo mismo
+            // EL ESCÁNER ESTÁ PROTEGIDO POR EL CANDADO
+            if (interfazBloqueada) {
+                console.log("Lectura ignorada: Interfaz protegida.");
+                return;
+            }
             if (textoCodigo === ultimoCodigoLeido || escaneandoEnProgreso) return;
             
             escaneandoEnProgreso = true;
             ultimoCodigoLeido = textoCodigo;
 
-            // Limpiar el candado del código duplicado tras 3 segundos para permitir volver a escanearlo si es necesario
             clearTimeout(temporizadorResetCodigo);
             temporizadorResetCodigo = setTimeout(() => { ultimoCodigoLeido = ""; }, 3000);
 
@@ -339,7 +350,6 @@
                     const idDoc = `${grupo}_${alumno.replace(/\s+/g,'_')}_${actividad.replace(/\s+/g,'_')}`;
                     reproducirBeep();
 
-                    // Alerta visual rápida en pantalla
                     const alerta = document.getElementById("alertaLecturaRapida");
                     alerta.innerText = `⚡ REGISTRADO: ${alumno} -> ${actividad}`;
                     alerta.classList.remove("hidden");
@@ -354,27 +364,25 @@
                     });
 
                     setTimeout(() => { alerta.classList.add("hidden"); }, 2000);
-                } else {
-                    console.log("Código QR detectado pero no pertenece al formato del sistema.");
                 }
             } catch (e) {
                 console.error("Error al procesar el QR: ", e);
             } finally {
-                // Pequeño delay de 400ms entre lecturas físicas para mantener el flujo ultra rápido
                 setTimeout(() => { escaneandoEnProgreso = false; }, 400);
             }
         }
 
         window.abrirEscanerUnico = function() {
+            if (interfazBloqueada) { return alert("⚠️ Desactiva el seguro primero para poder escanear."); }
             document.getElementById("seccionEscaner").classList.remove("hidden");
             if(!html5QrcodeScanner) {
                 html5QrcodeScanner = new Html5Qrcode("reader");
             }
             html5QrcodeScanner.start(
                 { facingMode: "environment" },
-                { fps: 20, qrbox: { width: 260, height: 260 } }, // Subidos los FPS a 20 para lectura inmediata
+                { fps: 20, qrbox: { width: 260, height: 260 } },
                 (decodedText) => { procesarLecturaQR(decodedText); },
-                (err) => { /* Silenciar errores continuos de enfoque */ }
+                (err) => {}
             ).catch(err => console.error("Error cámara: ", err));
         }
 
@@ -389,14 +397,37 @@
             }
         }
 
-        // INTERFAZ DE RENDERIZADO DE TABLAS COMPLETA
+        window.gestionarAlumnoFila = async function(idFirestore, nombreAlumno, enRecuperacion) {
+            if (interfazBloqueada) { return alert("⚠️ Panel bloqueado. Quita el seguro para modificar alumnos."); }
+            
+            const txtEstado = enRecuperacion ? "Quitar de Recuperación" : "Poner en Recuperación";
+            const seleccion = prompt(`Gestionar Alumno: ${nombreAlumno}\n\nEscribe:\n[ 1 ] ${txtEstado}\n[ 2 ] Eliminar Alumno permanentemente\n\nElige una opción:`);
+            
+            if (seleccion === "1") {
+                await updateDoc(doc(db, "alumnos", idFirestore), { recuperacion: !enRecuperacion });
+                alert("Estado de recuperación actualizado.");
+                cargarTodoSistema();
+            } else if (seleccion === "2") {
+                if (confirm(`¿Segura que deseas eliminar a ${nombreAlumno}? Esta acción no se puede deshacer.`)) {
+                    await deleteDoc(doc(db, "alumnos", idFirestore));
+                    alert("Alumno eliminado.");
+                    cargarTodoSistema();
+                }
+            }
+        }
+
         window.montarYRenderizarTodo = function(esSnapshot) {
             const cabecera = document.getElementById("tabCabeceraDinamica");
             const cuerpo = document.getElementById("tabCuerpoDinamico");
-            const metaFirmas = parseInt(document.getElementById("metaFirmasInput").value) || 0;
+            
+            let metaFirmas = parseInt(document.getElementById("metaFirmasInput").value) || 0;
+            if(metaFirmas === 0 && globalTrabajos.length > 0) {
+                metaFirmas = globalTrabajos.length;
+                document.getElementById("metaFirmasInput").value = metaFirmas;
+            }
 
             if (globalAlumnos.length === 0) {
-                cuerpo.innerHTML = `<tr><td class="p-8 text-slate-500 italic">No hay alumnos inscritos en este grupo o no has digitado el grupo...</td></tr>`;
+                cuerpo.innerHTML = `<tr><td class="p-8 text-slate-500 italic">No hay alumnos inscritos en este grupo...</td></tr>`;
                 return;
             }
 
@@ -404,7 +435,6 @@
             let sumaCalificacionesTotales = 0;
 
             if (vistaActual === "calificaciones") {
-                // CABECERA CALIFICACIONES
                 let htmlCab = `<th class="p-3 text-left min-w-[200px] bg-slate-950 font-bold sticky left-0 z-20">Nombre del Alumno</th>`;
                 globalTrabajos.forEach(t => {
                     htmlCab += `<th onclick="gestionarTrabajoColumna('${t.idFirestore}','${t.nombre}','${t.fechaLimite}')" class="p-3 cursor-pointer hover:bg-slate-600 transition min-w-[90px] border-l border-slate-600/40 text-[10px] font-black uppercase tracking-wider text-blue-300">
@@ -415,7 +445,6 @@
                 htmlCab += `<th class="p-3 bg-slate-950 font-black text-yellow-400 border-l border-slate-700 min-w-[70px]">NOTA</th>`;
                 cabecera.innerHTML = htmlCab;
 
-                // CUERPO CALIFICACIONES
                 let htmlCuerpo = "";
                 globalAlumnos.forEach(al => {
                     let firmasDeEsteAlumno = 0;
@@ -431,7 +460,7 @@
                         </td>`;
                     });
 
-                    const divisorMeta = globalTrabajos.length || 1;
+                    const divisorMeta = metaFirmas || 1;
                     let puntosFirmas = parseFloat(((firmasDeEsteAlumno * 50) / divisorMeta).toFixed(1));
                     if(puntosFirmas > 50) puntosFirmas = 50.0;
 
@@ -445,7 +474,7 @@
                     const baseFilaEstilo = al.recuperacion ? 'bg-red-500/5 border-l-4 border-l-red-500 font-semibold' : 'hover:bg-slate-800/40';
 
                     htmlCuerpo += `<tr class="${baseFilaEstilo} transition">
-                        <td class="p-2.5 text-left font-medium text-slate-200 sticky left-0 bg-slate-850 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.3)] flex items-center justify-between gap-1">
+                        <td onclick="gestionarAlumnoFila('${al.idFirestore}', '${al.nombre}', ${al.recuperacion || false})" class="p-2.5 text-left font-medium text-slate-200 sticky left-0 bg-slate-850 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.3)] flex items-center justify-between gap-1 cursor-pointer hover:text-pink-400 transition">
                             <span class="truncate pr-1">${al.nombre}</span>
                             ${al.recuperacion ? '<span class="text-[9px] px-1 bg-red-600/20 text-red-400 border border-red-500/20 rounded font-black shrink-0">REC</span>' : ''}
                         </td>
@@ -457,14 +486,12 @@
                 cuerpo.innerHTML = htmlCuerpo;
 
             } else {
-                // CABECERA ASISTENCIAS
                 let htmlCab = `<th class="p-3 text-left min-w-[200px] bg-slate-950 font-bold sticky left-0 z-20">Nombre del Alumno</th>`;
                 globalFechasAsistencias.forEach(f => {
                     htmlCab += `<th class="p-3 min-w-[85px] border-l border-slate-600/40 text-[10px] font-black uppercase text-emerald-400 bg-slate-950">${f.fechaFormateada}</th>`;
                 });
                 cabecera.innerHTML = htmlCab;
 
-                // CUERPO ASISTENCIAS
                 let htmlCuerpo = "";
                 globalAlumnos.forEach(al => {
                     let celdasAsis = "";
@@ -484,7 +511,7 @@
                     const baseFilaEstilo = al.recuperacion ? 'bg-red-500/5 border-l-4 border-l-red-500' : 'hover:bg-slate-800/40';
 
                     htmlCuerpo += `<tr class="${baseFilaEstilo} transition">
-                        <td class="p-2.5 text-left font-medium text-slate-200 sticky left-0 bg-slate-850 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
+                        <td onclick="gestionarAlumnoFila('${al.idFirestore}', '${al.nombre}', ${al.recuperacion || false})" class="p-2.5 text-left font-medium text-slate-200 sticky left-0 bg-slate-850 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.3)] cursor-pointer hover:text-pink-400 transition">
                             ${al.nombre}
                         </td>
                         ${celdasAsis}
@@ -493,7 +520,6 @@
                 cuerpo.innerHTML = htmlCuerpo;
             }
 
-            // ACTUALIZAR KPIS SUPERIORES
             document.getElementById("kpiTotalAlumnos").innerText = globalAlumnos.length;
             document.getElementById("kpiRecuperacion").innerText = globalAlumnos.filter(a => a.recuperacion).length;
             
@@ -505,6 +531,7 @@
         }
 
         window.gestionarTrabajoColumna = async function(idFirestore, nombreTrabajo, fechaActual) {
+            if (interfazBloqueada) { return alert("⚠️ Panel bloqueado. Quita el seguro."); }
             const accion = prompt(`¿Qué deseas hacer con la actividad "${nombreTrabajo}"?\n\n[ 1 ] Cambiar / Editar Fecha Límite\n[ 2 ] Eliminar Trabajo por Completo\n\nEscribe el número de la acción:`);
             if (accion === "1") {
                 const nuevaFecha = prompt(`Escribe la nueva fecha límite (AAAA-MM-DD):`, fechaActual);
@@ -526,6 +553,7 @@
         }
 
         window.alternarCasillaFirmaManual = async function(nombreAlumno, nombreTrabajo, estadoActual) {
+            if (interfazBloqueada) { return alert("⚠️ Panel bloqueado. Quita el seguro."); }
             const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
             const idDoc = `${grupo}_Manual_${nombreAlumno.replace(/\s+/g,'_')}_${nombreTrabajo.replace(/\s+/g,'_')}`;
             const seleccion = prompt(`Modificar firma para ${nombreAlumno} en: ${nombreTrabajo}\n\nEscribe:\n[ 1 ] Firmar Actividad (✓)\n[ 2 ] Quitar Firma / No Entregó (-)`);
@@ -533,12 +561,13 @@
             if(seleccion === "1") {
                 await setDoc(doc(db, "codigos_qr", idDoc), { alumno: nombreAlumno, actividad: nombreTrabajo, grupo, estado: "Escaneado", tipo: "trabajo" });
             } else if(seleccion === "2") {
-                await setDoc(doc(db, "codigos_qr", idDoc), { alumno: nombreAlumno, actividad: nombreTrabajo, grupo, estado: "Cancelado", tipo: "trabajo" });
+                await setDoc(doc(db, "codigos_qr", idDoc), { alumno: nombreAlumno, actividad: nombreTrabajo, group, estado: "Cancelado", tipo: "trabajo" });
             } else { return; }
             cargarTodoSistema();
         }
 
         window.alternarCasillaAsistenciaManual = async function(nombreAlumno, fechaFormateada) {
+            if (interfazBloqueada) { return alert("⚠️ Panel bloqueado. Quita el seguro."); }
             const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
             const idDoc = `${grupo}_AsisManual_${nombreAlumno.replace(/\s+/g,'_')}_${fechaFormateada}`;
             const seleccion = prompt(`Marcar asistencia para ${nombreAlumno} en ${fechaFormateada}:\n\nEscribe:\n[ 1 ] Asistencia (✓)\n[ 2 ] Retardo (R)\n[ 3 ] Falta (-)`);
@@ -554,6 +583,7 @@
         }
 
         window.capturarExamenA_Mano = async function(nombreAlumno, notaActual) {
+            if (interfazBloqueada) { return alert("⚠️ Panel bloqueado. Quita el seguro."); }
             const grupo = document.getElementById("filtroGrupo").value.trim().toUpperCase();
             const parcial = document.getElementById("filtroParcial").value;
             const nuevaNotaStr = prompt(`Escribe la calificación del examen para ${nombreAlumno} (Valor de 0 a 50):`, notaActual);
